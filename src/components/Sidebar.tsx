@@ -201,10 +201,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 ? 'text-on-primary bg-info/20 border-l-3 border-[#2563EB] font-bold shadow-2xs'
                 : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
             }`}
-            title="Dashboard (Hub Central)"
+            title="Dashboard"
           >
             <span className="material-symbols-outlined text-[18px] text-info">dashboard</span>
-            {isExpanded && <span className="font-label-md sidebar-text truncate">Dashboard (Hub Central)</span>}
+            {isExpanded && <span className="font-label-md sidebar-text truncate">Dashboard</span>}
           </button>
         </div>
 
