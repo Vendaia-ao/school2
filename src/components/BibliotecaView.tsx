@@ -374,6 +374,18 @@ export const BibliotecaView: React.FC<BibliotecaViewProps> = ({
   // Drawer / Modal States
   const [selectedRecurso, setSelectedRecurso] = useState<RecursoBiblioteca | null>(null);
   const [isDetailDrawerOpen, setIsDetailDrawerOpen] = useState(false);
+  const [isReaderOpen, setIsReaderOpen] = useState(false);
+  const [readerCurrentPage, setReaderCurrentPage] = useState<number>(1);
+  const [readerZoom, setReaderZoom] = useState<number>(100);
+
+  const openReader = (recurso: RecursoBiblioteca) => {
+    setSelectedRecurso(recurso);
+    setReaderCurrentPage(1);
+    setReaderZoom(100);
+    setIsReaderOpen(true);
+    setIsDetailDrawerOpen(false);
+    onShowToast(`Modo de Leitura iniciado: "${recurso.titulo}"`);
+  };
 
   const [isEditorDrawerOpen, setIsEditorDrawerOpen] = useState(false);
   const [editingRecurso, setEditingRecurso] = useState<RecursoBiblioteca | null>(null);
@@ -744,10 +756,7 @@ export const BibliotecaView: React.FC<BibliotecaViewProps> = ({
                       className="bg-surface-white border border-border-subtle rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
                     >
                       <div
-                        onClick={() => {
-                          setSelectedRecurso(rec);
-                          setIsDetailDrawerOpen(true);
-                        }}
+                        onClick={() => openReader(rec)}
                         className="relative h-48 bg-surface-container-high overflow-hidden cursor-pointer"
                       >
                         <img
@@ -769,10 +778,7 @@ export const BibliotecaView: React.FC<BibliotecaViewProps> = ({
                       </div>
 
                       <div
-                        onClick={() => {
-                          setSelectedRecurso(rec);
-                          setIsDetailDrawerOpen(true);
-                        }}
+                        onClick={() => openReader(rec)}
                         className="p-4 flex-1 flex flex-col justify-between cursor-pointer"
                       >
                         <div>
@@ -803,10 +809,7 @@ export const BibliotecaView: React.FC<BibliotecaViewProps> = ({
 
                       <div className="px-4 py-2.5 bg-surface-container-low border-t border-border-subtle flex items-center justify-between">
                         <button
-                          onClick={() => {
-                            setSelectedRecurso(rec);
-                            setIsDetailDrawerOpen(true);
-                          }}
+                          onClick={() => openReader(rec)}
                           className="text-xs text-primary hover:text-secondary font-bold flex items-center gap-1 cursor-pointer transition-colors"
                         >
                           <Eye className="w-3.5 h-3.5 text-secondary" />
@@ -907,10 +910,7 @@ export const BibliotecaView: React.FC<BibliotecaViewProps> = ({
                             <td className="px-4 py-3 text-right">
                               <div className="flex items-center justify-end gap-1">
                                 <button
-                                  onClick={() => {
-                                    setSelectedRecurso(rec);
-                                    setIsDetailDrawerOpen(true);
-                                  }}
+                                  onClick={() => openReader(rec)}
                                   className="px-2.5 py-1 text-primary hover:text-secondary font-bold text-xs bg-primary/5 hover:bg-primary/10 rounded-lg transition-colors cursor-pointer flex items-center gap-1"
                                   title="Ler Livro"
                                 >
@@ -1859,7 +1859,7 @@ export const BibliotecaView: React.FC<BibliotecaViewProps> = ({
                   </p>
                   {selectedRecurso.isEbookDisponivel && (
                     <button
-                      onClick={() => onShowToast(`Modo de Leitura iniciado para "${selectedRecurso.titulo}".`)}
+                      onClick={() => openReader(selectedRecurso)}
                       className="bg-primary text-surface-white hover:bg-primary/90 text-xs px-4 py-2 rounded-xl font-bold inline-flex items-center gap-2 shadow-sm cursor-pointer transition-all"
                     >
                       <BookOpen className="w-4 h-4" /> Ler Ficheiro PDF Online
@@ -1887,6 +1887,196 @@ export const BibliotecaView: React.FC<BibliotecaViewProps> = ({
               >
                 Fechar
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DIRECT E-BOOK & PDF READER MODAL */}
+      {isReaderOpen && selectedRecurso && (
+        <div className="fixed inset-0 bg-[#09172e]/95 backdrop-blur-md z-50 flex flex-col overflow-hidden animate-in fade-in duration-200">
+          {/* Reader Topbar Header */}
+          <div className="bg-[#09172e] border-b border-surface-white/10 px-4 py-2.5 flex items-center justify-between text-surface-white shrink-0 shadow-lg z-20">
+            {/* Left: Book Title & Details */}
+            <div className="flex items-center gap-3 min-w-0">
+              <button
+                onClick={() => setIsReaderOpen(false)}
+                className="p-1.5 rounded-lg text-surface-white/70 hover:text-surface-white hover:bg-surface-white/10 transition-colors cursor-pointer shrink-0"
+                title="Fechar Leitor"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="w-8 h-8 rounded-lg bg-secondary/20 border border-secondary/40 flex items-center justify-center text-secondary shrink-0">
+                <BookOpen className="w-4 h-4" />
+              </div>
+
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] uppercase font-extrabold px-1.5 py-0.5 rounded bg-secondary/20 text-secondary border border-secondary/30">
+                    {selectedRecurso.formato === 'PDF' ? 'E-Book PDF' : 'Físico com Pré-Visualização'}
+                  </span>
+                  <span className="text-[10px] text-surface-white/60 font-mono">ISBN: {selectedRecurso.codigoIsbn}</span>
+                </div>
+                <h2 className="text-xs sm:text-sm font-bold text-surface-white truncate leading-tight mt-0.5">
+                  {selectedRecurso.titulo}
+                </h2>
+              </div>
+            </div>
+
+            {/* Center: Controls (Page Nav & Zoom) */}
+            <div className="hidden md:flex items-center gap-4 bg-surface-white/5 border border-surface-white/10 px-4 py-1.5 rounded-xl text-xs">
+              <div className="flex items-center gap-2">
+                <button
+                  disabled={readerCurrentPage <= 1}
+                  onClick={() => setReaderCurrentPage((p) => Math.max(1, p - 1))}
+                  className="p-1 rounded hover:bg-surface-white/10 disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer"
+                  title="Página Anterior"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+
+                <span className="font-bold text-[11px] text-surface-white min-w-[90px] text-center">
+                  Página <span className="text-secondary">{readerCurrentPage}</span> de 32
+                </span>
+
+                <button
+                  disabled={readerCurrentPage >= 32}
+                  onClick={() => setReaderCurrentPage((p) => Math.min(32, p + 1))}
+                  className="p-1 rounded hover:bg-surface-white/10 disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer"
+                  title="Página Seguinte"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="h-4 w-[1px] bg-surface-white/20" />
+
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setReaderZoom((z) => Math.max(50, z - 10))}
+                  className="px-2 py-0.5 rounded hover:bg-surface-white/10 font-bold cursor-pointer text-xs"
+                  title="Diminuir Zoom"
+                >
+                  -
+                </button>
+                <span className="font-mono text-[11px] font-bold min-w-[42px] text-center text-surface-white/80">
+                  {readerZoom}%
+                </span>
+                <button
+                  onClick={() => setReaderZoom((z) => Math.min(200, z + 10))}
+                  className="px-2 py-0.5 rounded hover:bg-surface-white/10 font-bold cursor-pointer text-xs"
+                  title="Aumentar Zoom"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            {/* Right: Actions */}
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => onShowToast(`Transferência de "${selectedRecurso.titulo}" iniciada.`)}
+                className="bg-secondary text-surface-white hover:bg-secondary/90 text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 cursor-pointer shadow-sm transition-all"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Descarregar PDF</span>
+              </button>
+              <button
+                onClick={() => setIsReaderOpen(false)}
+                className="bg-surface-white/10 hover:bg-surface-white/20 text-surface-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer"
+              >
+                Sair do Leitor
+              </button>
+            </div>
+          </div>
+
+          {/* Reader Body / Content Viewport */}
+          <div className="flex-1 flex overflow-hidden bg-[#0d1f3b] relative">
+            {/* Main Reading Stage */}
+            <div className="flex-1 overflow-auto p-4 sm:p-8 flex justify-center items-start custom-scrollbar">
+              <div
+                style={{ transform: `scale(${readerZoom / 100})`, transformOrigin: 'top center' }}
+                className="bg-white text-slate-900 rounded-lg shadow-2xl border border-slate-300 w-full max-w-3xl min-h-[850px] p-8 sm:p-12 transition-transform duration-200 flex flex-col justify-between"
+              >
+                {/* Book Header */}
+                <div>
+                  <div className="flex items-center justify-between border-b-2 border-primary/20 pb-4 mb-6 text-xs text-slate-500 font-semibold">
+                    <span className="uppercase tracking-widest text-primary font-bold text-[10px]">
+                      {selectedRecurso.tipo} • Vendaia School Digital Library
+                    </span>
+                    <span>Página {readerCurrentPage}</span>
+                  </div>
+
+                  {readerCurrentPage === 1 ? (
+                    /* Page 1: Cover & Intro */
+                    <div className="space-y-6 text-center py-6">
+                      <div className="w-40 h-56 mx-auto rounded-xl overflow-hidden shadow-xl border border-slate-200">
+                        <img src={selectedRecurso.capaUrl} alt={selectedRecurso.titulo} className="w-full h-full object-cover" />
+                      </div>
+                      <div>
+                        <span className="inline-block px-3 py-1 bg-secondary/10 text-secondary font-bold text-xs rounded-full uppercase tracking-wider mb-2">
+                          {selectedRecurso.disciplina} • {selectedRecurso.classe}
+                        </span>
+                        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight">
+                          {selectedRecurso.titulo}
+                        </h1>
+                        <p className="text-sm font-semibold text-slate-600 mt-2">{selectedRecurso.autor}</p>
+                      </div>
+                      <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-slate-700 text-left max-w-lg mx-auto leading-relaxed">
+                        <span className="font-bold text-primary block mb-1">Sinopse da Obra:</span>
+                        {selectedRecurso.descricao}
+                      </div>
+                    </div>
+                  ) : (
+                    /* Page 2+: Content simulation */
+                    <div className="space-y-6 text-xs text-slate-800 leading-relaxed">
+                      <div className="flex justify-between items-baseline border-b border-slate-200 pb-2">
+                        <h3 className="text-sm font-bold text-primary">
+                          Capítulo {readerCurrentPage - 1}: Fundamentos & Aplicação Prática
+                        </h3>
+                        <span className="text-[10px] text-slate-400 font-mono">Unidade Pedagógica #{readerCurrentPage}</span>
+                      </div>
+
+                      <p>
+                        A análise detalhada dos conceitos apresentados nesta secção permite a consolidação dos conhecimentos teóricos e a sua aplicação direta na resolução de problemas do quotidiano escolar e exames nacionais.
+                      </p>
+
+                      <div className="bg-blue-50 border-l-4 border-secondary p-4 rounded-r-xl space-y-2">
+                        <span className="font-bold text-secondary text-xs uppercase tracking-wider block">
+                          📌 Nota Didática de Estudo
+                        </span>
+                        <p className="text-slate-700 text-xs">
+                          Certifique-se de rever os exercícios práticos propostos no final deste módulo. A compreensão dos postulados teóricos é indispensável para o sucesso nas avaliações contínuas.
+                        </p>
+                      </div>
+
+                      <div className="border border-slate-200 rounded-xl p-5 bg-slate-50/50 space-y-3">
+                        <h4 className="font-bold text-slate-900 text-xs">Exercícios de Demonstração Solucionados:</h4>
+                        <div className="space-y-2 text-slate-700">
+                          <p className="font-mono text-[11px] bg-white p-2.5 rounded border border-slate-200">
+                            1. Considere a função f(x) = 2x² - 4x + 6 no domínio dos números reais. Determine o vértice da parábola e o seu valor mínimo.
+                          </p>
+                          <p className="text-[11px] text-emerald-700 font-medium pl-2">
+                            ✓ Solução: x_v = -b / (2a) = 4 / 4 = 1; f(1) = 2(1)² - 4(1) + 6 = 4. Vértice V(1, 4).
+                          </p>
+                        </div>
+                      </div>
+
+                      <p>
+                        Em suma, o acompanhamento sistemático da matéria através do manual digital proporciona aos alunos e professores uma ferramenta flexível e rigorosa para a consecução dos objetivos programáticos definidos para o ano letivo.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Book Footer */}
+                <div className="border-t border-slate-200 pt-4 flex justify-between items-center text-[10px] text-slate-400 font-mono">
+                  <span>ISBN {selectedRecurso.codigoIsbn}</span>
+                  <span>Vendaia School © 2026 • Direitos Reservados</span>
+                  <span>Pág. {readerCurrentPage} de 32</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
