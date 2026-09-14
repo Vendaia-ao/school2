@@ -28,7 +28,87 @@ export const AlunoPortalView: React.FC<AlunoPortalViewProps> = ({ onShowToast })
 
   return (
     <div className="mt-header-height p-4 w-full flex flex-col gap-3">
-      {/* Quick Metrics Bar - Matching Reference Standard */}
+      {/* Header Profile Banner */}
+      <div className="bg-surface-white border border-border-subtle rounded-xl p-4 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-full bg-primary text-surface-white font-bold text-xl flex items-center justify-center border-2 border-primary/40 shadow">
+            AM
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="font-headline-sm text-lg font-bold text-primary">Afonso Mateus Lemba</h1>
+              <span className="px-2 py-0.5 bg-green-100 text-green-800 text-[10px] font-bold rounded-full">
+                Aluno Matriculado
+              </span>
+            </div>
+            <p className="text-xs text-on-surface-variant font-medium">
+              Nº de Processo: <span className="font-bold text-primary">3798</span> | E-mail: <span className="text-primary font-bold">3798@ispozango.com</span>
+            </p>
+            <p className="text-[11px] text-outline">
+              Turma: <span className="font-semibold text-on-surface">10º Ano A - Ciências Físicas</span> | Período: <span className="font-semibold text-on-surface">Manhã</span>
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+          <button
+            onClick={() => setMustChangePassword(!mustChangePassword)}
+            className="bg-surface-container text-on-surface-variant hover:bg-surface-container-high px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors border border-border-subtle"
+            title="Alterar Palavra-Passe"
+          >
+            <KeyRound className="w-4 h-4 stroke-[1.75]" />
+            Palavra-Passe
+          </button>
+          <button
+            onClick={() => setActiveTab('cartao')}
+            className="bg-primary/10 text-primary hover:bg-primary/20 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+          >
+            <CreditCard className="w-4 h-4 stroke-[1.75]" />
+            Cartão Digital
+          </button>
+          <button
+            onClick={() => setActiveTab('financeiro')}
+            className="bg-primary text-surface-white hover:bg-primary/90 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 shadow-sm cursor-pointer transition-all"
+          >
+            <Wallet className="w-4 h-4 stroke-[1.75]" />
+            <span>Pagar Propinas</span>
+          </button>
+        </div>
+      </div>
+
+      {/* First-time access password change modal alert */}
+      {mustChangePassword && (
+        <div className="bg-amber-50 border-2 border-amber-400 rounded-xl p-4 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-amber-600 text-3xl">lock_reset</span>
+            <div>
+              <p className="font-bold text-amber-900 text-sm">Alteração Obrigatória de Palavra-Passe (1º Acesso)</p>
+              <p className="text-amber-800">
+                Por motivos de segurança, altere a palavra-passe temporária fornecida pela secretaria escolar.
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handlePasswordChangeSubmit} className="flex items-center gap-2 w-full sm:w-auto">
+            <input
+              type="password"
+              placeholder="Nova Palavra-Passe..."
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="px-3 py-1.5 bg-surface-white border border-amber-300 rounded-lg text-xs"
+              required
+            />
+            <button
+              type="submit"
+              className="bg-amber-600 text-surface-white px-3 py-1.5 rounded-lg font-bold hover:bg-amber-700 whitespace-nowrap"
+            >
+              Atualizar
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* Quick Metrics Bar - Positioned directly above the Tabs Box */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Card 1: Média Geral */}
         <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
@@ -92,86 +172,6 @@ export const AlunoPortalView: React.FC<AlunoPortalViewProps> = ({ onShowToast })
               Digital VS-3798
             </span>
           </div>
-        </div>
-      </div>
-
-      {/* First-time access password change modal alert */}
-      {mustChangePassword && (
-        <div className="bg-amber-50 border-2 border-amber-400 rounded-xl p-4 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-amber-600 text-3xl">lock_reset</span>
-            <div>
-              <p className="font-bold text-amber-900 text-sm">Alteração Obrigatória de Palavra-Passe (1º Acesso)</p>
-              <p className="text-amber-800">
-                Por motivos de segurança, altere a palavra-passe temporária fornecida pela secretaria escolar.
-              </p>
-            </div>
-          </div>
-
-          <form onSubmit={handlePasswordChangeSubmit} className="flex items-center gap-2 w-full sm:w-auto">
-            <input
-              type="password"
-              placeholder="Nova Palavra-Passe..."
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="px-3 py-1.5 bg-surface-white border border-amber-300 rounded-lg text-xs"
-              required
-            />
-            <button
-              type="submit"
-              className="bg-amber-600 text-surface-white px-3 py-1.5 rounded-lg font-bold hover:bg-amber-700 whitespace-nowrap"
-            >
-              Atualizar
-            </button>
-          </form>
-        </div>
-      )}
-
-      {/* Header Profile Banner */}
-      <div className="bg-surface-white border border-border-subtle rounded-xl p-4 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-primary text-surface-white font-bold text-xl flex items-center justify-center border-2 border-primary/40 shadow">
-            AM
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-headline-sm text-lg font-bold text-primary">Afonso Mateus Lemba</h1>
-              <span className="px-2 py-0.5 bg-green-100 text-green-800 text-[10px] font-bold rounded-full">
-                Aluno Matriculado
-              </span>
-            </div>
-            <p className="text-xs text-on-surface-variant font-medium">
-              Nº de Processo: <span className="font-bold text-primary">3798</span> | E-mail: <span className="text-primary font-bold">3798@ispozango.com</span>
-            </p>
-            <p className="text-[11px] text-outline">
-              Turma: <span className="font-semibold text-on-surface">10º Ano A - Ciências Físicas</span> | Período: <span className="font-semibold text-on-surface">Manhã</span>
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
-          <button
-            onClick={() => setMustChangePassword(!mustChangePassword)}
-            className="bg-surface-container text-on-surface-variant hover:bg-surface-container-high px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors border border-border-subtle"
-            title="Alterar Palavra-Passe"
-          >
-            <KeyRound className="w-4 h-4 stroke-[1.75]" />
-            Palavra-Passe
-          </button>
-          <button
-            onClick={() => setActiveTab('cartao')}
-            className="bg-primary/10 text-primary hover:bg-primary/20 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
-          >
-            <CreditCard className="w-4 h-4 stroke-[1.75]" />
-            Cartão Digital
-          </button>
-          <button
-            onClick={() => setActiveTab('financeiro')}
-            className="bg-primary text-surface-white hover:bg-primary/90 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 shadow-sm cursor-pointer transition-all"
-          >
-            <Wallet className="w-4 h-4 stroke-[1.75]" />
-            <span>Pagar Propinas</span>
-          </button>
         </div>
       </div>
 

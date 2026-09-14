@@ -13,7 +13,46 @@ export const ProfessorPortalView: React.FC<ProfessorPortalViewProps> = ({ onShow
 
   return (
     <div className="mt-header-height p-4 w-full flex flex-col gap-3">
-      {/* Quick Metrics Bar - Matching Reference Standard */}
+      {/* Header Profile Banner */}
+      <div className="bg-surface-white border border-border-subtle rounded-xl p-4 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-full bg-primary text-surface-white font-bold text-xl flex items-center justify-center border-2 border-primary/40 shadow">
+            DH
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="font-headline-sm text-lg font-bold text-primary">Prof. Domingos Henriques</h1>
+              <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-[10px] font-bold rounded-full">
+                Docente Efetivo
+              </span>
+            </div>
+            <p className="text-xs text-on-surface-variant font-medium">
+              E-mail: <span className="text-primary font-bold">Domingoshenriques1@ispozango.com</span> | Carga Letiva: <span className="font-bold text-primary">26 Temps/sem</span>
+            </p>
+            <p className="text-[11px] text-outline">
+              Disciplinas: <span className="font-semibold text-on-surface">Matemática I, Matemática II</span> | Direção de Turma: <span className="font-semibold text-on-surface">10º Ano A</span>
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+          <span className="text-xs font-semibold text-outline">Turma Atual:</span>
+          <select
+            value={selectedTurma}
+            onChange={(e) => {
+              setSelectedTurma(e.target.value);
+              onShowToast(`Turma selecionada: ${e.target.value}`);
+            }}
+            className="text-xs bg-surface-container-low border border-border-subtle font-bold text-primary rounded-lg px-3 py-1.5 focus:outline-none focus:border-primary"
+          >
+            <option value="10A-CIEN">10º Ano A - Ciências Físicas</option>
+            <option value="11A-INF">11º Ano A - Informática</option>
+            <option value="12A-GEST">12º Ano A - Gestão</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Quick Metrics Bar - Positioned directly above Tabs Box */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Card 1: Docente */}
         <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
@@ -70,45 +109,6 @@ export const ProfessorPortalView: React.FC<ProfessorPortalViewProps> = ({ onShow
               Em Lançamento
             </span>
           </div>
-        </div>
-      </div>
-
-      {/* Header Profile Banner */}
-      <div className="bg-surface-white border border-border-subtle rounded-xl p-4 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-primary text-surface-white font-bold text-xl flex items-center justify-center border-2 border-primary/40 shadow">
-            DH
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-headline-sm text-lg font-bold text-primary">Prof. Domingos Henriques</h1>
-              <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-[10px] font-bold rounded-full">
-                Docente Efetivo
-              </span>
-            </div>
-            <p className="text-xs text-on-surface-variant font-medium">
-              E-mail: <span className="text-primary font-bold">Domingoshenriques1@ispozango.com</span> | Carga Letiva: <span className="font-bold text-primary">26 Temps/sem</span>
-            </p>
-            <p className="text-[11px] text-outline">
-              Disciplinas: <span className="font-semibold text-on-surface">Matemática I, Matemática II</span> | Direção de Turma: <span className="font-semibold text-on-surface">10º Ano A</span>
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 w-full md:w-auto justify-end">
-          <span className="text-xs font-semibold text-outline">Turma Atual:</span>
-          <select
-            value={selectedTurma}
-            onChange={(e) => {
-              setSelectedTurma(e.target.value);
-              onShowToast(`Turma selecionada: ${e.target.value}`);
-            }}
-            className="text-xs bg-surface-container-low border border-border-subtle font-bold text-primary rounded-lg px-3 py-1.5 focus:outline-none focus:border-primary"
-          >
-            <option value="10A-CIEN">10º Ano A - Ciências Físicas</option>
-            <option value="11A-INF">11º Ano A - Informática</option>
-            <option value="12A-GEST">12º Ano A - Gestão</option>
-          </select>
         </div>
       </div>
 
