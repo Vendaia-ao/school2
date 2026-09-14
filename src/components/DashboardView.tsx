@@ -235,7 +235,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectView, onSh
               </span>
             </div>
 
-            {/* Gauge Conic Squarish Visual */}
+            {/* Gauge Conic Squarish Visual (Arredondamento Aumentado) */}
             <div className="flex flex-col items-center justify-center my-3">
               <div
                 className="w-32 h-32 rounded-2xl flex items-center justify-center shadow-sm relative transition-transform hover:scale-105 cursor-pointer p-3"
