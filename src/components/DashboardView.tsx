@@ -140,11 +140,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectView, onSh
 
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
-                  <span className="w-3 h-3 rounded bg-[#051939] dark:bg-[#3b82f6] inline-block" />
+                  <span className="w-3 h-3 rounded bg-[#051939] inline-block" />
                   Receita
                 </div>
                 <div className="flex items-center gap-1.5 text-xs font-semibold text-secondary">
-                  <span className="w-3 h-3 rounded bg-[#a54400] dark:bg-[#f97316] inline-block" />
+                  <span className="w-3 h-3 rounded bg-[#a54400] inline-block" />
                   Despesa
                 </div>
               </div>
@@ -177,21 +177,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectView, onSh
               ].map((item) => (
                 <div key={item.mes} className="flex-1 flex flex-col items-center h-full justify-end group z-10">
                   <div className="flex items-end gap-1.5 h-full w-full justify-center">
-                    {/* Receita Bar (Dark Navy #051939 / Light Blue in dark mode) */}
+                    {/* Receita Bar (Dark Navy #051939) */}
                     <div
-                      className="w-5 sm:w-7 bg-[#051939] dark:bg-[#3b82f6] rounded-t-md transition-all group-hover:brightness-125 shadow-2xs relative"
+                      className="w-5 sm:w-7 bg-[#051939] dark:bg-[#0c2340] border border-[#051939]/30 dark:border-border-subtle/50 rounded-t-md transition-all group-hover:brightness-125 shadow-2xs relative"
                       style={{ height: item.hRec }}
                     >
-                      <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-[#051939] dark:bg-[#1e293b] text-surface-white text-[10px] py-0.5 px-1.5 rounded shadow pointer-events-none whitespace-nowrap z-20 font-bold">
+                      <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-[#051939] text-surface-white text-[10px] py-0.5 px-1.5 rounded shadow pointer-events-none whitespace-nowrap z-20 font-bold">
                         Rec: {item.receita}
                       </div>
                     </div>
-                    {/* Despesa Bar (Terracotta Rust #a54400 / Orange in dark mode) */}
+                    {/* Despesa Bar (Terracotta Rust #a54400) */}
                     <div
-                      className="w-5 sm:w-7 bg-[#a54400] dark:bg-[#f97316] rounded-t-md transition-all group-hover:brightness-110 shadow-2xs relative"
+                      className="w-5 sm:w-7 bg-[#a54400] dark:bg-[#8c3a00] border border-[#a54400]/30 dark:border-border-subtle/50 rounded-t-md transition-all group-hover:brightness-110 shadow-2xs relative"
                       style={{ height: item.hDesp }}
                     >
-                      <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-[#a54400] dark:bg-[#ea580c] text-surface-white text-[10px] py-0.5 px-1.5 rounded shadow pointer-events-none whitespace-nowrap z-20 font-bold">
+                      <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-[#a54400] text-surface-white text-[10px] py-0.5 px-1.5 rounded shadow pointer-events-none whitespace-nowrap z-20 font-bold">
                         Desp: {item.despesa}
                       </div>
                     </div>
