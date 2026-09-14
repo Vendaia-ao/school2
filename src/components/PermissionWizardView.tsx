@@ -311,62 +311,157 @@ export const PermissionWizardView: React.FC<Props> = ({ target, onBack, onSave, 
         {/* Modal Scrollable Body */}
         <div className="p-3 overflow-y-auto flex-1 min-h-0 text-xs space-y-3">
           
-          {/* Base / Global Matrix Table Section (Always Visible) */}
-          <div className="border border-border-subtle rounded-xl bg-surface-white shadow-2xs overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-[10px]">
-                <thead className="sticky top-0 z-10 bg-surface-container-low border-b border-border-subtle text-[8px]">
-                  <tr>
-                    <th className="px-3 py-2 font-bold text-primary min-w-[200px]">MÓDULO / RECURSO</th>
-                    {OPERATIONS.map((op) => (
-                      <th key={op} className="px-1 py-2 text-center font-bold text-outline min-w-[60px]">
-                        {op}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border-subtle">
-                  {filteredResources.map((res) => {
-                    const set = (structureMatrices['global'] || {})[res.id] || new Set();
-                    const isAll = set.size === OPERATIONS.length;
-                    return (
-                      <tr key={res.id} className="hover:bg-surface-container-low/30 transition-colors">
-                        <td className="px-3 py-1.5">
-                          <div className="flex items-center justify-between gap-2">
-                            <div>
-                              <span className="text-[7px] uppercase font-bold text-outline leading-none block tracking-wider">{res.module}</span>
-                              <span className="font-bold text-primary text-[11px] leading-tight">{res.name}</span>
+          {/* Base / Global Matrix Table Section (ONLY Visible when Escopo === 'global') */}
+          {scopeType === 'global' && (
+            <div className="border border-border-subtle rounded-xl bg-surface-white shadow-2xs overflow-hidden">
+              <div className="bg-surface-container-low px-4 py-2 border-b border-border-subtle flex items-center justify-between">
+                <span className="font-bold text-xs text-primary flex items-center gap-1.5">
+                  <Globe className="w-4 h-4 text-secondary" /> Matriz de Permissões de Escopo Global
+                </span>
+                <span className="text-[10px] text-outline font-semibold">
+                  Aplica-se a toda a instituição globalmente
+                </span>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-[10px]">
+                  <thead className="sticky top-0 z-10 bg-surface-container-low border-b border-border-subtle text-[8px]">
+                    <tr>
+                      <th className="px-3 py-2 font-bold text-primary min-w-[200px]">MÓDULO / RECURSO</th>
+                      {OPERATIONS.map((op) => (
+                        <th key={op} className="px-1 py-2 text-center font-bold text-outline min-w-[60px]">
+                          {op}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-subtle">
+                    {filteredResources.map((res) => {
+                      const set = (structureMatrices['global'] || {})[res.id] || new Set();
+                      const isAll = set.size === OPERATIONS.length;
+                      return (
+                        <tr key={res.id} className="hover:bg-surface-container-low/30 transition-colors">
+                          <td className="px-3 py-1.5">
+                            <div className="flex items-center justify-between gap-2">
+                              <div>
+                                <span className="text-[7px] uppercase font-bold text-outline leading-none block tracking-wider">{res.module}</span>
+                                <span className="font-bold text-primary text-[11px] leading-tight">{res.name}</span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => toggleResourceAll('global', res.id)}
+                                className="text-[9px] text-secondary hover:underline font-semibold cursor-pointer shrink-0"
+                              >
+                                [{isAll ? 'Desmarcar' : 'Marcar'}]
+                              </button>
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => toggleResourceAll('global', res.id)}
-                              className="text-[9px] text-secondary hover:underline font-semibold cursor-pointer shrink-0"
-                            >
-                              [{isAll ? 'Desmarcar' : 'Marcar'}]
-                            </button>
-                          </div>
-                        </td>
+                          </td>
 
-                        {OPERATIONS.map((op) => {
-                          const checked = set.has(op);
-                          return (
-                            <td key={op} className="px-1 py-1.5 text-center">
-                              <input
-                                type="checkbox"
-                                checked={checked}
-                                onChange={() => toggleMatrixCell('global', res.id, op)}
-                                className="w-3.5 h-3.5 rounded border-border-subtle text-secondary focus:ring-secondary cursor-pointer"
-                              />
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                          {OPERATIONS.map((op) => {
+                            const checked = set.has(op);
+                            return (
+                              <td key={op} className="px-1 py-1.5 text-center">
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  onChange={() => toggleMatrixCell('global', res.id, op)}
+                                  className="w-3.5 h-3.5 rounded border-border-subtle text-secondary focus:ring-secondary cursor-pointer"
+                                />
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Uniform Polo Matrix (Visible in Restricted + Uniform mode) */}
+          {scopeType === 'restricted' && scopeMode === 'uniform' && (
+            <div className="space-y-3">
+              <div className="p-3 bg-surface-white border border-border-subtle rounded-xl shadow-2xs flex items-center justify-between flex-wrap gap-2">
+                <span className="font-bold text-xs text-primary flex items-center gap-1.5">
+                  <Building2 className="w-4 h-4 text-secondary" /> Polos Selecionados para Matriz Uniforme:
+                </span>
+                <div className="flex items-center gap-3 flex-wrap">
+                  {structures.map((s) => (
+                    <label key={s.id} className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-primary">
+                      <input
+                        type="checkbox"
+                        checked={selectedStructures.includes(s.id)}
+                        onChange={() => toggleStructureSelection(s.id)}
+                        className="w-3.5 h-3.5 rounded border-border-subtle text-secondary focus:ring-secondary"
+                      />
+                      {s.nome}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="border border-border-subtle rounded-xl bg-surface-white shadow-2xs overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-[10px]">
+                    <thead className="sticky top-0 z-10 bg-surface-container-low border-b border-border-subtle text-[8px]">
+                      <tr>
+                        <th className="px-3 py-2 font-bold text-primary min-w-[200px]">MÓDULO / RECURSO</th>
+                        {OPERATIONS.map((op) => (
+                          <th key={op} className="px-1 py-2 text-center font-bold text-outline min-w-[60px]">
+                            {op}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border-subtle">
+                      {filteredResources.map((res) => {
+                        const targetId = selectedStructures[0] || 'str-02';
+                        const set = (structureMatrices[targetId] || {})[res.id] || new Set();
+                        const isAll = set.size === OPERATIONS.length;
+                        return (
+                          <tr key={res.id} className="hover:bg-surface-container-low/30 transition-colors">
+                            <td className="px-3 py-1.5">
+                              <div className="flex items-center justify-between gap-2">
+                                <div>
+                                  <span className="text-[7px] uppercase font-bold text-outline leading-none block tracking-wider">{res.module}</span>
+                                  <span className="font-bold text-primary text-[11px] leading-tight">{res.name}</span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    selectedStructures.forEach((sId) => toggleResourceAll(sId, res.id));
+                                  }}
+                                  className="text-[9px] text-secondary hover:underline font-semibold cursor-pointer shrink-0"
+                                >
+                                  [{isAll ? 'Desmarcar' : 'Marcar'}]
+                                </button>
+                              </div>
+                            </td>
+
+                            {OPERATIONS.map((op) => {
+                              const checked = set.has(op);
+                              return (
+                                <td key={op} className="px-1 py-1.5 text-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={() => {
+                                      selectedStructures.forEach((sId) => toggleMatrixCell(sId, res.id, op));
+                                    }}
+                                    className="w-3.5 h-3.5 rounded border-border-subtle text-secondary focus:ring-secondary cursor-pointer"
+                                  />
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Per-Polo Accordions (Visible in Restricted + Contextual / Acórdão por Polo mode) */}
           {scopeType === 'restricted' && scopeMode === 'contextual' && (
