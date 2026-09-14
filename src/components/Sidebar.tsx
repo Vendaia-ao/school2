@@ -20,6 +20,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // State for collapsible submenus
   const [openModules, setOpenModules] = useState<Record<string, boolean>>({
     academica: true,
+    biblioteca: false,
     servicos: false,
     financeira: false,
     rh: false,
@@ -33,7 +34,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [showThemeSubmenu, setShowThemeSubmenu] = useState(false);
   const [currentTheme, setCurrentTheme] = useState<'system' | 'light' | 'dark'>('light');
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(100);
+  const [zoomLevel, setZoomLevel] = useState(120);
   const [feedbackText, setFeedbackText] = useState('');
   const [includeDiag, setIncludeDiag] = useState(true);
   const [screenAttached, setScreenAttached] = useState(false);
@@ -69,10 +70,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  // Restore saved theme and 80% baseline zoom on mount
+  // Restore saved theme and 120% default zoom on mount
   React.useEffect(() => {
+    const savedZoom = localStorage.getItem('vendaia_zoom');
+    const initialZoom = savedZoom ? parseInt(savedZoom, 10) : 120;
+    setZoomLevel(initialZoom);
+    const actualCssZoom = Math.round((initialZoom * 80) / 100);
     try {
-      (document.body.style as any).zoom = '80%';
+      (document.body.style as any).zoom = `${actualCssZoom}%`;
     } catch (e) {
       // Fallback
     }
@@ -98,6 +103,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const handleZoomChange = (delta: number) => {
     const newZoom = Math.min(Math.max(zoomLevel + delta, 70), 150);
     setZoomLevel(newZoom);
+    localStorage.setItem('vendaia_zoom', newZoom.toString());
     const actualCssZoom = Math.round((newZoom * 80) / 100);
     try {
       (document.body.style as any).zoom = `${actualCssZoom}%`;
@@ -134,6 +140,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       const isCurrentlyOpen = prev[moduleKey];
       const closedState = {
         academica: false,
+        biblioteca: false,
         servicos: false,
         financeira: false,
         rh: false,
@@ -303,17 +310,69 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* BIBLIOTECA DIGITAL */}
           <div>
             <button
-              onClick={() => handleSelectScreen('biblioteca')}
-              className={`w-full flex items-center gap-2 px-3 py-2 transition-colors rounded menu-item text-left cursor-pointer ${
-                currentView === 'biblioteca'
+              onClick={() => toggleModule('biblioteca')}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded cursor-pointer menu-item transition-all text-left ${
+                ['biblioteca', 'biblioteca_catalogo', 'biblioteca_solicitacoes', 'biblioteca_relatorios', 'biblioteca_configuracoes'].includes(currentView)
                   ? 'text-on-primary bg-info/20 border-l-3 border-[#2563EB] font-bold shadow-2xs'
                   : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
               }`}
               title="Biblioteca Digital"
             >
-              <span className="material-symbols-outlined text-[18px]">local_library</span>
-              {isExpanded && <span className="font-label-md sidebar-text truncate">Biblioteca Digital</span>}
+              <div className="flex items-center gap-2 truncate">
+                <span className="material-symbols-outlined text-[18px]">local_library</span>
+                {isExpanded && <span className="font-label-md sidebar-text truncate">Biblioteca Digital</span>}
+              </div>
+              {isExpanded && (
+                <span className={`material-symbols-outlined text-[18px] transition-transform ${openModules.biblioteca ? 'rotate-180' : ''}`}>
+                  expand_more
+                </span>
+              )}
             </button>
+
+            {isExpanded && openModules.biblioteca && (
+              <div className="sidebar-text ml-5 pl-2 border-l border-on-primary-container/15 my-1 space-y-0.5">
+                <button
+                  onClick={() => handleSelectScreen('biblioteca_catalogo')}
+                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                    currentView === 'biblioteca' || currentView === 'biblioteca_catalogo'
+                      ? 'text-info font-bold bg-on-primary-container/20'
+                      : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
+                  }`}
+                >
+                  1. Catálogo
+                </button>
+                <button
+                  onClick={() => handleSelectScreen('biblioteca_solicitacoes')}
+                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                    currentView === 'biblioteca_solicitacoes'
+                      ? 'text-info font-bold bg-on-primary-container/20'
+                      : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
+                  }`}
+                >
+                  2. Solicitações
+                </button>
+                <button
+                  onClick={() => handleSelectScreen('biblioteca_relatorios')}
+                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                    currentView === 'biblioteca_relatorios'
+                      ? 'text-info font-bold bg-on-primary-container/20'
+                      : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
+                  }`}
+                >
+                  3. Relatórios
+                </button>
+                <button
+                  onClick={() => handleSelectScreen('biblioteca_configuracoes')}
+                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                    currentView === 'biblioteca_configuracoes'
+                      ? 'text-info font-bold bg-on-primary-container/20'
+                      : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
+                  }`}
+                >
+                  4. Configurações
+                </button>
+              </div>
+            )}
           </div>
 
           {/* SERVIÇOS INSTITUCIONAIS */}

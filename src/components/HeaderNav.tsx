@@ -113,9 +113,24 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
           </div>
         )}
 
-        {currentView === 'biblioteca' && (
+        {['biblioteca', 'biblioteca_catalogo', 'biblioteca_solicitacoes', 'biblioteca_relatorios', 'biblioteca_configuracoes'].includes(currentView) && (
           <div className="flex items-center gap-1">
-            <span className="text-primary font-bold text-sm">Biblioteca Digital</span>
+            <span
+              className="hover:text-primary cursor-pointer transition-colors"
+              onClick={() => onSelectView('biblioteca_catalogo')}
+            >
+              Biblioteca Digital
+            </span>
+            <ChevronRight className="w-3.5 h-3.5 text-outline" />
+            <span className="text-primary font-bold">
+              {currentView === 'biblioteca_solicitacoes'
+                ? 'Solicitações'
+                : currentView === 'biblioteca_relatorios'
+                ? 'Relatórios'
+                : currentView === 'biblioteca_configuracoes'
+                ? 'Configurações'
+                : 'Catálogo'}
+            </span>
           </div>
         )}
 

@@ -11,6 +11,10 @@ export type ActiveView =
   | 'professor_portal'
   // Módulo 3 — Biblioteca Digital
   | 'biblioteca' 
+  | 'biblioteca_catalogo'
+  | 'biblioteca_solicitacoes'
+  | 'biblioteca_relatorios'
+  | 'biblioteca_configuracoes'
   // Módulo 4 — Serviços Institucionais
   | 'servicos_produtos'
   | 'cantina'

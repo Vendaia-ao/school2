@@ -334,6 +334,14 @@ function AppContent() {
             <ServicosProdutosView onSelectView={setCurrentView} onShowToast={showToast} />
           )}
 
+          {(currentView === 'biblioteca' ||
+            currentView === 'biblioteca_catalogo' ||
+            currentView === 'biblioteca_solicitacoes' ||
+            currentView === 'biblioteca_relatorios' ||
+            currentView === 'biblioteca_configuracoes') && (
+            <BibliotecaView activeSubmodule={currentView} onSelectView={setCurrentView} onShowToast={showToast} />
+          )}
+
           {currentView === 'cantina' && (
             <CantinaView onSelectView={setCurrentView} onShowToast={showToast} />
           )}
