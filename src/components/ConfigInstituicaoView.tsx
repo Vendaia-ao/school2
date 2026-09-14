@@ -26,6 +26,7 @@ import {
   KeyRound,
   HardDrive,
   Copy,
+  MoreVertical,
 } from 'lucide-react';
 import { useAccess } from '../context/AccessContext';
 
@@ -143,19 +144,21 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
   const [confirmDeleteBackup, setConfirmDeleteBackup] = useState<BackupItem | null>(null);
   const [restoreBackup, setRestoreBackup] = useState<BackupItem | null>(null);
   const [newApiName, setNewApiName] = useState('');
+  const [openBackupMenu, setOpenBackupMenu] = useState<string | null>(null);
+  const [openApiMenu, setOpenApiMenu] = useState<string | null>(null);
 
   // General Settings Toggles
   const [manutencaoModo, setManutencaoModo] = useState(false);
 
   const templates = [
-    { id: 't1', nome: 'Declaração de Matrícula', tipo: 'PDF', atualizado: '05 Ago 2026', icon: <FileText className="w-5 h-5 text-secondary" /> },
-    { id: 't2', nome: 'Certificado de Conclusão', tipo: 'PDF', atualizado: '22 Jul 2026', icon: <FileText className="w-5 h-5 text-secondary" /> },
-    { id: 't3', nome: 'Recibo de Propina (AGT)', tipo: 'PDF', atualizado: '10 Jul 2026', icon: <FileText className="w-5 h-5 text-secondary" /> },
-    { id: 't4', nome: 'Cartão do Estudante Digital', tipo: 'PDF', atualizado: '15 Jun 2026', icon: <FileText className="w-5 h-5 text-secondary" /> },
-    { id: 't5', nome: 'Fatura / Recibo Institucional', tipo: 'PDF', atualizado: '01 Jun 2026', icon: <FileText className="w-5 h-5 text-secondary" /> },
-    { id: 't6', nome: 'Boletim de Notas & Caderneta', tipo: 'PDF', atualizado: '20 Mai 2026', icon: <FileText className="w-5 h-5 text-secondary" /> },
-    { id: 't7', nome: 'Contrato de Prestação de Serviços', tipo: 'DOCX', atualizado: '10 Mai 2026', icon: <FileText className="w-5 h-5 text-secondary" /> },
-    { id: 't8', nome: 'Termo de Responsabilidade', tipo: 'DOCX', atualizado: '05 Abr 2026', icon: <FileText className="w-5 h-5 text-secondary" /> },
+    { id: 't1', nome: 'Declaração de Matrícula', tipo: 'PDF', atualizado: '05 Ago 2026', icon: <FileText className="w-5 h-5 text-primary" /> },
+    { id: 't2', nome: 'Certificado de Conclusão', tipo: 'PDF', atualizado: '22 Jul 2026', icon: <FileText className="w-5 h-5 text-primary" /> },
+    { id: 't3', nome: 'Recibo de Propina (AGT)', tipo: 'PDF', atualizado: '10 Jul 2026', icon: <FileText className="w-5 h-5 text-primary" /> },
+    { id: 't4', nome: 'Cartão do Estudante Digital', tipo: 'PDF', atualizado: '15 Jun 2026', icon: <FileText className="w-5 h-5 text-primary" /> },
+    { id: 't5', nome: 'Fatura / Recibo Institucional', tipo: 'PDF', atualizado: '01 Jun 2026', icon: <FileText className="w-5 h-5 text-primary" /> },
+    { id: 't6', nome: 'Boletim de Notas & Caderneta', tipo: 'PDF', atualizado: '20 Mai 2026', icon: <FileText className="w-5 h-5 text-primary" /> },
+    { id: 't7', nome: 'Contrato de Prestação de Serviços', tipo: 'DOCX', atualizado: '10 Mai 2026', icon: <FileText className="w-5 h-5 text-primary" /> },
+    { id: 't8', nome: 'Termo de Responsabilidade', tipo: 'DOCX', atualizado: '05 Abr 2026', icon: <FileText className="w-5 h-5 text-primary" /> },
   ];
 
   const handleSaveDados = (e: React.FormEvent) => {
@@ -216,12 +219,12 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
   const activeIntegrationsCount = integrations.filter(i => i.estado === 'Conectado').length;
 
   return (
-    <div className="mt-header-height p-4 sm:p-5 w-full flex flex-col gap-4">
+    <div className="mt-header-height w-full flex flex-col gap-4 p-4">
       {/* Top Header Flush */}
       <div className="flex flex-wrap justify-between items-center gap-3">
         <div>
           <h1 className="text-xl font-bold text-primary flex items-center gap-2">
-            <Settings className="w-5 h-5 text-secondary stroke-[1.75]" />
+            <Settings className="w-5 h-5 text-primary stroke-[1.75]" />
             Configurações da Instituição
           </h1>
           <p className="text-xs text-outline">
@@ -232,7 +235,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
         <div className="flex items-center gap-2">
           {/* Structure Selector RN9.08 */}
           <div className="flex items-center gap-1.5 bg-surface-white border border-border-subtle rounded-xl px-3 py-1.5 shadow-2xs text-xs">
-            <Building2 className="w-4 h-4 text-secondary" />
+            <Building2 className="w-4 h-4 text-primary" />
             <span className="text-outline font-medium text-[11px]">Estrutura:</span>
             <select
               value={selectedStructureId}
@@ -250,68 +253,84 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
 
           <button
             onClick={() => onShowToast('Todas as alterações de configuração foram salvas!')}
-            className="bg-secondary text-surface-white hover:bg-secondary/90 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+            className="bg-primary hover:bg-primary-container text-surface-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 shadow-md transition-all cursor-pointer"
           >
             <Save className="w-4 h-4" /> Guardar Alterações
           </button>
         </div>
       </div>
 
-      {/* 4-KPI Grid Icon-Boxes */}
+      {/* 4-KPI Grid (Padrão Dashboard — h-[68px], sem redundâncias) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-        {/* KPI 1 */}
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-3.5 shadow-2xs flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
-            <Building2 className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="text-[10px] font-bold text-outline uppercase tracking-wider block">IDENTIDADE LEGAL</span>
-            <span className="text-xs font-bold text-primary block truncate">NIF {dadosForm.nif}</span>
-            <span className="text-[10px] text-success font-medium flex items-center gap-1">
-              <Check className="w-3 h-3" /> Registo Ativo
+        {/* Card 1: IDENTIDADE LEGAL */}
+        <div className="bg-surface-white border border-border-subtle/30 rounded-lg px-4 py-3 shadow-xs flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-outline text-[10px] uppercase font-bold tracking-wider mb-0.5">
+              IDENTIDADE LEGAL
             </span>
+            <span className="text-sm font-bold text-primary leading-none truncate">
+              NIF {dadosForm.nif}
+            </span>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-success bg-success/10 text-[10px] font-bold">
+              <Check className="w-3 h-3 mr-0.5" /> Ativo
+            </span>
+            <span className="text-[9px] text-outline font-medium uppercase">registo</span>
           </div>
         </div>
 
-        {/* KPI 2 */}
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-3.5 shadow-2xs flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center font-bold">
-            <Lock className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="text-[10px] font-bold text-outline uppercase tracking-wider block">SEGURANÇA & RLS</span>
-            <span className="text-xs font-bold text-primary block">2FA Facultativo • 30m</span>
-            <span className="text-[10px] text-success font-medium flex items-center gap-1">
-              <Shield className="w-3 h-3" /> Auditoria On
+        {/* Card 2: SEGURANÇA & RLS */}
+        <div className="bg-surface-white border border-border-subtle/30 rounded-lg px-4 py-3 shadow-xs flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-outline text-[10px] uppercase font-bold tracking-wider mb-0.5">
+              SEGURANÇA & RLS
             </span>
+            <span className="text-sm font-bold text-primary leading-none">
+              2FA • 30m
+            </span>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-success bg-success/10 text-[10px] font-bold">
+              <Shield className="w-3 h-3 mr-0.5" /> Auditoria
+            </span>
+            <span className="text-[9px] text-outline font-medium uppercase">ativa</span>
           </div>
         </div>
 
-        {/* KPI 3 */}
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-3.5 shadow-2xs flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-info/10 text-info flex items-center justify-center font-bold">
-            <Plug className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="text-[10px] font-bold text-outline uppercase tracking-wider block">CONECTORES</span>
-            <span className="text-xs font-bold text-primary block">{activeIntegrationsCount} de {integrations.length} Ativos</span>
-            <span className="text-[10px] text-info font-medium flex items-center gap-1">
-              <Server className="w-3 h-3" /> Gateway EMIS OK
+        {/* Card 3: CONECTORES */}
+        <div className="bg-surface-white border border-border-subtle/30 rounded-lg px-4 py-3 shadow-xs flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-outline text-[10px] uppercase font-bold tracking-wider mb-0.5">
+              CONECTORES
             </span>
+            <span className="text-xl sm:text-2xl font-bold text-primary leading-none">
+              {activeIntegrationsCount} / {integrations.length}
+            </span>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-info bg-info/10 text-[10px] font-bold">
+              <Server className="w-3 h-3 mr-0.5" /> EMIS OK
+            </span>
+            <span className="text-[9px] text-outline font-medium uppercase">gateway</span>
           </div>
         </div>
 
-        {/* KPI 4 */}
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-3.5 shadow-2xs flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-warning/10 text-warning flex items-center justify-center font-bold">
-            <Database className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="text-[10px] font-bold text-outline uppercase tracking-wider block">BACKUPS</span>
-            <span className="text-xs font-bold text-primary block truncate">Hoje, 03:00 (248 MB)</span>
-            <span className="text-[10px] text-outline font-medium flex items-center gap-1">
-              <HardDrive className="w-3 h-3" /> Retenção 30d
+        {/* Card 4: BACKUPS */}
+        <div className="bg-surface-white border border-border-subtle/30 rounded-lg px-4 py-3 shadow-xs flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-outline text-[10px] uppercase font-bold tracking-wider mb-0.5">
+              BACKUPS
             </span>
+            <span className="text-sm font-bold text-primary leading-none truncate">
+              Hoje, 03:00
+            </span>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-primary bg-primary/10 text-[10px] font-bold">
+              248 MB
+            </span>
+            <span className="text-[9px] text-outline font-medium uppercase">30d retenção</span>
           </div>
         </div>
       </div>
@@ -346,8 +365,8 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
 
           {/* Logótipo */}
           <div className="border border-border-subtle rounded-xl p-4 bg-surface-container-low/30 space-y-3">
-            <h3 className="font-bold text-secondary uppercase text-[10px] tracking-wider flex items-center gap-1.5">
-              <Building2 className="w-3.5 h-3.5 text-secondary" />
+            <h3 className="font-bold text-primary uppercase text-[10px] tracking-wider flex items-center gap-1.5">
+              <Building2 className="w-3.5 h-3.5 text-primary" />
               Logótipo e Identidade Visual
             </h3>
             <div className="flex items-center gap-6">
@@ -358,7 +377,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
                 <button
                   type="button"
                   onClick={() => onShowToast('Seletor de logótipo aberto.')}
-                  className="bg-secondary text-surface-white px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-secondary/90 transition-all w-fit shadow-2xs"
+                  className="bg-primary hover:bg-primary-container text-surface-white px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all w-fit shadow-2xs"
                 >
                   <Upload className="w-3.5 h-3.5" /> Carregar Novo Logótipo
                 </button>
@@ -375,7 +394,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
                 type="text"
                 value={dadosForm.nome}
                 onChange={(e) => setDadosForm({ ...dadosForm, nome: e.target.value })}
-                className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-secondary focus:outline-none"
+                className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none"
               />
             </div>
             <div>
@@ -384,7 +403,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
                 type="text"
                 value={dadosForm.designacao}
                 onChange={(e) => setDadosForm({ ...dadosForm, designacao: e.target.value })}
-                className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-secondary focus:outline-none"
+                className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none"
               />
             </div>
             <div>
@@ -393,7 +412,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
                 type="text"
                 value={dadosForm.nif}
                 onChange={(e) => setDadosForm({ ...dadosForm, nif: e.target.value })}
-                className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-secondary focus:outline-none font-mono"
+                className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none font-mono"
               />
             </div>
             <div>
@@ -402,7 +421,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
                 type="text"
                 value={dadosForm.telefone}
                 onChange={(e) => setDadosForm({ ...dadosForm, telefone: e.target.value })}
-                className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-secondary focus:outline-none"
+                className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none"
               />
             </div>
             <div>
@@ -411,7 +430,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
                 type="email"
                 value={dadosForm.email}
                 onChange={(e) => setDadosForm({ ...dadosForm, email: e.target.value })}
-                className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-secondary focus:outline-none"
+                className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none"
               />
             </div>
             <div>
@@ -420,7 +439,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
                 type="text"
                 value={dadosForm.website}
                 onChange={(e) => setDadosForm({ ...dadosForm, website: e.target.value })}
-                className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-secondary focus:outline-none"
+                className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none"
               />
             </div>
             <div className="md:col-span-2">
@@ -429,7 +448,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
                 type="text"
                 value={dadosForm.morada}
                 onChange={(e) => setDadosForm({ ...dadosForm, morada: e.target.value })}
-                className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-secondary focus:outline-none"
+                className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none"
               />
             </div>
             <div>
@@ -438,7 +457,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
                 type="text"
                 value={dadosForm.anoFundacao}
                 onChange={(e) => setDadosForm({ ...dadosForm, anoFundacao: e.target.value })}
-                className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-secondary focus:outline-none"
+                className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none"
               />
             </div>
             <div>
@@ -447,7 +466,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
                 type="text"
                 value={dadosForm.diretorGeral}
                 onChange={(e) => setDadosForm({ ...dadosForm, diretorGeral: e.target.value })}
-                className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-secondary focus:outline-none"
+                className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none"
               />
             </div>
           </div>
@@ -455,7 +474,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
           <div className="flex justify-end pt-3 border-t border-border-subtle">
             <button
               type="submit"
-              className="bg-secondary text-surface-white px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-secondary/90 transition-all shadow-sm"
+              className="bg-primary hover:bg-primary/90 text-surface-white px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-sm"
             >
               <Save className="w-4 h-4" /> Guardar Dados Institucionais
             </button>
@@ -475,7 +494,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
             </div>
             <button
               onClick={() => onShowToast('Seletor de ficheiro de template aberto.')}
-              className="bg-secondary text-surface-white hover:bg-secondary/90 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-2xs transition-all cursor-pointer"
+              className="bg-primary text-surface-white hover:bg-primary/90 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-2xs transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4" /> Carregar Novo Template
             </button>
@@ -483,9 +502,9 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {templates.map((t) => (
-              <div key={t.id} className="border border-border-subtle rounded-xl p-3.5 flex items-center justify-between hover:border-secondary/40 transition-all bg-surface-white shadow-2xs">
+              <div key={t.id} className="border border-border-subtle rounded-xl p-3.5 flex items-center justify-between hover:border-primary/40 transition-all bg-surface-white shadow-2xs">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center font-bold">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold">
                     {t.icon}
                   </div>
                   <div>
@@ -528,7 +547,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-outline font-bold mb-1">Idioma Principal da Plataforma</label>
-              <select className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-secondary focus:outline-none bg-surface-white cursor-pointer">
+              <select className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none bg-surface-white cursor-pointer">
                 <option>Português (Angola) — pt-AO</option>
                 <option>Português (Portugal) — pt-PT</option>
                 <option>Português (Brasil) — pt-BR</option>
@@ -538,7 +557,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
             </div>
             <div>
               <label className="block text-outline font-bold mb-1">Formato de Data Oficial</label>
-              <select className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-secondary focus:outline-none bg-surface-white cursor-pointer">
+              <select className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none bg-surface-white cursor-pointer">
                 <option>DD MMM AAAA (10 Ago 2026)</option>
                 <option>DD/MM/AAAA (10/08/2026)</option>
                 <option>AAAA-MM-DD (2026-08-10)</option>
@@ -546,7 +565,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
             </div>
             <div>
               <label className="block text-outline font-bold mb-1">Moeda Principal de Faturação</label>
-              <select className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-secondary focus:outline-none bg-surface-white cursor-pointer">
+              <select className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none bg-surface-white cursor-pointer">
                 <option>Kwanza Angolano (Kz / AOA)</option>
                 <option>Euro (€ / EUR)</option>
                 <option>Dólar Americano ($ / USD)</option>
@@ -554,7 +573,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
             </div>
             <div>
               <label className="block text-outline font-bold mb-1">Fuso Horário de Referência</label>
-              <select className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-secondary focus:outline-none bg-surface-white cursor-pointer">
+              <select className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none bg-surface-white cursor-pointer">
                 <option>África/Luanda (WAT, UTC+1)</option>
                 <option>Europe/Lisbon (WET, UTC+0)</option>
               </select>
@@ -564,7 +583,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
           <div className="flex justify-end pt-3 border-t border-border-subtle">
             <button
               onClick={() => onShowToast('Configurações de localização guardadas!')}
-              className="bg-secondary text-surface-white px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-secondary/90 transition-all shadow-sm"
+              className="bg-primary hover:bg-primary/90 text-surface-white px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-sm"
             >
               <Save className="w-4 h-4" /> Guardar Localização
             </button>
@@ -585,26 +604,26 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
           <div className="space-y-5">
             {/* Pwd Policies */}
             <div className="space-y-3">
-              <h3 className="font-bold text-secondary uppercase text-[10px] tracking-wider border-b border-border-subtle pb-1">
+              <h3 className="font-bold text-primary uppercase text-[10px] tracking-wider border-b border-border-subtle pb-1">
                 Políticas de Palavra-passe
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-outline font-bold mb-1">Comprimento Mínimo (Caracteres)</label>
-                  <input type="number" defaultValue={8} className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-secondary focus:outline-none" />
+                  <input type="number" defaultValue={8} className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none" />
                 </div>
                 <div>
                   <label className="block text-outline font-bold mb-1">Expiração Obrigatoria (Dias)</label>
-                  <input type="number" defaultValue={90} className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-secondary focus:outline-none" />
+                  <input type="number" defaultValue={90} className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none" />
                 </div>
               </div>
               <div className="space-y-1.5">
                 <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-surface-container-low/40 transition-colors">
-                  <input type="checkbox" defaultChecked className="rounded border-border-subtle text-secondary focus:ring-secondary cursor-pointer" />
+                  <input type="checkbox" defaultChecked className="rounded border-border-subtle text-primary focus:ring-primary cursor-pointer" />
                   <span className="font-semibold text-primary">Exigir letras maiúsculas e caracteres especiais</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-surface-container-low/40 transition-colors">
-                  <input type="checkbox" defaultChecked className="rounded border-border-subtle text-secondary focus:ring-secondary cursor-pointer" />
+                  <input type="checkbox" defaultChecked className="rounded border-border-subtle text-primary focus:ring-primary cursor-pointer" />
                   <span className="font-semibold text-primary">Forçar alteração de palavra-passe no primeiro acesso</span>
                 </label>
               </div>
@@ -612,17 +631,17 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
 
             {/* Session Policies */}
             <div className="space-y-3 pt-3 border-t border-border-subtle">
-              <h3 className="font-bold text-secondary uppercase text-[10px] tracking-wider border-b border-border-subtle pb-1">
+              <h3 className="font-bold text-primary uppercase text-[10px] tracking-wider border-b border-border-subtle pb-1">
                 Gestão de Sessões & Autenticação 2FA
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-outline font-bold mb-1">Tempo limite de inatividade (minutos)</label>
-                  <input type="number" defaultValue={30} className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-secondary focus:outline-none" />
+                  <input type="number" defaultValue={30} className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none" />
                 </div>
                 <div>
                   <label className="block text-outline font-bold mb-1">Tentativas de login falhadas antes de bloqueio</label>
-                  <input type="number" defaultValue={5} className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-secondary focus:outline-none" />
+                  <input type="number" defaultValue={5} className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none" />
                 </div>
               </div>
             </div>
@@ -631,7 +650,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
           <div className="flex justify-end pt-3 border-t border-border-subtle">
             <button
               onClick={() => onShowToast('Políticas de segurança guardadas com sucesso!')}
-              className="bg-secondary text-surface-white px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-secondary/90 transition-all shadow-sm"
+              className="bg-primary hover:bg-primary/90 text-surface-white px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-sm"
             >
               <Save className="w-4 h-4" /> Guardar Segurança
             </button>
@@ -651,7 +670,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
             </div>
             <button
               onClick={createBackup}
-              className="bg-secondary text-surface-white hover:bg-secondary/90 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-2xs transition-all cursor-pointer"
+              className="bg-primary text-surface-white hover:bg-primary/90 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-2xs transition-all cursor-pointer"
             >
               <Database className="w-4 h-4" /> Criar Backup Agora
             </button>
@@ -676,37 +695,52 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
                     <td className="px-3.5 py-3 text-outline">{b.data}</td>
                     <td className="px-3.5 py-3 text-on-surface-variant font-semibold">{b.tamanho}</td>
                     <td className="px-3.5 py-3 text-center">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${b.tipo === 'Automático' ? 'bg-info/10 text-info' : 'bg-secondary/10 text-secondary'}`}>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${b.tipo === 'Automático' ? 'bg-info/10 text-info' : 'bg-primary/10 text-primary'}`}>
                         {b.tipo}
                       </span>
                     </td>
                     <td className="px-3.5 py-3 text-center">
                       <span className={`${estadoChip(b.estado)} px-2.5 py-1 rounded-full text-[10px] font-bold`}>{b.estado}</span>
                     </td>
-                    <td className="px-3.5 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          onClick={() => onShowToast(`Download do backup "${b.nome}" iniciado.`)}
-                          className="p-1.5 text-outline hover:text-success rounded-lg hover:bg-success/10 transition-colors cursor-pointer"
-                          title="Download"
-                        >
-                          <Download className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => setRestoreBackup(b)}
-                          className="p-1.5 text-outline hover:text-info rounded-lg hover:bg-info/10 transition-colors cursor-pointer"
-                          title="Restaurar"
-                        >
-                          <RefreshCw className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => setConfirmDeleteBackup(b)}
-                          className="p-1.5 text-outline hover:text-error rounded-lg hover:bg-error/10 transition-colors cursor-pointer"
-                          title="Remover"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                    <td className="px-3.5 py-3 text-right relative">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setOpenBackupMenu(openBackupMenu === b.id ? null : b.id); }}
+                        className={`p-1.5 text-outline hover:text-primary rounded-lg transition-colors cursor-pointer ${openBackupMenu === b.id ? 'bg-surface-container-high text-primary' : 'hover:bg-surface-container'}`}
+                        title="Ações"
+                      >
+                        <MoreVertical className="w-4 h-4 stroke-[2]" />
+                      </button>
+
+                      {openBackupMenu === b.id && (
+                        <>
+                          <div className="fixed inset-0 z-20 cursor-default" onClick={(e) => { e.stopPropagation(); setOpenBackupMenu(null); }} />
+                          <div className="absolute right-3 top-10 z-30 w-48 bg-surface-white border border-border-subtle rounded-xl shadow-xl py-1 text-left text-xs divide-y divide-border-subtle animate-in fade-in zoom-in-95 duration-100 font-normal">
+                            <div className="py-1">
+                              <button
+                                onClick={() => { onShowToast(`Download do backup "${b.nome}" iniciado.`); setOpenBackupMenu(null); }}
+                                className="w-full px-3 py-2 text-left flex items-center gap-2 text-on-surface-variant hover:bg-success/10 hover:text-success font-medium cursor-pointer transition-colors"
+                              >
+                                <Download className="w-4 h-4 text-success stroke-[2]" />
+                                <span>Download Backup</span>
+                              </button>
+                              <button
+                                onClick={() => { setRestoreBackup(b); setOpenBackupMenu(null); }}
+                                className="w-full px-3 py-2 text-left flex items-center gap-2 text-on-surface-variant hover:bg-info/10 hover:text-info font-medium cursor-pointer transition-colors"
+                              >
+                                <RefreshCw className="w-4 h-4 text-info stroke-[2]" />
+                                <span>Restaurar Backup</span>
+                              </button>
+                              <button
+                                onClick={() => { setConfirmDeleteBackup(b); setOpenBackupMenu(null); }}
+                                className="w-full px-3 py-2 text-left flex items-center gap-2 text-on-surface-variant hover:bg-error/10 hover:text-error font-medium cursor-pointer transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4 text-error stroke-[2]" />
+                                <span>Remover Backup</span>
+                              </button>
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -728,7 +762,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {integrations.map((int) => (
-              <div key={int.id} className="border border-border-subtle rounded-xl p-4 flex items-center justify-between bg-surface-white shadow-2xs hover:border-secondary/40 transition-all">
+              <div key={int.id} className="border border-border-subtle rounded-xl p-4 flex items-center justify-between bg-surface-white shadow-2xs hover:border-primary/40 transition-all">
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold ${int.estado === 'Conectado' ? 'bg-success/10 text-success' : int.estado === 'Erro' ? 'bg-error/10 text-error' : 'bg-surface-container text-outline'}`}>
                     <Plug className="w-5 h-5" />
@@ -736,14 +770,14 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
                   <div>
                     <p className="font-bold text-primary text-xs">{int.nome}</p>
                     <p className="text-[11px] text-outline leading-tight">{int.descricao}</p>
-                    <span className="text-[9px] text-secondary uppercase font-bold tracking-wider">{int.categoria}</span>
+                    <span className="text-[9px] text-primary uppercase font-bold tracking-wider">{int.categoria}</span>
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <span className={`${estadoChip(int.estado)} px-2.5 py-0.5 rounded-full text-[10px] font-bold`}>{int.estado}</span>
                   <button
                     onClick={() => onShowToast(`Configuração de "${int.nome}" aberta.`)}
-                    className="text-[11px] text-secondary font-bold hover:underline cursor-pointer"
+                    className="text-[11px] text-primary font-bold hover:underline cursor-pointer"
                   >
                     {int.estado === 'Conectado' ? 'Configurar' : 'Conectar'}
                   </button>
@@ -766,7 +800,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
             </div>
             <button
               onClick={() => setApiModal(true)}
-              className="bg-secondary text-surface-white hover:bg-secondary/90 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-2xs transition-all cursor-pointer"
+              className="bg-primary text-surface-white hover:bg-primary/90 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-2xs transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4" /> Gerar Nova API Key
             </button>
@@ -798,23 +832,38 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
                     <td className="px-3.5 py-3 text-center">
                       <span className={`${estadoChip(k.estado)} px-2.5 py-1 rounded-full text-[10px] font-bold`}>{k.estado}</span>
                     </td>
-                    <td className="px-3.5 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          onClick={() => onShowToast(`Chave de "${k.nome}" copiada!`)}
-                          className="p-1.5 text-outline hover:text-info rounded-lg hover:bg-info/10 transition-colors cursor-pointer"
-                          title="Copiar Chave"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => setConfirmDeleteApi(k)}
-                          className="p-1.5 text-outline hover:text-error rounded-lg hover:bg-error/10 transition-colors cursor-pointer"
-                          title="Revogar"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                    <td className="px-3.5 py-3 text-right relative">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setOpenApiMenu(openApiMenu === k.id ? null : k.id); }}
+                        className={`p-1.5 text-outline hover:text-primary rounded-lg transition-colors cursor-pointer ${openApiMenu === k.id ? 'bg-surface-container-high text-primary' : 'hover:bg-surface-container'}`}
+                        title="Ações"
+                      >
+                        <MoreVertical className="w-4 h-4 stroke-[2]" />
+                      </button>
+
+                      {openApiMenu === k.id && (
+                        <>
+                          <div className="fixed inset-0 z-20 cursor-default" onClick={(e) => { e.stopPropagation(); setOpenApiMenu(null); }} />
+                          <div className="absolute right-3 top-10 z-30 w-44 bg-surface-white border border-border-subtle rounded-xl shadow-xl py-1 text-left text-xs divide-y divide-border-subtle animate-in fade-in zoom-in-95 duration-100 font-normal">
+                            <div className="py-1">
+                              <button
+                                onClick={() => { onShowToast(`Chave de "${k.nome}" copiada!`); setOpenApiMenu(null); }}
+                                className="w-full px-3 py-2 text-left flex items-center gap-2 text-on-surface-variant hover:bg-info/10 hover:text-info font-medium cursor-pointer transition-colors"
+                              >
+                                <Copy className="w-4 h-4 text-info stroke-[2]" />
+                                <span>Copiar Chave</span>
+                              </button>
+                              <button
+                                onClick={() => { setConfirmDeleteApi(k); setOpenApiMenu(null); }}
+                                className="w-full px-3 py-2 text-left flex items-center gap-2 text-on-surface-variant hover:bg-error/10 hover:text-error font-medium cursor-pointer transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4 text-error stroke-[2]" />
+                                <span>Revogar Key</span>
+                              </button>
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -848,7 +897,7 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
                     setManutencaoModo(e.target.checked);
                     onShowToast(`Modo de manutenção ${e.target.checked ? 'ativado' : 'desativado'}.`);
                   }}
-                  className="w-4 h-4 rounded border-border-subtle text-secondary focus:ring-secondary cursor-pointer"
+                  className="w-4 h-4 rounded border-border-subtle text-primary focus:ring-primary cursor-pointer"
                 />
                 {manutencaoModo ? 'Ativo' : 'Desativado'}
               </label>
@@ -860,16 +909,29 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
       {/* Modal: Gerar API Key */}
       {apiModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 overflow-y-auto backdrop-blur-xs">
-          <div className="bg-surface-white rounded-2xl shadow-2xl border border-border-subtle w-full max-w-md p-6 my-8">
-            <div className="flex justify-between items-center border-b border-border-subtle pb-3 mb-4">
-              <h2 className="text-base font-bold text-primary flex items-center gap-2">
-                <Key className="w-5 h-5 text-secondary" /> Gerar Nova API Key
-              </h2>
-              <button onClick={() => setApiModal(false)} className="text-outline hover:text-primary p-1 rounded-lg hover:bg-surface-container cursor-pointer">
-                <X className="w-4 h-4" />
+          <div className="bg-surface-white rounded-2xl shadow-2xl border border-border-subtle w-full max-w-md overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="bg-primary text-surface-white p-4 sm:p-5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-surface-white/10 border border-surface-white/20 flex items-center justify-center text-surface-white font-bold shrink-0">
+                  <Key className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold leading-tight">Gerar Nova API Key</h2>
+                  <p className="text-[11px] text-surface-white/70">
+                    Crie uma nova chave de acesso para aplicações externas.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setApiModal(false)}
+                className="text-surface-white/70 hover:text-surface-white p-1 rounded-lg hover:bg-surface-white/10 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
               </button>
             </div>
-            <form onSubmit={createApiKey} className="space-y-4 text-xs">
+
+            <form onSubmit={createApiKey} className="p-5 space-y-4 text-xs">
               <div>
                 <label className="block text-outline font-bold mb-1">Nome da Aplicação / Integração</label>
                 <input
@@ -878,14 +940,22 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
                   placeholder="ex: App Móvil Professores"
                   value={newApiName}
                   onChange={(e) => setNewApiName(e.target.value)}
-                  className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-secondary focus:outline-none"
+                  className="w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none"
                 />
               </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setApiModal(false)} className="border border-border-subtle px-4 py-2 rounded-xl font-semibold cursor-pointer hover:bg-surface-container transition-all">
+
+              <div className="flex justify-end gap-2 border-t border-border-subtle pt-4 mt-5">
+                <button
+                  type="button"
+                  onClick={() => setApiModal(false)}
+                  className="border border-border-subtle hover:bg-surface-container rounded-xl px-4 py-2 text-xs font-semibold cursor-pointer transition-all"
+                >
                   Cancelar
                 </button>
-                <button type="submit" className="bg-secondary text-surface-white px-5 py-2 rounded-xl font-bold cursor-pointer hover:bg-secondary/90 transition-all">
+                <button
+                  type="submit"
+                  className="bg-primary hover:bg-primary/90 text-surface-white rounded-xl px-5 py-2 text-xs font-bold cursor-pointer transition-all shadow-md"
+                >
                   Gerar Key
                 </button>
               </div>
@@ -897,25 +967,47 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
       {/* Modal: Confirmar Remoção de API Key */}
       {confirmDeleteApi && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 overflow-y-auto backdrop-blur-xs">
-          <div className="bg-surface-white rounded-2xl shadow-2xl border border-border-subtle w-full max-w-md p-6 my-8">
-            <div className="flex justify-between items-center border-b border-border-subtle pb-3 mb-4">
-              <h2 className="text-base font-bold text-primary flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-warning" /> Revogar API Key
-              </h2>
-              <button onClick={() => setConfirmDeleteApi(null)} className="text-outline hover:text-primary p-1 rounded-lg hover:bg-surface-container cursor-pointer">
-                <X className="w-4 h-4" />
+          <div className="bg-surface-white rounded-2xl shadow-2xl border border-border-subtle w-full max-w-md overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="bg-primary text-surface-white p-4 sm:p-5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-surface-white/10 border border-surface-white/20 flex items-center justify-center text-surface-white font-bold shrink-0">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold leading-tight">Revogar API Key</h2>
+                  <p className="text-[11px] text-surface-white/70">
+                    Confirmação de revogação de credencial.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setConfirmDeleteApi(null)}
+                className="text-surface-white/70 hover:text-surface-white p-1 rounded-lg hover:bg-surface-white/10 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
               </button>
             </div>
-            <p className="text-xs text-on-surface-variant mb-4">
-              Esta ação é irreversível. Deseja revogar a chave <strong className="text-primary">{confirmDeleteApi.nome}</strong>?
-            </p>
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setConfirmDeleteApi(null)} className="border border-border-subtle px-4 py-2 rounded-xl font-semibold cursor-pointer hover:bg-surface-container transition-all">
-                Cancelar
-              </button>
-              <button onClick={removeApiKey} className="bg-error text-surface-white px-5 py-2 rounded-xl font-bold cursor-pointer hover:bg-error/90 transition-all">
-                Sim, Revogar
-              </button>
+
+            <div className="p-5 text-xs">
+              <p className="text-on-surface-variant mb-5 leading-relaxed">
+                Esta ação é irreversível. Deseja revogar a chave <strong className="text-primary font-bold">{confirmDeleteApi.nome}</strong>?
+              </p>
+
+              <div className="flex justify-end gap-2 border-t border-border-subtle pt-4">
+                <button
+                  onClick={() => setConfirmDeleteApi(null)}
+                  className="border border-border-subtle hover:bg-surface-container rounded-xl px-4 py-2 text-xs font-semibold cursor-pointer transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={removeApiKey}
+                  className="bg-primary hover:bg-primary/90 text-surface-white rounded-xl px-5 py-2 text-xs font-bold cursor-pointer transition-all shadow-md"
+                >
+                  Sim, Revogar
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -924,25 +1016,47 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
       {/* Modal: Restauro de Backup */}
       {restoreBackup && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 overflow-y-auto backdrop-blur-xs">
-          <div className="bg-surface-white rounded-2xl shadow-2xl border border-border-subtle w-full max-w-md p-6 my-8">
-            <div className="flex justify-between items-center border-b border-border-subtle pb-3 mb-4">
-              <h2 className="text-base font-bold text-primary flex items-center gap-2">
-                <RefreshCw className="w-5 h-5 text-info" /> Confirmar Restauro de Backup
-              </h2>
-              <button onClick={() => setRestoreBackup(null)} className="text-outline hover:text-primary p-1 rounded-lg hover:bg-surface-container cursor-pointer">
-                <X className="w-4 h-4" />
+          <div className="bg-surface-white rounded-2xl shadow-2xl border border-border-subtle w-full max-w-md overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="bg-primary text-surface-white p-4 sm:p-5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-surface-white/10 border border-surface-white/20 flex items-center justify-center text-surface-white font-bold shrink-0">
+                  <RefreshCw className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold leading-tight">Confirmar Restauro de Backup</h2>
+                  <p className="text-[11px] text-surface-white/70">
+                    Restauração da base de dados.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setRestoreBackup(null)}
+                className="text-surface-white/70 hover:text-surface-white p-1 rounded-lg hover:bg-surface-white/10 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
               </button>
             </div>
-            <p className="text-xs text-on-surface-variant mb-4">
-              Deseja restaurar a base de dados a partir do ponto de restauração <strong className="text-primary">{restoreBackup.nome}</strong> ({restoreBackup.data})?
-            </p>
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setRestoreBackup(null)} className="border border-border-subtle px-4 py-2 rounded-xl font-semibold cursor-pointer hover:bg-surface-container transition-all">
-                Cancelar
-              </button>
-              <button onClick={doRestore} className="bg-info text-surface-white px-5 py-2 rounded-xl font-bold cursor-pointer hover:bg-info/90 transition-all">
-                Restaurar
-              </button>
+
+            <div className="p-5 text-xs">
+              <p className="text-on-surface-variant mb-5 leading-relaxed">
+                Deseja restaurar a base de dados a partir do ponto de restauração <strong className="text-primary font-bold">{restoreBackup.nome}</strong> ({restoreBackup.data})?
+              </p>
+
+              <div className="flex justify-end gap-2 border-t border-border-subtle pt-4">
+                <button
+                  onClick={() => setRestoreBackup(null)}
+                  className="border border-border-subtle hover:bg-surface-container rounded-xl px-4 py-2 text-xs font-semibold cursor-pointer transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={doRestore}
+                  className="bg-primary hover:bg-primary/90 text-surface-white rounded-xl px-5 py-2 text-xs font-bold cursor-pointer transition-all shadow-md"
+                >
+                  Restaurar
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -951,25 +1065,47 @@ export const ConfigInstituicaoView: React.FC<Props> = ({ onShowToast }) => {
       {/* Modal: Confirmar Remoção de Backup */}
       {confirmDeleteBackup && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 overflow-y-auto backdrop-blur-xs">
-          <div className="bg-surface-white rounded-2xl shadow-2xl border border-border-subtle w-full max-w-md p-6 my-8">
-            <div className="flex justify-between items-center border-b border-border-subtle pb-3 mb-4">
-              <h2 className="text-base font-bold text-primary flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-warning" /> Remover Backup
-              </h2>
-              <button onClick={() => setConfirmDeleteBackup(null)} className="text-outline hover:text-primary p-1 rounded-lg hover:bg-surface-container cursor-pointer">
-                <X className="w-4 h-4" />
+          <div className="bg-surface-white rounded-2xl shadow-2xl border border-border-subtle w-full max-w-md overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="bg-primary text-surface-white p-4 sm:p-5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-surface-white/10 border border-surface-white/20 flex items-center justify-center text-surface-white font-bold shrink-0">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold leading-tight">Remover Backup</h2>
+                  <p className="text-[11px] text-surface-white/70">
+                    Exclusão de cópia de segurança.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setConfirmDeleteBackup(null)}
+                className="text-surface-white/70 hover:text-surface-white p-1 rounded-lg hover:bg-surface-white/10 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
               </button>
             </div>
-            <p className="text-xs text-on-surface-variant mb-4">
-              Deseja remover o ficheiro de backup <strong className="text-primary">{confirmDeleteBackup.nome}</strong>?
-            </p>
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setConfirmDeleteBackup(null)} className="border border-border-subtle px-4 py-2 rounded-xl font-semibold cursor-pointer hover:bg-surface-container transition-all">
-                Cancelar
-              </button>
-              <button onClick={removeBackup} className="bg-error text-surface-white px-4 py-2 rounded-xl font-bold cursor-pointer hover:bg-error/90 transition-all">
-                Remover
-              </button>
+
+            <div className="p-5 text-xs">
+              <p className="text-on-surface-variant mb-5 leading-relaxed">
+                Deseja remover o ficheiro de backup <strong className="text-primary font-bold">{confirmDeleteBackup.nome}</strong>?
+              </p>
+
+              <div className="flex justify-end gap-2 border-t border-border-subtle pt-4">
+                <button
+                  onClick={() => setConfirmDeleteBackup(null)}
+                  className="border border-border-subtle hover:bg-surface-container rounded-xl px-4 py-2 text-xs font-semibold cursor-pointer transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={removeBackup}
+                  className="bg-primary hover:bg-primary/90 text-surface-white rounded-xl px-5 py-2 text-xs font-bold cursor-pointer transition-all shadow-md"
+                >
+                  Remover
+                </button>
+              </div>
             </div>
           </div>
         </div>

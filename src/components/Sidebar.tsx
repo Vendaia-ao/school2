@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { ActiveView } from '../types';
+import { Palette, Search, MessageSquare, Camera, Send, X, ChevronRight, CircleCheck as CheckCircle2, Monitor, Sun, Moon, Check } from 'lucide-react';
 
 interface SidebarProps {
   currentView: ActiveView;
   onSelectView: (view: ActiveView) => void;
   isExpanded: boolean;
   onToggleExpand: () => void;
+  onShowToast?: (msg: string) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -13,6 +15,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectView,
   isExpanded,
   onToggleExpand,
+  onShowToast,
 }) => {
   // State for collapsible submenus
   const [openModules, setOpenModules] = useState<Record<string, boolean>>({
@@ -24,6 +27,104 @@ export const Sidebar: React.FC<SidebarProps> = ({
     comunicacao: false,
     admin: false,
   });
+
+  // State for Definições popover, Theme submenu & Feedback modal
+  const [showSettingsPopover, setShowSettingsPopover] = useState(false);
+  const [showThemeSubmenu, setShowThemeSubmenu] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState<'system' | 'light' | 'dark'>('light');
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(100);
+  const [feedbackText, setFeedbackText] = useState('');
+  const [includeDiag, setIncludeDiag] = useState(true);
+  const [screenAttached, setScreenAttached] = useState(false);
+
+  const handleSelectTheme = (themeMode: 'system' | 'light' | 'dark') => {
+    setCurrentTheme(themeMode);
+    setShowThemeSubmenu(false);
+    localStorage.setItem('vendaia_theme', themeMode);
+
+    let isDark = false;
+    if (themeMode === 'dark') {
+      isDark = true;
+    } else if (themeMode === 'system') {
+      isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      document.body.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark');
+    }
+
+    const themeLabels = {
+      system: 'Sistema',
+      light: 'Claro',
+      dark: 'Escuro',
+    };
+
+    if (onShowToast) {
+      onShowToast(`Tema alterado para: ${themeLabels[themeMode]}`);
+    }
+  };
+
+  // Restore saved theme and 80% baseline zoom on mount
+  React.useEffect(() => {
+    try {
+      (document.body.style as any).zoom = '80%';
+    } catch (e) {
+      // Fallback
+    }
+
+    const savedTheme = (localStorage.getItem('vendaia_theme') as 'system' | 'light' | 'dark') || 'light';
+    setCurrentTheme(savedTheme);
+    let isDark = false;
+    if (savedTheme === 'dark') {
+      isDark = true;
+    } else if (savedTheme === 'system') {
+      isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      document.body.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark');
+    }
+  }, []);
+
+  const handleZoomChange = (delta: number) => {
+    const newZoom = Math.min(Math.max(zoomLevel + delta, 70), 150);
+    setZoomLevel(newZoom);
+    const actualCssZoom = Math.round((newZoom * 80) / 100);
+    try {
+      (document.body.style as any).zoom = `${actualCssZoom}%`;
+    } catch (e) {
+      // Fallback
+    }
+    if (onShowToast) {
+      onShowToast(`Nível de zoom ajustado para ${newZoom}%.`);
+    }
+  };
+
+  const handleCaptureScreen = () => {
+    setScreenAttached(true);
+    if (onShowToast) {
+      onShowToast('Captura de ecrã efetuada e anexada ao feedback.');
+    }
+  };
+
+  const handleSendFeedback = (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowFeedbackModal(false);
+    setFeedbackText('');
+    setScreenAttached(false);
+    if (onShowToast) {
+      onShowToast('Feedback enviado com sucesso! Obrigado pela colaboração.');
+    }
+  };
 
   const toggleModule = (moduleKey: string) => {
     if (!isExpanded) {
@@ -493,24 +594,135 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      {/* Footer (3 Ações conforme Imagem da Direita: Definições, Ajuda & Suporte, Terminar Sessão) */}
-      <div className="border-t border-on-primary-container/20 p-2 shrink-0 space-y-0.5">
+      {/* Footer (3 Ações: Definições, Ajuda & Suporte, Terminar Sessão) */}
+      <div className="border-t border-on-primary-container/20 p-2 shrink-0 space-y-0.5 relative">
+        {/* Popover de Definições (Personalização & Zoom) */}
+        {showSettingsPopover && (
+          <>
+            <div
+              className="fixed inset-0 z-40"
+              onClick={() => setShowSettingsPopover(false)}
+            />
+            <div className="absolute bottom-16 left-2 right-2 z-50 bg-surface-white border border-border-subtle rounded-xl shadow-2xl p-3 text-xs text-primary animate-in fade-in zoom-in-95 duration-150">
+              {/* Option 1: Personalização */}
+              <div className="relative mb-2">
+                <button
+                  onClick={() => setShowThemeSubmenu(!showThemeSubmenu)}
+                  className={`w-full flex items-center justify-between p-2.5 rounded-lg font-semibold text-primary transition-colors cursor-pointer ${
+                    showThemeSubmenu ? 'bg-surface-container-low/90' : 'hover:bg-surface-container-low/70'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Palette className="w-4 h-4 text-outline stroke-[1.75]" />
+                    <span>Personalização</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-outline/60 stroke-[1.75]" />
+                </button>
+
+                {/* Submenu de Personalização (Sistema, Claro, Escuro) */}
+                {showThemeSubmenu && (
+                  <div className="absolute left-[calc(100%+8px)] top-0 z-50 w-44 bg-surface-white border border-border-subtle rounded-xl shadow-2xl p-1 text-xs text-primary animate-in fade-in zoom-in-95 duration-150">
+                    <button
+                      onClick={() => handleSelectTheme('system')}
+                      className={`w-full flex items-center justify-between p-2.5 rounded-lg transition-colors cursor-pointer text-left ${
+                        currentTheme === 'system'
+                          ? 'bg-surface-container-low font-bold'
+                          : 'hover:bg-surface-container-low/60 font-medium'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Monitor className="w-4 h-4 text-outline/80 stroke-[1.75]" />
+                        <span>Sistema</span>
+                      </div>
+                      {currentTheme === 'system' && <Check className="w-4 h-4 text-secondary stroke-[2.5]" />}
+                    </button>
+
+                    <button
+                      onClick={() => handleSelectTheme('light')}
+                      className={`w-full flex items-center justify-between p-2.5 rounded-lg transition-colors cursor-pointer text-left ${
+                        currentTheme === 'light'
+                          ? 'bg-surface-container-low font-bold'
+                          : 'hover:bg-surface-container-low/60 font-medium'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Sun className="w-4 h-4 text-outline/80 stroke-[1.75]" />
+                        <span>Claro</span>
+                      </div>
+                      {currentTheme === 'light' && <Check className="w-4 h-4 text-secondary stroke-[2.5]" />}
+                    </button>
+
+                    <button
+                      onClick={() => handleSelectTheme('dark')}
+                      className={`w-full flex items-center justify-between p-2.5 rounded-lg transition-colors cursor-pointer text-left ${
+                        currentTheme === 'dark'
+                          ? 'bg-surface-container-low font-bold'
+                          : 'hover:bg-surface-container-low/60 font-medium'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Moon className="w-4 h-4 text-outline/80 stroke-[1.75]" />
+                        <span>Escuro</span>
+                      </div>
+                      {currentTheme === 'dark' && <Check className="w-4 h-4 text-secondary stroke-[2.5]" />}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Option 2: Zoom */}
+              <div className="p-2.5 bg-surface-container-low/40 rounded-lg space-y-2 border border-border-subtle/40">
+                <div className="flex items-center gap-2 font-semibold text-primary">
+                  <Search className="w-4 h-4 text-outline stroke-[1.75]" />
+                  <span>Zoom</span>
+                </div>
+                <div className="flex items-center justify-between bg-surface-white border border-border-subtle rounded-lg px-2 py-1 shadow-2xs">
+                  <button
+                    onClick={() => handleZoomChange(-10)}
+                    className="w-6 h-6 rounded flex items-center justify-center font-bold text-outline hover:text-primary hover:bg-surface-container transition-colors cursor-pointer"
+                    title="Reduzir Zoom"
+                  >
+                    -
+                  </button>
+                  <span className="font-mono font-bold text-primary text-xs">{zoomLevel}%</span>
+                  <button
+                    onClick={() => handleZoomChange(10)}
+                    className="w-6 h-6 rounded flex items-center justify-center font-bold text-outline hover:text-primary hover:bg-surface-container transition-colors cursor-pointer"
+                    title="Aumentar Zoom"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
         <button
-          onClick={() => handleSelectScreen('config_instituicao')}
-          className="w-full flex items-center gap-2 px-3 py-1.5 text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20 transition-colors rounded menu-item text-left cursor-pointer"
+          onClick={() => setShowSettingsPopover(!showSettingsPopover)}
+          className={`w-full flex items-center gap-2 px-3 py-1.5 transition-all rounded menu-item text-left cursor-pointer ${
+            showSettingsPopover
+              ? 'border border-white/60 bg-surface-white/10 text-on-primary font-bold shadow-2xs'
+              : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
+          }`}
           title="Definições"
         >
           <span className="material-symbols-outlined text-[18px]">settings</span>
           {isExpanded && <span className="font-label-md sidebar-text">Definições</span>}
         </button>
+
         <button
-          onClick={() => alert('Atendimento de Suporte Técnico Vendaia School® ativo. Contacto: suporte@vendaia.pt')}
+          onClick={() => {
+            setShowSettingsPopover(false);
+            setShowFeedbackModal(true);
+          }}
           className="w-full flex items-center gap-2 px-3 py-1.5 text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20 transition-colors rounded menu-item text-left cursor-pointer"
           title="Ajuda & Suporte"
         >
           <span className="material-symbols-outlined text-[18px]">help_outline</span>
           {isExpanded && <span className="font-label-md sidebar-text">Ajuda & Suporte</span>}
         </button>
+
         <button
           onClick={() => alert('Sessão terminada com sucesso.')}
           className="w-full flex items-center gap-2 px-3 py-1.5 text-error/90 hover:text-error hover:bg-error/10 transition-colors rounded menu-item text-left cursor-pointer font-medium"
@@ -520,6 +732,110 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {isExpanded && <span className="font-label-md sidebar-text">Terminar Sessão</span>}
         </button>
       </div>
+
+      {/* Modal de Feedback: Ajuda & Suporte */}
+      {showFeedbackModal && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 overflow-y-auto backdrop-blur-xs">
+          <div className="bg-[#0c1c38] text-surface-white rounded-2xl shadow-2xl border border-white/10 w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="bg-[#081528] px-6 py-4 border-b border-white/10 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white shrink-0">
+                  <MessageSquare className="w-5 h-5 stroke-[1.75]" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold leading-tight">Enviar feedback</h2>
+                  <p className="text-[11px] text-white/70">
+                    Ajude-nos a melhorar a plataforma Vendaia School®
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowFeedbackModal(false)}
+                className="text-white/70 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <form onSubmit={handleSendFeedback} className="p-6 space-y-4 text-xs">
+              <div>
+                <label className="block text-white/90 font-bold mb-1.5">
+                  Descreva o seu feedback ou problema <span className="text-error">*</span>
+                </label>
+                <textarea
+                  required
+                  rows={4}
+                  value={feedbackText}
+                  onChange={(e) => setFeedbackText(e.target.value)}
+                  placeholder="Explique o que aconteceu, sugestões de melhoria ou erros observados..."
+                  className="w-full bg-[#06101f] border border-white/15 rounded-xl p-3 text-xs text-white placeholder-white/40 focus:border-blue-500 focus:outline-none resize-none leading-relaxed"
+                />
+              </div>
+
+              <div>
+                <label className="block text-white/90 font-bold mb-1.5">Anexo de Ecrã</label>
+                <button
+                  type="button"
+                  onClick={handleCaptureScreen}
+                  className="w-full bg-white/5 hover:bg-white/10 border border-white/15 rounded-xl py-3 px-4 text-xs font-bold text-white flex items-center justify-center gap-2 cursor-pointer transition-all shadow-2xs"
+                >
+                  <Camera className="w-4 h-4 text-blue-400 stroke-[2]" />
+                  <span>{screenAttached ? 'Substituir captura de ecrã' : 'Tirar captura de ecrã'}</span>
+                </button>
+                {screenAttached && (
+                  <div className="mt-2 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-between text-[11px]">
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      Captura_ecra_vendaia_school.png (1.2 MB)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setScreenAttached(false)}
+                      className="text-white/60 hover:text-white"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-1">
+                <label className="flex items-start gap-2.5 cursor-pointer text-white/80 select-none">
+                  <input
+                    type="checkbox"
+                    checked={includeDiag}
+                    onChange={(e) => setIncludeDiag(e.target.checked)}
+                    className="w-4 h-4 rounded border-white/20 text-blue-500 focus:ring-blue-500 bg-[#06101f] cursor-pointer mt-0.5"
+                  />
+                  <span className="text-[11px] leading-tight">
+                    Incluir dados de diagnóstico do sistema (versão, navegador e resolução de ecrã)
+                  </span>
+                </label>
+              </div>
+
+              {/* Footer Buttons */}
+              <div className="flex justify-end gap-2 border-t border-white/10 pt-4 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowFeedbackModal(false)}
+                  className="border border-white/20 hover:bg-white/10 text-white rounded-xl px-5 py-2 text-xs font-semibold cursor-pointer transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-xl px-6 py-2 text-xs font-bold flex items-center gap-2 cursor-pointer transition-all shadow-md"
+                >
+                  <Send className="w-3.5 h-3.5 stroke-[2]" />
+                  Enviar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </aside>
   );
 };

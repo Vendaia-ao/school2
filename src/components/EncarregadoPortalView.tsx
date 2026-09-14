@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActiveView } from '../types';
-import { Users, UserCheck, CreditCard, Wallet, Award, CalendarCheck, Clock, MessageSquare } from 'lucide-react';
+import { Users, UserCheck, CreditCard, Wallet, Award, CalendarCheck, Clock, MessageSquare, TrendingUp, CheckCircle2 } from 'lucide-react';
 
 interface EncarregadoPortalViewProps {
   onSelectView: (view: ActiveView) => void;
@@ -55,14 +55,74 @@ export const EncarregadoPortalView: React.FC<EncarregadoPortalViewProps> = ({ on
   const selectedEducando = educandos.find((e) => e.id === selectedStudentId) || educandos[0];
 
   return (
-    <div className="mt-header-height p-4 w-full flex flex-col gap-4 max-w-7xl mx-auto">
+    <div className="mt-header-height p-4 w-full flex flex-col gap-3">
+      {/* Quick Metrics Bar - Matching Reference Standard */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Card 1: Educando Selecionado */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div>
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider block mb-0.5">Educando em Foco</span>
+            <span className="text-sm font-bold text-primary truncate leading-none">{selectedEducando.nome}</span>
+          </div>
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-primary bg-primary/10 text-[10px] font-bold">
+            {selectedEducando.turma}
+          </span>
+        </div>
+
+        {/* Card 2: Média do Educando */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div>
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider block mb-0.5">Média Académica</span>
+            <span className="text-xl font-bold text-primary leading-none">{selectedEducando.mediaGeral} <span className="text-xs font-normal text-outline">Valores</span></span>
+          </div>
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-success bg-success/10 text-[10px] font-bold">
+            <TrendingUp className="w-3.5 h-3.5" /> Bom Aproveitamento
+          </span>
+        </div>
+
+        {/* Card 3: Propinas */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div>
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider block mb-0.5">Estado das Propinas</span>
+            <span className="text-sm font-bold text-primary leading-none">
+              {selectedEducando.propinaStatus === 'Regular' ? 'Propinas Em Dia' : 'Propina Pendente'}
+            </span>
+          </div>
+          <span
+            className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+              selectedEducando.propinaStatus === 'Regular' ? 'bg-success/10 text-success' : 'bg-amber-100 text-amber-800'
+            }`}
+          >
+            {selectedEducando.propinaStatus === 'Regular' ? 'Regularizado' : 'Atenção'}
+          </span>
+        </div>
+
+        {/* Card 4: Total Educandos */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-2.5 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider mb-0.5">
+              Educandos Registados
+            </span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl font-bold text-primary leading-none">{educandos.length}</span>
+              <span className="text-[10px] text-outline font-medium">Alunos</span>
+            </div>
+          </div>
+          <div className="flex flex-col items-end gap-1.5">
+            <span className="px-2 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">
+              Família Lemba
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* Title Header */}
       <div className="bg-surface-white border border-border-subtle rounded-xl p-4 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <span className="text-[10px] font-bold text-secondary uppercase tracking-widest">Portal da Família & Encarregado</span>
+          <span className="text-[10px] font-bold text-primary uppercase tracking-widest">Portal da Família & Encarregado</span>
           <h1 className="font-headline-sm text-lg font-bold text-primary">Acompanhamento Educacional e Financeiro</h1>
           <p className="text-xs text-on-surface-variant">
-            Encarregado: <span className="font-bold text-primary">Sr. António Lemba</span> | Contacto: <span className="text-secondary font-bold">948729630@ispozango.com</span>
+            Encarregado: <span className="font-bold text-primary">Sr. António Lemba</span> | Contacto: <span className="text-primary font-bold">948729630@ispozango.com</span>
           </p>
         </div>
 
@@ -77,7 +137,7 @@ export const EncarregadoPortalView: React.FC<EncarregadoPortalViewProps> = ({ on
               setSelectedStudentId(e.target.value);
               onShowToast(`Alternado para o educando: ${educandos.find((x) => x.id === e.target.value)?.nome}`);
             }}
-            className="w-full text-xs font-bold bg-surface-white border border-border-subtle rounded-lg px-3 py-1.5 focus:outline-none focus:border-secondary text-primary"
+            className="w-full text-xs font-bold bg-surface-white border border-border-subtle rounded-lg px-3 py-1.5 focus:outline-none focus:border-primary text-primary"
           >
             {educandos.map((e) => (
               <option key={e.id} value={e.id}>
@@ -211,7 +271,7 @@ export const EncarregadoPortalView: React.FC<EncarregadoPortalViewProps> = ({ on
             <h2 className="font-bold text-primary text-sm">Liquidação de Propinas Escolares</h2>
             <button
               onClick={() => onShowToast('Acedendo ao sistema de pagamento via Multicaixa...')}
-              className="bg-secondary text-surface-white px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5"
+              className="bg-primary text-surface-white hover:bg-primary/90 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
             >
               Pagar Propinas Online
             </button>

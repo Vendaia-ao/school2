@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ActiveView } from '../types';
 import { useAccess } from '../context/AccessContext';
 import {
   Building2,
   Calendar,
+  Clock,
   ChevronDown,
   Bell,
   Grid3x3,
@@ -31,8 +32,23 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
 }) => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showAnoLectivoMenu, setShowAnoLectivoMenu] = useState(false);
-  const [selectedAnoLectivo, setSelectedAnoLectivo] = useState('ANO LECTIVO 2025/26');
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formattedDate = now.toLocaleDateString('pt-PT', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+  const formattedTime = now.toLocaleTimeString('pt-PT', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
 
   const { userStructures, currentStructureId, switchStructure } = useAccess();
 
@@ -41,8 +57,6 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
     currentStructureId === 'all'
       ? 'Todas as Estruturas'
       : currentStructure?.nome || 'Sede Central (Luanda)';
-
-  const anosLectivos = ['ANO LECTIVO 2025/26', 'ANO LECTIVO 2024/25', 'ANO LECTIVO 2023/24'];
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -65,7 +79,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
         {['estudantes', 'perfil', 'turmas', 'professores', 'config_academicas', 'aluno_portal', 'encarregado_portal', 'professor_portal'].includes(currentView) && (
           <div className="flex items-center gap-1">
             <span
-              className="hover:text-secondary cursor-pointer transition-colors"
+              className="hover:text-primary cursor-pointer transition-colors"
               onClick={() => onSelectView('estudantes')}
             >
               Gestão Académica
@@ -99,104 +113,143 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
           </div>
         )}
 
+        {currentView === 'biblioteca' && (
+          <div className="flex items-center gap-1">
+            <span className="text-primary font-bold text-sm">Biblioteca Digital</span>
+          </div>
+        )}
+
         {['servicos_produtos', 'cantina'].includes(currentView) && (
           <div className="flex items-center gap-1">
-            <span>Serviços Institucionais</span>
+            <span
+              className="hover:text-primary cursor-pointer transition-colors"
+              onClick={() => onSelectView('servicos_produtos')}
+            >
+              Serviços Institucionais
+            </span>
             <ChevronRight className="w-3.5 h-3.5 text-outline" />
             <span className="text-primary font-bold">
-              {currentView === 'servicos_produtos' ? 'Serviços & Produtos' : 'Cantina'}
+              {currentView === 'servicos_produtos' ? 'Serviços e Produtos' : 'Gerir Cantina'}
             </span>
           </div>
         )}
 
         {['tesouraria', 'gestao_financeira', 'financeiro'].includes(currentView) && (
           <div className="flex items-center gap-1">
-            <span>Gestão Financeira</span>
+            <span
+              className="hover:text-primary cursor-pointer transition-colors"
+              onClick={() => onSelectView('tesouraria')}
+            >
+              Gestão Financeira
+            </span>
             <ChevronRight className="w-3.5 h-3.5 text-outline" />
             <span className="text-primary font-bold">
-              {currentView === 'tesouraria' ? 'Tesouraria' : 'Balanço Financeiro'}
+              {currentView === 'tesouraria' ? 'Tesouraria / Facturação' : 'Gestão Financeira'}
+            </span>
+          </div>
+        )}
+
+        {['rh_colaboradores'].includes(currentView) && (
+          <div className="flex items-center gap-1">
+            <span
+              className="hover:text-primary cursor-pointer transition-colors"
+              onClick={() => onSelectView('rh_colaboradores')}
+            >
+              Recursos Humanos
+            </span>
+            <ChevronRight className="w-3.5 h-3.5 text-outline" />
+            <span className="text-primary font-bold">Colaboradores</span>
+          </div>
+        )}
+
+        {['gestao_documental', 'documental'].includes(currentView) && (
+          <div className="flex items-center gap-1">
+            <span
+              className="hover:text-primary cursor-pointer transition-colors"
+              onClick={() => onSelectView('gestao_documental')}
+            >
+              Gestão Documental
+            </span>
+            <ChevronRight className="w-3.5 h-3.5 text-outline" />
+            <span className="text-primary font-bold">Arquivo Documental</span>
+          </div>
+        )}
+
+        {['comunicacao', 'cms'].includes(currentView) && (
+          <div className="flex items-center gap-1">
+            <span
+              className="hover:text-primary cursor-pointer transition-colors"
+              onClick={() => onSelectView('comunicacao')}
+            >
+              Comunicação
+            </span>
+            <ChevronRight className="w-3.5 h-3.5 text-outline" />
+            <span className="text-primary font-bold">
+              {currentView === 'comunicacao' ? 'Comunicação' : 'CMS (Website)'}
             </span>
           </div>
         )}
 
         {['utilizadores_permissoes', 'estruturas', 'config_instituicao', 'administracao'].includes(currentView) && (
           <div className="flex items-center gap-1">
-            <span>Administração</span>
+            <span
+              className="hover:text-primary cursor-pointer transition-colors"
+              onClick={() => onSelectView('utilizadores_permissoes')}
+            >
+              Admin. Plataforma
+            </span>
             <ChevronRight className="w-3.5 h-3.5 text-outline" />
             <span className="text-primary font-bold">
               {currentView === 'config_instituicao'
-                ? 'Configurações da Instituição'
+                ? 'Config. Instituição'
                 : currentView === 'estruturas'
                 ? 'Estruturas & Unidades'
-                : 'Utilizadores e Permissões'}
+                : 'Utilizadores & Permissões'}
             </span>
           </div>
         )}
       </div>
 
-      {/* Right Controls: Dark Pills + Control Icons + User Avatar (1:1 Reference Match) */}
+      {/* Right Controls: Frameless Header Controls + Control Icons + User Avatar */}
       <div className="flex items-center gap-3">
-        {/* Pill 1: Seletor de Estrutura / Polo */}
+        {/* Item 1: Data e Hora em Tempo Real (Sem Fundo) */}
+        <div className="flex items-center gap-2 px-2.5 py-1 text-xs font-bold text-primary">
+          <Clock className="w-4 h-4 text-primary shrink-0 stroke-[2]" />
+          <span className="capitalize text-primary">{formattedDate}</span>
+          <span className="text-primary/40">•</span>
+          <span className="font-mono text-secondary font-extrabold">{formattedTime}</span>
+        </div>
+
+        {/* Item 2: Seletor de Estrutura / Polo (Sem Fundo Escuro) */}
         <div className="relative">
-          <div className="flex items-center gap-2 bg-[#3B4758] hover:bg-[#2D3748] text-white px-3.5 py-1.5 rounded-lg text-xs font-bold shadow-2xs transition-colors cursor-pointer relative">
-            <Building2 className="w-4 h-4 text-white/80 shrink-0 stroke-[2]" />
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold text-primary hover:bg-surface-container/60 transition-colors cursor-pointer relative">
+            <Building2 className="w-4 h-4 text-primary shrink-0 stroke-[2]" />
             <select
               value={currentStructureId}
               onChange={(e) => switchStructure(e.target.value)}
-              className="bg-transparent text-white font-bold text-xs focus:outline-none cursor-pointer appearance-none pr-5 py-0 z-10"
+              className="bg-transparent text-primary font-bold text-xs focus:outline-none cursor-pointer appearance-none pr-5 py-0 z-10"
               title="Alternar Polo ou Estrutura"
             >
-              <option value="all" className="bg-[#2D3748] text-white font-semibold">
+              <option value="all" className="bg-surface-white text-primary font-semibold">
                 📍 Todas as Estruturas ({userStructures.length})
               </option>
-              <optgroup label="Unidades Operacionais" className="bg-[#2D3748] text-white font-semibold">
+              <optgroup label="Unidades Operacionais" className="bg-surface-white text-primary font-semibold">
                 {userStructures.map((s) => (
-                  <option key={s.id} value={s.id} className="bg-[#2D3748] text-white">
+                  <option key={s.id} value={s.id} className="bg-surface-white text-primary font-medium">
                     🏢 {s.nome}
                   </option>
                 ))}
               </optgroup>
             </select>
-            <ChevronDown className="w-3.5 h-3.5 text-white/80 absolute right-2 pointer-events-none stroke-[2.5]" />
+            <ChevronDown className="w-3.5 h-3.5 text-primary absolute right-2 pointer-events-none stroke-[2.5]" />
           </div>
-        </div>
-
-        {/* Pill 2: Seletor de Ano Lectivo */}
-        <div className="relative">
-          <button
-            onClick={() => setShowAnoLectivoMenu(!showAnoLectivoMenu)}
-            className="flex items-center gap-2 bg-[#3B4758] hover:bg-[#2D3748] text-white px-3.5 py-1.5 rounded-lg text-xs font-bold tracking-wide shadow-2xs transition-colors cursor-pointer"
-          >
-            <Calendar className="w-4 h-4 text-white/80 shrink-0 stroke-[2]" />
-            <span>{selectedAnoLectivo}</span>
-            <ChevronDown className="w-3.5 h-3.5 text-white/80 stroke-[2.5]" />
-          </button>
-
-          {showAnoLectivoMenu && (
-            <div className="absolute right-0 top-9 bg-surface-white border border-border-subtle rounded-lg shadow-xl py-1 z-50 w-48 text-xs">
-              {anosLectivos.map((ano) => (
-                <button
-                  key={ano}
-                  onClick={() => {
-                    setSelectedAnoLectivo(ano);
-                    setShowAnoLectivoMenu(false);
-                  }}
-                  className={`w-full text-left px-3 py-2 font-bold hover:bg-surface-container-low transition-colors ${
-                    selectedAnoLectivo === ano ? 'text-secondary bg-secondary/10' : 'text-primary'
-                  }`}
-                >
-                  {ano}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Control Icon 1: Notificação com Badge Laranja */}
         <div className="relative">
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="relative p-1.5 text-slate-600 hover:text-primary transition-colors rounded-lg hover:bg-surface-container cursor-pointer"
+            className="relative p-1.5 text-primary hover:text-primary/80 transition-colors rounded-lg hover:bg-surface-container cursor-pointer"
             title="Notificações"
           >
             <Bell className="w-5 h-5 stroke-[1.75]" />
@@ -233,13 +286,13 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
           )}
         </div>
 
-        {/* Control Icon 2: Grelha de Módulos (9 Dots Grid - Réplica Exata 1:1) */}
+        {/* Control Icon 2: Grelha de Módulos (9 Dots Grid) */}
         <button
           onClick={() => onSelectView('administracao')}
-          className="p-1.5 text-slate-600 hover:text-primary transition-colors rounded-lg hover:bg-surface-container cursor-pointer flex items-center justify-center"
+          className="p-1.5 text-primary hover:text-primary/80 transition-colors rounded-lg hover:bg-surface-container cursor-pointer flex items-center justify-center"
           title="Módulos Vendaia OS®"
         >
-          <svg className="w-4.5 h-4.5 text-slate-600 hover:text-primary fill-current transition-colors" viewBox="0 0 24 24">
+          <svg className="w-4.5 h-4.5 text-primary fill-current transition-colors" viewBox="0 0 24 24">
             <rect x="3" y="3" width="4.5" height="4.5" rx="1.2" />
             <rect x="9.75" y="3" width="4.5" height="4.5" rx="1.2" />
             <rect x="16.5" y="3" width="4.5" height="4.5" rx="1.2" />
@@ -255,10 +308,10 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
         {/* Control Icon 3: Fullscreen Toggle */}
         <button
           onClick={toggleFullscreen}
-          className="p-1.5 text-slate-600 hover:text-primary transition-colors rounded-lg hover:bg-surface-container cursor-pointer"
+          className="p-1.5 text-primary hover:text-primary/80 transition-colors rounded-lg hover:bg-surface-container cursor-pointer"
           title="Alternar Ecrã Inteiro"
         >
-          <Maximize2 className="w-4 h-4 stroke-[2]" />
+          <Maximize2 className="w-4 h-4 text-primary stroke-[2]" />
         </button>
 
         {/* Control Item 4: Dark Navy User Profile Circle Avatar */}

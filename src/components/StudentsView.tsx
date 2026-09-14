@@ -25,7 +25,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
 }) => {
   // Filter state
   const [filters, setFilters] = useState<StudentFilters>({
-    anoLetivo: '23/24',
+    anoLetivo: '2023/2024',
     dataInicio: '',
     dataFim: '',
     classe: 'Todas',
@@ -249,39 +249,35 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
       {/* Search & Filters Bar */}
       <div className="bg-surface-white border border-outline-variant/30 rounded-lg flex flex-wrap items-center justify-between gap-4 shadow-sm p-3">
         <div className="flex flex-col w-full gap-1.5">
-          {/* Dropdowns Row */}
-          <div className="flex flex-wrap items-center gap-1.5">
+          {/* Dropdowns Row - Perfect Single Line Fit (Zero Scrollbar) */}
+          <div className="flex items-center gap-1 w-full">
             <select
               value={filters.anoLetivo}
               onChange={(e) => setFilters({ ...filters, anoLetivo: e.target.value })}
-              className="appearance-none bg-surface border border-border-subtle rounded-md pl-2 pr-7 text-xs focus:outline-none focus:border-secondary py-0.5"
+              className="flex-1 min-w-0 appearance-none bg-surface border border-border-subtle rounded-md px-1.5 text-[11px] focus:outline-none focus:border-secondary h-7 py-0.5 text-ellipsis overflow-hidden cursor-pointer font-medium"
             >
-              <option value="23/24">Ano Letivo: 23/24</option>
-              <option value="22/23">Ano Letivo: 22/23</option>
-              <option value="21/22">Ano Letivo: 21/22</option>
+              <option value="2023/2024">Ano: 2023/2024</option>
+              <option value="2022/2023">Ano: 2022/2023</option>
+              <option value="2021/2022">Ano: 2021/2022</option>
             </select>
 
-            <div className="flex items-center gap-1.5">
-              <input
-                type="date"
-                value={filters.dataInicio}
-                onChange={(e) => setFilters({ ...filters, dataInicio: e.target.value })}
-                placeholder="Início"
-                className="appearance-none bg-surface border border-border-subtle rounded-md px-2 text-xs focus:outline-none focus:border-secondary w-28 py-0.5"
-              />
-              <input
-                type="date"
-                value={filters.dataFim}
-                onChange={(e) => setFilters({ ...filters, dataFim: e.target.value })}
-                placeholder="Fim"
-                className="appearance-none bg-surface border border-border-subtle rounded-md px-2 text-xs focus:outline-none focus:border-secondary w-28 py-0.5"
-              />
-            </div>
+            <input
+              type="date"
+              value={filters.dataInicio}
+              onChange={(e) => setFilters({ ...filters, dataInicio: e.target.value })}
+              className="flex-1 min-w-0 appearance-none bg-surface border border-border-subtle rounded-md px-1 text-[11px] focus:outline-none focus:border-secondary h-7 py-0.5 cursor-pointer"
+            />
+            <input
+              type="date"
+              value={filters.dataFim}
+              onChange={(e) => setFilters({ ...filters, dataFim: e.target.value })}
+              className="flex-1 min-w-0 appearance-none bg-surface border border-border-subtle rounded-md px-1 text-[11px] focus:outline-none focus:border-secondary h-7 py-0.5 cursor-pointer"
+            />
 
             <select
               value={filters.classe}
               onChange={(e) => setFilters({ ...filters, classe: e.target.value })}
-              className="appearance-none bg-surface border border-border-subtle rounded-md pl-2 pr-7 text-xs focus:outline-none focus:border-secondary py-0.5"
+              className="flex-1 min-w-0 appearance-none bg-surface border border-border-subtle rounded-md px-1.5 text-[11px] focus:outline-none focus:border-secondary h-7 py-0.5 text-ellipsis overflow-hidden cursor-pointer"
             >
               <option value="Todas">Classe: Todas</option>
               <option value="10º Ano">10º Ano</option>
@@ -292,7 +288,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
             <select
               value={filters.curso}
               onChange={(e) => setFilters({ ...filters, curso: e.target.value })}
-              className="appearance-none bg-surface border border-border-subtle rounded-md pl-2 pr-7 text-xs focus:outline-none focus:border-secondary py-0.5"
+              className="flex-1 min-w-0 appearance-none bg-surface border border-border-subtle rounded-md px-1.5 text-[11px] focus:outline-none focus:border-secondary h-7 py-0.5 text-ellipsis overflow-hidden cursor-pointer"
             >
               <option value="Todos">Curso: Todos</option>
               <option value="Ciências Físicas">Ciências Físicas</option>
@@ -305,7 +301,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
             <select
               value={filters.estado}
               onChange={(e) => setFilters({ ...filters, estado: e.target.value })}
-              className="appearance-none bg-surface border border-border-subtle rounded-md pl-2 pr-7 text-xs focus:outline-none focus:border-secondary py-0.5"
+              className="flex-1 min-w-0 appearance-none bg-surface border border-border-subtle rounded-md px-1.5 text-[11px] focus:outline-none focus:border-secondary h-7 py-0.5 text-ellipsis overflow-hidden cursor-pointer"
             >
               <option value="Todos">Estado: Todos</option>
               <option value="Ativo">Ativo</option>
@@ -315,7 +311,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
             <select
               value={filters.financeiro}
               onChange={(e) => setFilters({ ...filters, financeiro: e.target.value })}
-              className="appearance-none bg-surface border border-border-subtle rounded-md pl-2 pr-7 text-xs focus:outline-none focus:border-secondary py-0.5"
+              className="flex-1 min-w-0 appearance-none bg-surface border border-border-subtle rounded-md px-1.5 text-[11px] focus:outline-none focus:border-secondary h-7 py-0.5 text-ellipsis overflow-hidden cursor-pointer"
             >
               <option value="Todos">Financeiro: Todos</option>
               <option value="Regularizada">Regularizada</option>
@@ -326,13 +322,13 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
             <select
               value={filters.docPendente}
               onChange={(e) => setFilters({ ...filters, docPendente: e.target.value })}
-              className="appearance-none bg-surface border border-border-subtle rounded-md pl-2 pr-7 text-xs focus:outline-none focus:border-secondary py-0.5"
+              className="flex-1 min-w-0 appearance-none bg-surface border border-border-subtle rounded-md px-1.5 text-[11px] focus:outline-none focus:border-secondary h-7 py-0.5 text-ellipsis overflow-hidden cursor-pointer"
             >
-              <option value="">Documentação Pendente</option>
+              <option value="">Doc. Pendente</option>
               <option value="bi">BI/Passaporte</option>
-              <option value="cert">Certificado de Habilitações</option>
+              <option value="cert">Cert. Habilitações</option>
               <option value="foto">Fotografia</option>
-              <option value="ok">Tudo Regularizado</option>
+              <option value="ok">Tudo OK</option>
             </select>
           </div>
 
@@ -352,23 +348,11 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
             <div className="flex items-center gap-1.5 shrink-0">
               <button
                 onClick={onOpenAddModal}
-                className="bg-secondary text-surface-white px-2.5 h-7 rounded hover:bg-opacity-90 transition-colors shadow-sm flex items-center justify-center gap-1 font-semibold text-xs cursor-pointer"
+                className="bg-primary text-surface-white px-2.5 h-7 rounded hover:bg-primary/90 transition-colors shadow-sm flex items-center justify-center gap-1 font-semibold text-xs cursor-pointer"
                 title="Nova Inscrição"
               >
                 <span className="material-symbols-outlined text-[16px]">add</span>
                 <span className="whitespace-nowrap">Nova Inscrição</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  setRenewTargetStudent(null);
-                  setShowRenewModal(true);
-                }}
-                className="bg-primary text-surface-white px-2.5 h-7 rounded hover:bg-primary/90 transition-colors shadow-sm flex items-center justify-center gap-1 font-semibold text-xs cursor-pointer"
-                title="Renovação de Matrículas"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span className="whitespace-nowrap">Renovar Matrículas</span>
               </button>
 
               <div className="flex items-center border border-border-subtle rounded overflow-hidden">
@@ -379,13 +363,6 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                 >
                   <span className="material-symbols-outlined text-[16px]">upload</span>
                   <span className="whitespace-nowrap">Importar</span>
-                </button>
-                <button
-                  onClick={() => onShowToast('Gerando relatório de estudantes...')}
-                  className="bg-surface text-on-surface-variant w-7 h-7 hover:bg-surface-container transition-colors flex items-center justify-center border-r border-border-subtle"
-                  title="Ver Relatório"
-                >
-                  <span className="material-symbols-outlined text-[16px]">description</span>
                 </button>
                 <button
                   onClick={handleExportCSV}
@@ -404,7 +381,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                 <button
                   onClick={() => {
                     setFilters({
-                      anoLetivo: '23/24',
+                      anoLetivo: '2023/2024',
                       dataInicio: '',
                       dataFim: '',
                       classe: 'Todas',
@@ -446,8 +423,58 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
         </div>
       </div>
 
+      {/* Inline Batch Actions Banner (Estilo Fiel à Imagem de Referência) */}
+      {selectedIds.length > 0 && (
+        <div className="bg-[#FAF0E8] border border-[#E8D7C8] rounded-t-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 border-b-0 animate-in fade-in duration-200">
+          <span className="text-xs font-bold text-[#4A382C] flex items-center gap-1.5">
+            Acções em Lote Disponíveis:
+          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => {
+                setRenewTargetStudent(null);
+                setShowRenewModal(true);
+              }}
+              className="bg-surface-white border border-outline-variant/30 text-on-surface hover:bg-surface-container rounded-md px-3 py-1.5 text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer transition-colors"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-on-surface-variant" /> Renovar Matrícula ({selectedIds.length})
+            </button>
+            <button
+              onClick={() => onOpenBatchAction('card')}
+              className="bg-surface-white border border-outline-variant/30 text-on-surface hover:bg-surface-container rounded-md px-3 py-1.5 text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer transition-colors"
+            >
+              <span className="material-symbols-outlined text-[16px] text-on-surface-variant">badge</span> Emitir Cartão ({selectedIds.length})
+            </button>
+            <button
+              onClick={() => onOpenBatchAction('declaration')}
+              className="bg-surface-white border border-outline-variant/30 text-on-surface hover:bg-surface-container rounded-md px-3 py-1.5 text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer transition-colors"
+            >
+              <span className="material-symbols-outlined text-[16px] text-on-surface-variant">description</span> Declaração ({selectedIds.length})
+            </button>
+            <button
+              onClick={() => onOpenBatchAction('status')}
+              className="bg-[#047857] hover:bg-[#0369a1] text-surface-white rounded-md px-3.5 py-1.5 text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer transition-colors"
+            >
+              <span className="material-symbols-outlined text-[16px]">published_with_changes</span> Alterar Estado ({selectedIds.length})
+            </button>
+            <button
+              onClick={() => onOpenBatchAction('notify')}
+              className="bg-[#B45309] hover:bg-[#92400E] text-surface-white rounded-md px-3.5 py-1.5 text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer transition-colors"
+            >
+              <span className="material-symbols-outlined text-[16px]">notification_important</span> Notificar ({selectedIds.length})
+            </button>
+            <button
+              onClick={() => setSelectedIds([])}
+              className="bg-surface-white border border-outline-variant/30 text-outline hover:bg-surface-container rounded-md px-3 py-1.5 text-xs font-medium shadow-2xs cursor-pointer transition-colors"
+            >
+              Desmarcar
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Data Table */}
-      <div className="bg-surface-white border border-border-subtle rounded-xl overflow-hidden shadow-sm">
+      <div className={`bg-surface-white border border-border-subtle ${selectedIds.length > 0 ? 'rounded-b-xl border-t-0' : 'rounded-xl'} overflow-hidden shadow-sm`}>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse whitespace-nowrap">
             <thead>
@@ -664,7 +691,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
                 onClick={() => setCurrentPage(page)}
                 className={`px-2.5 py-1 border rounded font-medium cursor-pointer ${
                   currentPage === page
-                    ? 'border-secondary text-surface-white bg-secondary'
+                    ? 'border-primary text-surface-white bg-primary'
                     : 'border-border-subtle text-on-surface-variant hover:bg-surface-container-low'
                 }`}
               >
@@ -682,58 +709,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({
         </div>
       </div>
 
-      {/* Floating Action Bar for Selected Students */}
-      {selectedIds.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-primary-container text-on-primary px-6 py-3 rounded-full shadow-2xl flex items-center gap-6 border border-on-primary-container/20 animate-in fade-in slide-in-from-bottom-4 duration-300">
-          <div className="flex items-center gap-2 border-r border-on-primary-container/20 pr-6">
-            <span className="bg-secondary text-surface-white w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold">
-              {selectedIds.length}
-            </span>
-            <span className="text-xs font-medium">Estudantes Selecionados</span>
-          </div>
 
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => onOpenBatchAction('card')}
-              className="flex items-center gap-1.5 hover:text-secondary transition-colors text-xs font-semibold"
-            >
-              <span className="material-symbols-outlined text-[18px]">badge</span>
-              Emitir Cartão
-            </button>
-            <button
-              onClick={() => onOpenBatchAction('declaration')}
-              className="flex items-center gap-1.5 hover:text-secondary transition-colors text-xs font-semibold"
-            >
-              <span className="material-symbols-outlined text-[18px]">description</span>
-              Emitir Declaração
-            </button>
-            <button
-              onClick={() => onOpenBatchAction('status')}
-              className="flex items-center gap-1.5 hover:text-secondary transition-colors text-xs font-semibold"
-            >
-              <span className="material-symbols-outlined text-[18px]">published_with_changes</span>
-              Alterar Estado
-            </button>
-            <button
-              onClick={() => onOpenBatchAction('notify')}
-              className="flex items-center gap-1.5 hover:text-secondary transition-colors text-xs font-semibold"
-            >
-              <span className="material-symbols-outlined text-[18px]">notification_important</span>
-              Notificar Pendências
-            </button>
-          </div>
-
-          <div className="border-l border-on-primary-container/20 pl-2">
-            <button
-              onClick={() => setSelectedIds([])}
-              className="p-1 hover:bg-on-primary-container/20 rounded-full transition-colors"
-              title="Cancelar Seleção"
-            >
-              <span className="material-symbols-outlined text-[18px]">close</span>
-            </button>
-          </div>
-        </div>
-      )}
       {/* MODAL 1: Central de Renovação & Reconfirmação de Matrícula */}
       {showRenewModal && (
         <div className="fixed inset-0 bg-on-surface/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">

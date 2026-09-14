@@ -38,6 +38,7 @@ import { CmsView } from './components/CmsView';
 import { UtilizadoresPermissoesView } from './components/UtilizadoresPermissoesView';
 import { ConfigInstituicaoView } from './components/ConfigInstituicaoView';
 import { EstruturasView } from './components/EstruturasView';
+import { BibliotecaView } from './components/BibliotecaView';
 import { AccessProvider } from './context/AccessContext';
 import { StudentFormModal, ToastNotification } from './components/Modals';
 
@@ -252,6 +253,7 @@ function AppContent() {
           onSelectView={setCurrentView}
           isExpanded={isSidebarExpanded}
           onToggleExpand={() => setIsSidebarExpanded(!isSidebarExpanded)}
+          onShowToast={showToast}
         />
 
         {/* Dynamic Main View Container */}
@@ -368,9 +370,11 @@ function AppContent() {
             <ConfigInstituicaoView onSelectView={setCurrentView} onShowToast={showToast} />
           )}
 
-          {['biblioteca', 'financeiro'].includes(
-            currentView
-          ) && (
+          {currentView === 'biblioteca' && (
+            <BibliotecaView onSelectView={setCurrentView} onShowToast={showToast} />
+          )}
+
+          {currentView === 'financeiro' && (
             <div className="mt-header-height p-6 w-full">
               <div className="bg-surface-white border border-border-subtle rounded-xl p-8 text-center shadow-sm max-w-2xl mx-auto my-12">
                 <span className="material-symbols-outlined text-secondary text-5xl mb-3">construction</span>

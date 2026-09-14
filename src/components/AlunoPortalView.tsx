@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActiveView } from '../types';
-import { KeyRound, CreditCard, Wallet, Award, CalendarCheck, Clock, FileText, Library, Store, CheckCircle } from 'lucide-react';
+import { KeyRound, CreditCard, Wallet, Award, CalendarCheck, Clock, FileText, Library, Store, CheckCircle, TrendingUp, CheckCircle2 } from 'lucide-react';
 
 interface AlunoPortalViewProps {
   onSelectView: (view: ActiveView) => void;
@@ -27,7 +27,74 @@ export const AlunoPortalView: React.FC<AlunoPortalViewProps> = ({ onShowToast })
   };
 
   return (
-    <div className="mt-header-height p-4 w-full flex flex-col gap-4 max-w-7xl mx-auto">
+    <div className="mt-header-height p-4 w-full flex flex-col gap-3">
+      {/* Quick Metrics Bar - Matching Reference Standard */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Card 1: Média Geral */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div>
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider block mb-0.5">Média Geral Atual</span>
+            <span className="text-xl font-bold text-primary leading-none">15.5 <span className="text-xs font-normal text-outline">Valores</span></span>
+          </div>
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-success bg-success/10 text-[10px] font-bold">
+            <TrendingUp className="w-3.5 h-3.5" /> Aprovado
+          </span>
+        </div>
+
+        {/* Card 2: Assiduidade */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center transition-all hover:shadow-md h-[68px]">
+          <div className="w-full flex flex-col justify-center gap-1.5">
+            <div className="flex justify-between items-end">
+              <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider">Assiduidade Geral</span>
+              <span className="text-success font-bold text-[12px]">
+                98% <span className="text-[10px] font-medium text-outline ml-0.5">Presenças</span>
+              </span>
+            </div>
+            <div className="w-full bg-surface-container-low h-1.5 rounded-full overflow-hidden">
+              <div className="bg-success h-full rounded-full" style={{ width: '98%' }}></div>
+            </div>
+            <div className="flex justify-between text-[9px] font-medium uppercase text-outline">
+              <span>0 Faltas Injust.</span>
+              <span className="text-success font-bold">Regular</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 3: Propinas */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center transition-all hover:shadow-md h-[68px]">
+          <div className="w-full flex flex-col justify-center gap-1.5">
+            <div className="flex justify-between items-end">
+              <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider">Situação Financeira</span>
+              <span className="text-success font-bold text-[12px]">Setembro Pago</span>
+            </div>
+            <div className="w-full bg-surface-container-low h-1.5 rounded-full overflow-hidden">
+              <div className="bg-success h-full rounded-full" style={{ width: '100%' }}></div>
+            </div>
+            <div className="flex justify-between text-[9px] font-medium uppercase text-outline">
+              <span>Propina em Dia</span>
+              <span className="text-success font-bold">Regularizado</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 4: Documentos / Cartão */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-2.5 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider mb-0.5">
+              Cartão & Documentos
+            </span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl font-bold text-primary leading-none">Ativo</span>
+            </div>
+          </div>
+          <div className="flex flex-col items-end gap-1.5">
+            <span className="px-2 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">
+              Digital VS-3798
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* First-time access password change modal alert */}
       {mustChangePassword && (
         <div className="bg-amber-50 border-2 border-amber-400 rounded-xl p-4 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
@@ -63,7 +130,7 @@ export const AlunoPortalView: React.FC<AlunoPortalViewProps> = ({ onShowToast })
       {/* Header Profile Banner */}
       <div className="bg-surface-white border border-border-subtle rounded-xl p-4 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-secondary text-surface-white font-bold text-xl flex items-center justify-center border-2 border-primary shadow">
+          <div className="w-14 h-14 rounded-full bg-primary text-surface-white font-bold text-xl flex items-center justify-center border-2 border-primary/40 shadow">
             AM
           </div>
           <div>
@@ -74,7 +141,7 @@ export const AlunoPortalView: React.FC<AlunoPortalViewProps> = ({ onShowToast })
               </span>
             </div>
             <p className="text-xs text-on-surface-variant font-medium">
-              Nº de Processo: <span className="font-bold text-primary">3798</span> | E-mail: <span className="text-secondary font-bold">3798@ispozango.com</span>
+              Nº de Processo: <span className="font-bold text-primary">3798</span> | E-mail: <span className="text-primary font-bold">3798@ispozango.com</span>
             </p>
             <p className="text-[11px] text-outline">
               Turma: <span className="font-semibold text-on-surface">10º Ano A - Ciências Físicas</span> | Período: <span className="font-semibold text-on-surface">Manhã</span>
@@ -100,7 +167,7 @@ export const AlunoPortalView: React.FC<AlunoPortalViewProps> = ({ onShowToast })
           </button>
           <button
             onClick={() => setActiveTab('financeiro')}
-            className="bg-secondary text-surface-white hover:bg-secondary/90 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 shadow-md cursor-pointer transition-all border border-secondary"
+            className="bg-primary text-surface-white hover:bg-primary/90 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 shadow-sm cursor-pointer transition-all"
           >
             <Wallet className="w-4 h-4 stroke-[1.75]" />
             <span>Pagar Propinas</span>
@@ -306,7 +373,7 @@ export const AlunoPortalView: React.FC<AlunoPortalViewProps> = ({ onShowToast })
             <h2 className="font-bold text-primary text-sm">Histórico Financeiro e Mensalidades</h2>
             <button
               onClick={() => onShowToast('Acedendo ao Portal Multicaixa Express para pagamento online...')}
-              className="bg-secondary text-surface-white px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 cursor-pointer"
+              className="bg-primary text-surface-white hover:bg-primary/90 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
             >
               <span className="material-symbols-outlined text-[16px]">qr_code_2</span>
               Pagamento Online (MC Express)
@@ -333,7 +400,7 @@ export const AlunoPortalView: React.FC<AlunoPortalViewProps> = ({ onShowToast })
                   <td className="px-3 py-1.5 text-on-surface-variant">10/09/2026</td>
                   <td className="px-3 py-1.5 text-center"><span className="px-2 py-0.5 bg-green-100 text-green-800 rounded font-bold">Liquidada</span></td>
                   <td className="px-3 py-1.5 text-center">
-                    <button onClick={() => onShowToast('Baixando Recibo FT 2026/102...')} className="text-secondary font-bold hover:underline">
+                    <button onClick={() => onShowToast('Baixando Recibo FT 2026/102...')} className="text-primary font-bold hover:underline">
                       Baixar Recibo
                     </button>
                   </td>

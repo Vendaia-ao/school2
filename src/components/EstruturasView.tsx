@@ -5,7 +5,7 @@ import {
   Building2,
   Plus,
   Search,
-  CreditCard as Edit3,
+  Pencil,
   Power,
   Users,
   GraduationCap,
@@ -17,6 +17,7 @@ import {
   BookOpen,
   Briefcase,
   Layers,
+  MoreVertical,
 } from 'lucide-react';
 
 interface Props {
@@ -44,6 +45,7 @@ export const EstruturasView: React.FC<Props> = ({ onShowToast }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingStruct, setEditingStruct] = useState<Structure | null>(null);
   const [confirmStatusStruct, setConfirmStatusStruct] = useState<Structure | null>(null);
+  const [openActionMenu, setOpenActionMenu] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     codigo: '',
@@ -137,12 +139,12 @@ export const EstruturasView: React.FC<Props> = ({ onShowToast }) => {
   });
 
   return (
-    <div className="mt-header-height p-4 sm:p-5 w-full flex flex-col gap-4">
+    <div className="mt-header-height w-full flex flex-col gap-4 p-4">
       {/* Header Title */}
-      <div className="flex justify-between items-center mb-1">
+      <div className="flex justify-between items-center">
         <div>
           <h1 className="text-xl font-bold text-primary flex items-center gap-2">
-            <Building2 className="w-5 h-5 text-secondary stroke-[1.75]" />
+            <Building2 className="w-5 h-5 text-primary stroke-[1.75]" />
             Estruturas & Unidades Operacionais
           </h1>
           <p className="text-xs text-on-surface-variant">
@@ -151,51 +153,51 @@ export const EstruturasView: React.FC<Props> = ({ onShowToast }) => {
         </div>
         <button
           onClick={openCreateModal}
-          className="bg-secondary text-surface-white hover:bg-secondary/90 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+          className="bg-primary hover:bg-primary-container text-surface-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 shadow-md transition-all cursor-pointer"
         >
-          <Plus className="w-4 h-4 stroke-[1.75]" /> Nova Estrutura
+          <Plus className="w-4 h-4 stroke-[2]" /> Nova Estrutura
         </button>
       </div>
 
-      {/* KPI Cards */}
+      {/* KPI Cards — Enterprise Compact (68px height) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-3 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold">
-            <Building2 className="w-5 h-5 stroke-[1.75]" />
-          </div>
+        <div className="bg-surface-white border border-border-subtle/30 rounded-lg p-3.5 h-[68px] flex items-center justify-between shadow-xs">
           <div>
-            <p className="text-[10px] uppercase font-bold text-outline tracking-wider">Total de Estruturas</p>
-            <p className="font-headline-sm text-lg font-bold text-primary">{structures.length}</p>
+            <p className="text-[10px] uppercase tracking-wider text-outline font-bold">Total de Estruturas</p>
+            <p className="text-lg font-bold text-primary leading-tight mt-0.5">{structures.length}</p>
+          </div>
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <Building2 className="w-4 h-4 text-primary" />
           </div>
         </div>
 
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-3 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-success/10 text-success flex items-center justify-center font-bold">
-            <Users className="w-5 h-5 stroke-[1.75]" />
-          </div>
+        <div className="bg-surface-white border border-border-subtle/30 rounded-lg p-3.5 h-[68px] flex items-center justify-between shadow-xs">
           <div>
-            <p className="text-[10px] uppercase font-bold text-outline tracking-wider">Estudantes Consolidados</p>
-            <p className="font-headline-sm text-lg font-bold text-primary">{totalEstudantes.toLocaleString('pt-PT')}</p>
+            <p className="text-[10px] uppercase tracking-wider text-outline font-bold">Estudantes Consolidados</p>
+            <p className="text-lg font-bold text-primary leading-tight mt-0.5">{totalEstudantes.toLocaleString('pt-PT')}</p>
+          </div>
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <Users className="w-4 h-4 text-primary" />
           </div>
         </div>
 
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-3 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-info/10 text-info flex items-center justify-center font-bold">
-            <GraduationCap className="w-5 h-5 stroke-[1.75]" />
-          </div>
+        <div className="bg-surface-white border border-border-subtle/30 rounded-lg p-3.5 h-[68px] flex items-center justify-between shadow-xs">
           <div>
-            <p className="text-[10px] uppercase font-bold text-outline tracking-wider">Corpo Docente Ativo</p>
-            <p className="font-headline-sm text-lg font-bold text-primary">{totalProfessores.toLocaleString('pt-PT')}</p>
+            <p className="text-[10px] uppercase tracking-wider text-outline font-bold">Corpo Docente Ativo</p>
+            <p className="text-lg font-bold text-primary leading-tight mt-0.5">{totalProfessores.toLocaleString('pt-PT')}</p>
+          </div>
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <GraduationCap className="w-4 h-4 text-primary" />
           </div>
         </div>
 
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-3 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center font-bold">
-            <Power className="w-5 h-5 stroke-[1.75]" />
-          </div>
+        <div className="bg-surface-white border border-border-subtle/30 rounded-lg p-3.5 h-[68px] flex items-center justify-between shadow-xs">
           <div>
-            <p className="text-[10px] uppercase font-bold text-outline tracking-wider">Unidades Operacionais</p>
-            <p className="font-headline-sm text-lg font-bold text-primary">{estruturasAtivas} Ativas</p>
+            <p className="text-[10px] uppercase tracking-wider text-outline font-bold">Unidades Operacionais</p>
+            <p className="text-lg font-bold text-primary leading-tight mt-0.5">{estruturasAtivas} Ativas</p>
+          </div>
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <Power className="w-4 h-4 text-primary" />
           </div>
         </div>
       </div>
@@ -207,7 +209,7 @@ export const EstruturasView: React.FC<Props> = ({ onShowToast }) => {
             <select
               value={filterTipo}
               onChange={(e) => setFilterTipo(e.target.value)}
-              className="appearance-none bg-surface border border-border-subtle rounded-md pl-2 pr-7 text-xs focus:outline-none focus:border-secondary py-1.5 cursor-pointer font-medium"
+              className="appearance-none bg-surface border border-border-subtle rounded-md pl-2 pr-7 text-xs focus:outline-none focus:border-primary py-1.5 cursor-pointer font-medium"
             >
               <option value="Todos">Tipo: Todos</option>
               <option value="college">Colégios</option>
@@ -221,7 +223,7 @@ export const EstruturasView: React.FC<Props> = ({ onShowToast }) => {
             <select
               value={filterEstado}
               onChange={(e) => setFilterEstado(e.target.value)}
-              className="appearance-none bg-surface border border-border-subtle rounded-md pl-2 pr-7 text-xs focus:outline-none focus:border-secondary py-1.5 cursor-pointer font-medium"
+              className="appearance-none bg-surface border border-border-subtle rounded-md pl-2 pr-7 text-xs focus:outline-none focus:border-primary py-1.5 cursor-pointer font-medium"
             >
               <option value="Todos">Estado: Todos</option>
               <option value="Ativo">Ativos</option>
@@ -235,7 +237,7 @@ export const EstruturasView: React.FC<Props> = ({ onShowToast }) => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Pesquisar por nome, código ou diretor..."
-              className="pl-9 pr-3 py-1.5 text-xs bg-surface-white border border-border-subtle rounded-lg focus:outline-none focus:border-secondary font-medium w-64"
+              className="pl-9 pr-3 py-1.5 text-xs bg-surface-white border border-border-subtle rounded-lg focus:outline-none focus:border-primary font-medium w-64"
             />
           </div>
         </div>
@@ -262,7 +264,7 @@ export const EstruturasView: React.FC<Props> = ({ onShowToast }) => {
                     <tr
                       key={s.id}
                       className={`hover:bg-surface-container-low/30 transition-colors ${
-                        isSelected ? 'bg-secondary/5 font-semibold' : ''
+                        isSelected ? 'bg-primary/5 font-semibold' : ''
                       }`}
                     >
                       <td className="px-3.5 py-3">
@@ -274,7 +276,7 @@ export const EstruturasView: React.FC<Props> = ({ onShowToast }) => {
                             <p className="font-bold text-primary text-xs flex items-center gap-1.5">
                               {s.nome}
                               {isSelected && (
-                                <span className="bg-secondary text-surface-white text-[9px] font-bold px-1.5 py-0.2 rounded-full">
+                                <span className="bg-primary text-surface-white text-[9px] font-bold px-1.5 py-0.2 rounded-full">
                                   Contexto Ativo
                                 </span>
                               )}
@@ -316,33 +318,49 @@ export const EstruturasView: React.FC<Props> = ({ onShowToast }) => {
                         </span>
                       </td>
 
-                      <td className="px-3.5 py-3 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            onClick={() => {
-                              switchStructure(s.id);
-                              onShowToast(`Contexto alterado para "${s.nome}".`);
-                            }}
-                            className="px-2 py-1 text-[10px] bg-secondary/10 text-secondary hover:bg-secondary hover:text-surface-white font-bold rounded transition-colors cursor-pointer"
-                            title="Alternar para este contexto"
-                          >
-                            Trabalhar Aqui
-                          </button>
-                          <button
-                            onClick={() => openEditModal(s)}
-                            className="p-1.5 text-outline hover:text-primary rounded hover:bg-primary/10 transition-colors cursor-pointer"
-                            title="Editar"
-                          >
-                            <Edit3 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => setConfirmStatusStruct(s)}
-                            className="p-1.5 text-outline hover:text-warning rounded hover:bg-warning/10 transition-colors cursor-pointer"
-                            title="Ativar/Desativar"
-                          >
-                            <Power className="w-4 h-4" />
-                          </button>
-                        </div>
+                      <td className="px-3.5 py-3 text-right relative">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setOpenActionMenu(openActionMenu === s.id ? null : s.id); }}
+                          className={`p-1.5 text-outline hover:text-primary rounded-lg transition-colors cursor-pointer ${openActionMenu === s.id ? 'bg-surface-container-high text-primary' : 'hover:bg-surface-container'}`}
+                          title="Ações"
+                        >
+                          <MoreVertical className="w-4 h-4 stroke-[2]" />
+                        </button>
+
+                        {openActionMenu === s.id && (
+                          <>
+                            <div className="fixed inset-0 z-20 cursor-default" onClick={(e) => { e.stopPropagation(); setOpenActionMenu(null); }} />
+                            <div className="absolute right-3 top-10 z-30 w-52 bg-surface-white border border-border-subtle rounded-xl shadow-xl py-1 text-left text-xs divide-y divide-border-subtle animate-in fade-in zoom-in-95 duration-100 font-normal">
+                              <div className="py-1">
+                                <button
+                                  onClick={() => {
+                                    switchStructure(s.id);
+                                    onShowToast(`Contexto alterado para "${s.nome}".`);
+                                    setOpenActionMenu(null);
+                                  }}
+                                  className="w-full px-3 py-2 text-left flex items-center gap-2 text-on-surface-variant hover:bg-primary/10 hover:text-primary font-medium cursor-pointer transition-colors"
+                                >
+                                  <Briefcase className="w-4 h-4 text-primary stroke-[2]" />
+                                  <span>Trabalhar Aqui</span>
+                                </button>
+                                <button
+                                  onClick={() => { openEditModal(s); setOpenActionMenu(null); }}
+                                  className="w-full px-3 py-2 text-left flex items-center gap-2 text-on-surface-variant hover:bg-primary/10 hover:text-primary font-medium cursor-pointer transition-colors"
+                                >
+                                  <Pencil className="w-4 h-4 text-primary stroke-[2]" />
+                                  <span>Editar Estrutura</span>
+                                </button>
+                                <button
+                                  onClick={() => { setConfirmStatusStruct(s); setOpenActionMenu(null); }}
+                                  className="w-full px-3 py-2 text-left flex items-center gap-2 text-on-surface-variant hover:bg-warning/10 hover:text-warning font-medium cursor-pointer transition-colors"
+                                >
+                                  <Power className="w-4 h-4 text-warning stroke-[2]" />
+                                  <span>{s.estado === 'Ativo' ? 'Desativar Estrutura' : 'Ativar Estrutura'}</span>
+                                </button>
+                              </div>
+                            </div>
+                          </>
+                        )}
                       </td>
                     </tr>
                   );
@@ -361,22 +379,32 @@ export const EstruturasView: React.FC<Props> = ({ onShowToast }) => {
 
       {/* Modal: Criar / Editar Estrutura */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-surface-white rounded-xl shadow-2xl border border-border-subtle w-full max-w-lg p-6 my-8">
-            <div className="flex justify-between items-center border-b border-border-subtle pb-3 mb-4">
-              <h2 className="text-lg font-bold text-primary flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-secondary" />
-                {editingStruct ? `Editar Estrutura: ${editingStruct.nome}` : 'Criar Nova Estrutura'}
-              </h2>
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 overflow-y-auto backdrop-blur-xs">
+          <div className="bg-surface-white rounded-2xl shadow-2xl border border-border-subtle w-full max-w-lg overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="bg-primary text-surface-white p-4 sm:p-5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-secondary-container/20 border border-secondary-container/40 flex items-center justify-center text-secondary-container font-bold shrink-0">
+                  <Building2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold leading-tight">
+                    {editingStruct ? `Editar Estrutura: ${editingStruct.nome}` : 'Criar Nova Estrutura'}
+                  </h2>
+                  <p className="text-[11px] text-surface-white/70">
+                    {editingStruct ? 'Atualize os dados e responsáveis da unidade.' : 'Preencha a identificação e localização da nova unidade.'}
+                  </p>
+                </div>
+              </div>
               <button
                 onClick={() => setModalOpen(false)}
-                className="text-outline hover:text-primary p-1 rounded hover:bg-surface-container cursor-pointer"
+                className="text-surface-white/70 hover:text-surface-white p-1 rounded-lg hover:bg-surface-white/10 transition-colors cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-3 text-xs">
+            <form onSubmit={handleSubmit} className="p-5 space-y-3.5 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <label className="block text-outline font-bold">
                   Código da Unidade
@@ -385,7 +413,7 @@ export const EstruturasView: React.FC<Props> = ({ onShowToast }) => {
                     required
                     value={form.codigo}
                     onChange={(e) => setForm({ ...form, codigo: e.target.value })}
-                    className="mt-1 w-full border border-border-subtle rounded p-2 text-xs focus:border-secondary focus:outline-none"
+                    className="mt-1 w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none"
                     placeholder="Ex: COL-01, CAM-02"
                   />
                 </label>
@@ -395,7 +423,7 @@ export const EstruturasView: React.FC<Props> = ({ onShowToast }) => {
                   <select
                     value={form.tipo}
                     onChange={(e) => setForm({ ...form, tipo: e.target.value as StructureType })}
-                    className="mt-1 w-full border border-border-subtle rounded p-2 text-xs focus:border-secondary focus:outline-none bg-surface-white"
+                    className="mt-1 w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none bg-surface-white"
                   >
                     {tipoOptions.map((t) => (
                       <option key={t.value} value={t.value}>
@@ -413,7 +441,7 @@ export const EstruturasView: React.FC<Props> = ({ onShowToast }) => {
                   required
                   value={form.nome}
                   onChange={(e) => setForm({ ...form, nome: e.target.value })}
-                  className="mt-1 w-full border border-border-subtle rounded p-2 text-xs focus:border-secondary focus:outline-none"
+                  className="mt-1 w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none"
                   placeholder="Ex: Colégio Talatona, Campus Universitário Central"
                 />
               </label>
@@ -425,7 +453,7 @@ export const EstruturasView: React.FC<Props> = ({ onShowToast }) => {
                   required
                   value={form.morada}
                   onChange={(e) => setForm({ ...form, morada: e.target.value })}
-                  className="mt-1 w-full border border-border-subtle rounded p-2 text-xs focus:border-secondary focus:outline-none"
+                  className="mt-1 w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none"
                   placeholder="Ex: Via S10, Talatona, Luanda"
                 />
               </label>
@@ -437,7 +465,7 @@ export const EstruturasView: React.FC<Props> = ({ onShowToast }) => {
                   required
                   value={form.diretorResponsavel}
                   onChange={(e) => setForm({ ...form, diretorResponsavel: e.target.value })}
-                  className="mt-1 w-full border border-border-subtle rounded p-2 text-xs focus:border-secondary focus:outline-none"
+                  className="mt-1 w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none"
                   placeholder="Ex: Dra. Sara Silva, Prof. Carlos Mendes"
                 />
               </label>
@@ -449,7 +477,7 @@ export const EstruturasView: React.FC<Props> = ({ onShowToast }) => {
                     type="number"
                     value={form.estudantesCount}
                     onChange={(e) => setForm({ ...form, estudantesCount: Number(e.target.value) })}
-                    className="mt-1 w-full border border-border-subtle rounded p-2 text-xs focus:border-secondary focus:outline-none"
+                    className="mt-1 w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none"
                   />
                 </label>
 
@@ -459,7 +487,7 @@ export const EstruturasView: React.FC<Props> = ({ onShowToast }) => {
                     type="number"
                     value={form.professoresCount}
                     onChange={(e) => setForm({ ...form, professoresCount: Number(e.target.value) })}
-                    className="mt-1 w-full border border-border-subtle rounded p-2 text-xs focus:border-secondary focus:outline-none"
+                    className="mt-1 w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none"
                   />
                 </label>
               </div>
@@ -469,24 +497,24 @@ export const EstruturasView: React.FC<Props> = ({ onShowToast }) => {
                 <select
                   value={form.estado}
                   onChange={(e) => setForm({ ...form, estado: e.target.value as 'Ativo' | 'Inativo' })}
-                  className="mt-1 w-full border border-border-subtle rounded p-2 text-xs focus:border-secondary focus:outline-none bg-surface-white"
+                  className="mt-1 w-full border border-border-subtle rounded-lg p-2.5 text-xs focus:border-primary focus:outline-none bg-surface-white"
                 >
                   <option value="Ativo">Ativo</option>
                   <option value="Inativo">Inativo</option>
                 </select>
               </label>
 
-              <div className="flex justify-end gap-2 border-t border-border-subtle pt-3 mt-4">
+              <div className="flex justify-end gap-2 border-t border-border-subtle pt-4 mt-5">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="border border-border-subtle px-4 py-2 rounded-lg font-semibold cursor-pointer hover:bg-surface-container transition-all"
+                  className="border border-border-subtle hover:bg-surface-container rounded-xl px-4 py-2 text-xs font-semibold cursor-pointer transition-all"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="bg-secondary text-surface-white px-4 py-2 rounded-lg font-bold cursor-pointer hover:bg-secondary/90 transition-all"
+                  className="bg-primary hover:bg-primary/90 text-surface-white rounded-xl px-5 py-2 text-xs font-bold cursor-pointer transition-all shadow-md"
                 >
                   {editingStruct ? 'Guardar Alterações' : 'Criar Estrutura'}
                 </button>
@@ -498,43 +526,55 @@ export const EstruturasView: React.FC<Props> = ({ onShowToast }) => {
 
       {/* Modal: Confirmar Ativação / Desativação */}
       {confirmStatusStruct && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-surface-white rounded-xl shadow-2xl border border-border-subtle w-full max-w-md p-6 my-8">
-            <div className="flex justify-between items-center border-b border-border-subtle pb-3 mb-4">
-              <h2 className="text-lg font-bold text-primary flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-warning" />
-                {confirmStatusStruct.estado === 'Ativo' ? 'Desativar Estrutura' : 'Ativar Estrutura'}
-              </h2>
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 overflow-y-auto backdrop-blur-xs">
+          <div className="bg-surface-white rounded-2xl shadow-2xl border border-border-subtle w-full max-w-md overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="bg-primary text-surface-white p-4 sm:p-5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-secondary-container/20 border border-secondary-container/40 flex items-center justify-center text-secondary-container font-bold shrink-0">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold leading-tight">
+                    {confirmStatusStruct.estado === 'Ativo' ? 'Desativar Estrutura' : 'Ativar Estrutura'}
+                  </h2>
+                  <p className="text-[11px] text-surface-white/70">
+                    Confirmação de alteração do estado operacional.
+                  </p>
+                </div>
+              </div>
               <button
                 onClick={() => setConfirmStatusStruct(null)}
-                className="text-outline hover:text-primary p-1 rounded hover:bg-surface-container cursor-pointer"
+                className="text-surface-white/70 hover:text-surface-white p-1 rounded-lg hover:bg-surface-white/10 transition-colors cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-xs text-on-surface-variant mb-4">
-              Deseja alterar o estado da estrutura{' '}
-              <strong className="text-primary">{confirmStatusStruct.nome}</strong> para{' '}
-              <strong className="text-secondary">
-                {confirmStatusStruct.estado === 'Ativo' ? 'Inativo' : 'Ativo'}
-              </strong>
-              ?
-            </p>
+            <div className="p-5 text-xs">
+              <p className="text-on-surface-variant mb-5 leading-relaxed">
+                Deseja alterar o estado da estrutura{' '}
+                <strong className="text-primary font-bold">{confirmStatusStruct.nome}</strong> para{' '}
+                <strong className="text-primary font-bold">
+                  {confirmStatusStruct.estado === 'Ativo' ? 'Inativo' : 'Ativo'}
+                </strong>
+                ?
+              </p>
 
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setConfirmStatusStruct(null)}
-                className="border border-border-subtle px-4 py-2 rounded-lg font-semibold cursor-pointer hover:bg-surface-container transition-all"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleToggleStatus}
-                className="bg-secondary text-surface-white px-4 py-2 rounded-lg font-bold cursor-pointer hover:bg-secondary/90 transition-all"
-              >
-                Confirmar
-              </button>
+              <div className="flex justify-end gap-2 border-t border-border-subtle pt-4">
+                <button
+                  onClick={() => setConfirmStatusStruct(null)}
+                  className="border border-border-subtle hover:bg-surface-container rounded-xl px-4 py-2 text-xs font-semibold cursor-pointer transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleToggleStatus}
+                  className="bg-primary hover:bg-primary/90 text-surface-white rounded-xl px-5 py-2 text-xs font-bold cursor-pointer transition-all shadow-md"
+                >
+                  Confirmar Alteração
+                </button>
+              </div>
             </div>
           </div>
         </div>

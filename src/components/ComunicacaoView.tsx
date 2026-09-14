@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActiveView } from '../types';
-import { MessageSquare, Send, Mail, CheckCircle2, MessageCircle, Users, BellRing, Smartphone, FileText, History, Edit3, Sliders } from 'lucide-react';
+import { MessageSquare, Send, Mail, CheckCircle2, MessageCircle, Users, BellRing, Smartphone, FileText, History, Pencil as Edit3, Sliders, Search, Plus, Eye, Download, RefreshCw, Copy, Bell, X } from 'lucide-react';
 
 interface ComunicacaoViewProps {
   onSelectView: (view: ActiveView) => void;
@@ -18,10 +18,41 @@ interface MessageHistory {
   autor: string;
 }
 
+const ModalXL: React.FC<{ title: string; subtitle?: string; onClose: () => void; children: React.ReactNode }> = ({ title, subtitle, onClose, children }) => (
+  <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div className="bg-surface-white border border-border-subtle rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 my-8">
+      {/* Header — Paleta de Cores Módulo Administração */}
+      <div className="bg-primary text-surface-white px-5 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 bg-surface-white/10 rounded-xl">
+            <MessageSquare className="w-5 h-5 text-surface-white" />
+          </div>
+          <div>
+            <h3 className="font-bold text-sm leading-tight text-surface-white">{title}</h3>
+            <p className="text-[11px] text-surface-white/80">
+              {subtitle || 'Registo e Envio de Avisos e Notificações Institucionais'}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          className="hover:bg-surface-white/20 p-1.5 rounded-lg transition-colors text-surface-white cursor-pointer"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+      {children}
+    </div>
+  </div>
+);
+
 export const ComunicacaoView: React.FC<ComunicacaoViewProps> = ({ onShowToast }) => {
-  const [activeTab, setActiveTab] = useState<'nova' | 'historico' | 'modelos' | 'canais'>('historico');
+  const [activeTab, setActiveTab] = useState<'historico' | 'modelos' | 'canais'>('historico');
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCanal, setFilterCanal] = useState('todos');
+  const [filterEstado, setFilterEstado] = useState('todos');
+  const [filterDestinatario, setFilterDestinatario] = useState('todos');
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
   // Form states for new communication
@@ -156,6 +187,7 @@ export const ComunicacaoView: React.FC<ComunicacaoViewProps> = ({ onShowToast })
     setHistoryList([newComm, ...historyList]);
     setSubject('');
     setMessageBody('');
+    setIsModalOpen(false);
     setActiveTab('historico');
     onShowToast('Comunicado enviado com sucesso para os destinatários selecionados!');
   };
@@ -163,7 +195,7 @@ export const ComunicacaoView: React.FC<ComunicacaoViewProps> = ({ onShowToast })
   const applyTemplate = (tmpl: (typeof templates)[0]) => {
     setSubject(tmpl.assunto);
     setMessageBody(tmpl.corpo);
-    setActiveTab('nova');
+    setIsModalOpen(true);
     onShowToast(`Modelo "${tmpl.nome}" aplicado no formulário de envio.`);
   };
 
@@ -176,64 +208,66 @@ export const ComunicacaoView: React.FC<ComunicacaoViewProps> = ({ onShowToast })
     const matchesCanal =
       filterCanal === 'todos' || item.canal.toLowerCase() === filterCanal.toLowerCase();
 
-    return matchesSearch && matchesCanal;
+    const matchesEstado =
+      filterEstado === 'todos' || item.estado.toLowerCase() === filterEstado.toLowerCase();
+
+    const matchesDestinatario =
+      filterDestinatario === 'todos' ||
+      item.destinatarios.toLowerCase().includes(filterDestinatario.toLowerCase());
+
+    return matchesSearch && matchesCanal && matchesEstado && matchesDestinatario;
   });
 
   return (
-    <div className="mt-header-height p-4 w-full flex flex-col gap-4 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-1">
-        <h1 className="text-xl font-bold text-primary flex items-center gap-2">
-          <MessageSquare className="w-5 h-5 text-secondary" />
-          Comunicação Institucional
-        </h1>
-        <button
-          onClick={() => setActiveTab('nova')}
-          className="bg-secondary text-surface-white hover:bg-secondary/90 px-4 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer"
-        >
-          <Send className="w-4 h-4 stroke-[1.75]" />
-          Novo Comunicado
-        </button>
-      </div>
+    <div className="mt-header-height p-4 w-full flex flex-col gap-3">
 
       {/* Quick Metrics Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-3 shadow-sm flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-transparent text-info flex items-center justify-center">
-            <Mail className="w-5 h-5 stroke-[1.75]" />
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider mb-0.5">Mensagens no Mês</span>
+            <span className="text-2xl font-bold leading-none text-primary">1.428</span>
           </div>
-          <div>
-            <p className="text-[10px] uppercase font-bold text-outline tracking-wider">Mensagens no Mês</p>
-            <p className="font-headline-sm text-lg font-bold text-primary">1.428</p>
-          </div>
-        </div>
-
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-3 shadow-sm flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-transparent text-success flex items-center justify-center">
-            <CheckCircle2 className="w-5 h-5 stroke-[1.75]" />
-          </div>
-          <div>
-            <p className="text-[10px] uppercase font-bold text-outline tracking-wider">Taxa de Entrega</p>
-            <p className="font-headline-sm text-lg font-bold text-primary">98.4%</p>
+          <div className="flex flex-col items-end gap-1">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-info bg-info/10 text-[10px] font-bold">
+              <Mail className="w-4 h-4" />+12%
+            </span>
           </div>
         </div>
 
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-3 shadow-sm flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-transparent text-warning flex items-center justify-center">
-            <Smartphone className="w-5 h-5 stroke-[1.75]" />
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider mb-0.5">Taxa de Entrega</span>
+            <span className="text-2xl font-bold leading-none text-primary">98.4%</span>
           </div>
-          <div>
-            <p className="text-[10px] uppercase font-bold text-outline tracking-wider">Saldo de SMS</p>
-            <p className="font-headline-sm text-lg font-bold text-primary">4.250 crd</p>
+          <div className="flex flex-col items-end gap-1">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-success bg-success/10 text-[10px] font-bold">
+              <CheckCircle2 className="w-4 h-4" />Excelente
+            </span>
           </div>
         </div>
 
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-3 shadow-sm flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-transparent text-secondary flex items-center justify-center">
-            <Users className="w-5 h-5 stroke-[1.75]" />
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider mb-0.5">Saldo de SMS</span>
+            <span className="text-2xl font-bold leading-none text-primary">4.250</span>
           </div>
-          <div>
-            <p className="text-[10px] uppercase font-bold text-outline tracking-wider">Encarregados Ativos</p>
-            <p className="font-headline-sm text-lg font-bold text-primary">842 enc.</p>
+          <div className="flex flex-col items-end gap-1">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-warning bg-warning/10 text-[10px] font-bold">
+              <Smartphone className="w-4 h-4" />Ativo
+            </span>
+          </div>
+        </div>
+
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider mb-0.5">Encarregados Ativos</span>
+            <span className="text-2xl font-bold leading-none text-primary">842</span>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-primary bg-primary/10 text-[10px] font-bold">
+              <Users className="w-4 h-4" />Comunidade
+            </span>
           </div>
         </div>
       </div>
@@ -250,18 +284,6 @@ export const ComunicacaoView: React.FC<ComunicacaoViewProps> = ({ onShowToast })
         >
           <History className="w-4 h-4" />
           Histórico de Envio
-        </button>
-
-        <button
-          onClick={() => setActiveTab('nova')}
-          className={`flex-1 min-w-[125px] py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-            activeTab === 'nova'
-              ? 'bg-primary text-surface-white shadow-sm'
-              : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'
-          }`}
-        >
-          <Edit3 className="w-4 h-4" />
-          Nova Mensagem
         </button>
 
         <button
@@ -292,34 +314,76 @@ export const ComunicacaoView: React.FC<ComunicacaoViewProps> = ({ onShowToast })
       {/* Tab 1: Histórico de Envio */}
       {activeTab === 'historico' && (
         <div className="bg-surface-white border border-border-subtle rounded-xl p-4 shadow-sm flex flex-col gap-3">
-          {/* Filters & Search */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pb-2 border-b border-border-subtle">
-            <div className="relative w-full sm:w-72">
-              <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-outline text-[16px]">
-                search
-              </span>
-              <input
-                type="text"
-                placeholder="Pesquisar comunicados..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-surface-container-low border border-border-subtle rounded-lg focus:outline-none focus:border-secondary"
-              />
+          {/* Filters & Search & Actions */}
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Filter: Canal */}
+              <div className="flex items-center gap-1.5 bg-surface border border-border-subtle rounded-lg px-2.5 py-1 font-medium text-xs">
+                <span className="font-bold text-primary">Canal:</span>
+                <select
+                  value={filterCanal}
+                  onChange={(e) => setFilterCanal(e.target.value)}
+                  className="bg-transparent text-xs focus:outline-none font-medium text-on-surface cursor-pointer"
+                >
+                  <option value="todos">Todos</option>
+                  <option value="sms">SMS</option>
+                  <option value="e-mail">E-mail</option>
+                  <option value="push app">Push App</option>
+                  <option value="multicanal">Multicanal</option>
+                </select>
+              </div>
+
+              {/* Filter: Estado */}
+              <div className="flex items-center gap-1.5 bg-surface border border-border-subtle rounded-lg px-2.5 py-1 font-medium text-xs">
+                <span className="font-bold text-primary">Estado:</span>
+                <select
+                  value={filterEstado}
+                  onChange={(e) => setFilterEstado(e.target.value)}
+                  className="bg-transparent text-xs focus:outline-none font-medium text-on-surface cursor-pointer"
+                >
+                  <option value="todos">Todos</option>
+                  <option value="enviado">Enviado</option>
+                  <option value="entregue">Entregue</option>
+                  <option value="lido">Lido</option>
+                  <option value="agendado">Agendado</option>
+                </select>
+              </div>
+
+              {/* Filter: Público-Alvo / Destinatários */}
+              <div className="flex items-center gap-1.5 bg-surface border border-border-subtle rounded-lg px-2.5 py-1 font-medium text-xs">
+                <span className="font-bold text-primary">Destinatários:</span>
+                <select
+                  value={filterDestinatario}
+                  onChange={(e) => setFilterDestinatario(e.target.value)}
+                  className="bg-transparent text-xs focus:outline-none font-medium text-on-surface cursor-pointer"
+                >
+                  <option value="todos">Todos</option>
+                  <option value="encarregados">Encarregados</option>
+                  <option value="estudantes">Estudantes</option>
+                  <option value="docente">Docentes / Professores</option>
+                  <option value="comunidade">Comunidade</option>
+                </select>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-              <span className="text-xs text-outline font-semibold">Canal:</span>
-              <select
-                value={filterCanal}
-                onChange={(e) => setFilterCanal(e.target.value)}
-                className="text-xs bg-surface-container-low border border-border-subtle rounded-lg px-2 py-1.5 focus:outline-none focus:border-secondary"
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Search className="w-4 h-4 text-outline absolute left-3 top-2.5" />
+                <input
+                  type="text"
+                  placeholder="Pesquisar comunicados..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 pr-3 py-1.5 text-xs bg-surface-white border border-border-subtle rounded-lg focus:outline-none focus:border-primary font-medium"
+                />
+              </div>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="bg-primary text-surface-white hover:bg-primary/90 px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm transition-all"
               >
-                <option value="todos">Todos os Canais</option>
-                <option value="sms">SMS</option>
-                <option value="e-mail">E-mail</option>
-                <option value="push app">Push App</option>
-                <option value="multicanal">Multicanal</option>
-              </select>
+                <Send className="w-4 h-4 stroke-[1.75]" />
+                Novo Comunicado
+              </button>
             </div>
           </div>
 
@@ -360,50 +424,31 @@ export const ComunicacaoView: React.FC<ComunicacaoViewProps> = ({ onShowToast })
                           {item.estado}
                         </span>
                       </td>
-                      <td className="px-3 py-1.5 text-center font-bold text-secondary">{item.taxaAbertura}</td>
-                      <td className="px-3 py-1.5 text-center relative">
-                        <button
-                          onClick={() => setActiveMenuId(activeMenuId === item.id ? null : item.id)}
-                          className="text-outline hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-surface-variant/50 cursor-pointer"
-                          title="Opções"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">more_vert</span>
-                        </button>
-
-                        {activeMenuId === item.id && (
-                          <>
-                            <div className="fixed inset-0 z-20" onClick={() => setActiveMenuId(null)} />
-                            <div className="absolute right-2 top-8 w-44 bg-surface-white border border-border-subtle rounded-md shadow-lg z-30 p-1 text-xs text-left">
-                              <button
-                                onClick={() => {
-                                  setActiveMenuId(null);
-                                  onShowToast(`Reenviando comunicado "${item.titulo}"...`);
-                                }}
-                                className="w-full text-left px-3 py-1.5 hover:bg-surface-container rounded flex items-center gap-2 cursor-pointer font-medium text-primary"
-                              >
-                                <span className="material-symbols-outlined text-[16px]">send</span> Reenviar
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setActiveMenuId(null);
-                                  onShowToast(`Detalhes do comunicado "${item.titulo}" - Autor: ${item.autor}`);
-                                }}
-                                className="w-full text-left px-3 py-1.5 hover:bg-surface-container rounded flex items-center gap-2 cursor-pointer font-medium text-on-surface"
-                              >
-                                <span className="material-symbols-outlined text-[16px]">visibility</span> Ver Detalhes
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setActiveMenuId(null);
-                                  onShowToast(`Exportando relatório de entrega de "${item.titulo}"...`);
-                                }}
-                                className="w-full text-left px-3 py-1.5 hover:bg-surface-container rounded flex items-center gap-2 cursor-pointer font-medium text-secondary"
-                              >
-                                <span className="material-symbols-outlined text-[16px]">download</span> Exportar Relatório
-                              </button>
-                            </div>
-                          </>
-                        )}
+                      <td className="px-3 py-1.5 text-center font-bold text-primary">{item.taxaAbertura}</td>
+                      <td className="px-3 py-1.5 text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <button
+                            onClick={() => onShowToast(`Detalhes do comunicado "${item.titulo}" - Autor: ${item.autor}`)}
+                            title="Ver Detalhes"
+                            className="p-1.5 text-outline hover:text-primary rounded hover:bg-surface-container transition-colors cursor-pointer"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => onShowToast(`Reenviando comunicado "${item.titulo}"...`)}
+                            title="Reenviar Comunicado"
+                            className="p-1.5 text-outline hover:text-primary rounded hover:bg-primary/10 transition-colors cursor-pointer"
+                          >
+                            <Send className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => onShowToast(`Exportando relatório de entrega de "${item.titulo}"...`)}
+                            title="Exportar Relatório"
+                            className="p-1.5 text-outline hover:text-info rounded hover:bg-info/10 transition-colors cursor-pointer"
+                          >
+                            <Download className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -414,130 +459,131 @@ export const ComunicacaoView: React.FC<ComunicacaoViewProps> = ({ onShowToast })
         </div>
       )}
 
-      {/* Tab 2: Nova Mensagem */}
-      {activeTab === 'nova' && (
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-5 shadow-sm">
-          <form onSubmit={handleSendNewMessage} className="space-y-4 max-w-3xl">
-            <h2 className="font-title-lg text-lg font-bold text-primary border-b border-border-subtle pb-2">
-              Compor Novo Comunicado
-            </h2>
-
-            {/* Target Group Selector */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-on-surface mb-1">Grupo Alvo de Destinatários:</label>
-                <select
-                  value={targetGroup}
-                  onChange={(e) => setTargetGroup(e.target.value)}
-                  className="w-full text-xs bg-surface-container-low border border-border-subtle rounded-lg p-2 focus:outline-none focus:border-secondary"
-                >
-                  <option value="encarregados">Todos os Encarregados de Educação (842)</option>
-                  <option value="alunos">Todos os Estudantes (1.250)</option>
-                  <option value="professores">Corpo Docente e Professores (68)</option>
-                  <option value="turma_especifica">Turma Específica</option>
-                  <option value="comunidade">Toda a Comunidade Escolar</option>
-                </select>
-              </div>
-
-              {targetGroup === 'turma_especifica' && (
-                <div>
-                  <label className="block text-xs font-bold text-on-surface mb-1">Selecionar Turma:</label>
+      {/* Modal XL: Compor Novo Comunicado */}
+      {isModalOpen && (
+        <ModalXL title="Compor Novo Comunicado" onClose={() => setIsModalOpen(false)}>
+          <form onSubmit={handleSendNewMessage}>
+            <div className="p-4 sm:p-5 flex flex-col gap-3.5 text-xs">
+              {/* Compact Top Configuration Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pb-3 border-b border-border-subtle items-center">
+                <div className={`${targetGroup === 'turma_especifica' ? 'sm:col-span-4' : 'sm:col-span-5'} flex flex-col gap-1`}>
+                  <label className="font-bold text-on-surface text-[11px]">Destinatários *</label>
                   <select
-                    value={selectedClass}
-                    onChange={(e) => setSelectedClass(e.target.value)}
-                    className="w-full text-xs bg-surface-container-low border border-border-subtle rounded-lg p-2 focus:outline-none focus:border-secondary"
+                    value={targetGroup}
+                    onChange={(e) => setTargetGroup(e.target.value)}
+                    className="p-2 border border-border-subtle rounded-lg bg-surface font-medium outline-none focus:border-primary text-xs cursor-pointer"
                   >
-                    <option value="10A">10º Ano - Turma A</option>
-                    <option value="10B">10º Ano - Turma B</option>
-                    <option value="11A">11º Ano - Turma A</option>
-                    <option value="12A">12º Ano - Turma A</option>
+                    <option value="encarregados">Todos os Encarregados de Educação (842)</option>
+                    <option value="alunos">Todos os Estudantes (1.250)</option>
+                    <option value="professores">Corpo Docente e Professores (68)</option>
+                    <option value="turma_especifica">Turma Específica</option>
+                    <option value="comunidade">Toda a Comunidade Escolar</option>
                   </select>
                 </div>
-              )}
-            </div>
 
-            {/* Channels Checkboxes */}
-            <div>
-              <label className="block text-xs font-bold text-on-surface mb-1.5">Canais de Difusão Ativos:</label>
-              <div className="flex flex-wrap gap-4 text-xs font-medium">
-                <label className="flex items-center gap-1.5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={channelEmail}
-                    onChange={(e) => setChannelEmail(e.target.checked)}
-                    className="rounded border-outline-variant text-secondary focus:ring-secondary"
-                  />
-                  <span>E-mail Institucional</span>
-                </label>
-                <label className="flex items-center gap-1.5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={channelSMS}
-                    onChange={(e) => setChannelSMS(e.target.checked)}
-                    className="rounded border-outline-variant text-secondary focus:ring-secondary"
-                  />
-                  <span>SMS Imediato (Gateway Vendaia)</span>
-                </label>
-                <label className="flex items-center gap-1.5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={channelPush}
-                    onChange={(e) => setChannelPush(e.target.checked)}
-                    className="rounded border-outline-variant text-secondary focus:ring-secondary"
-                  />
-                  <span>Notificação Push na App móvel</span>
-                </label>
+                {targetGroup === 'turma_especifica' && (
+                  <div className="sm:col-span-3 flex flex-col gap-1">
+                    <label className="font-bold text-on-surface text-[11px]">Turma *</label>
+                    <select
+                      value={selectedClass}
+                      onChange={(e) => setSelectedClass(e.target.value)}
+                      className="p-2 border border-border-subtle rounded-lg bg-surface font-medium outline-none focus:border-primary text-xs cursor-pointer"
+                    >
+                      <option value="10A">10º Ano - Turma A</option>
+                      <option value="10B">10º Ano - Turma B</option>
+                      <option value="11A">11º Ano - Turma A</option>
+                      <option value="12A">12º Ano - Turma A</option>
+                    </select>
+                  </div>
+                )}
+
+                <div className={`${targetGroup === 'turma_especifica' ? 'sm:col-span-5' : 'sm:col-span-7'} flex flex-col gap-1`}>
+                  <label className="font-bold text-on-surface text-[11px]">Canais de Difusão Ativos</label>
+                  <div className="flex flex-wrap items-center gap-3 pt-1">
+                    <label className="flex items-center gap-1.5 cursor-pointer text-xs font-medium">
+                      <input
+                        type="checkbox"
+                        checked={channelEmail}
+                        onChange={(e) => setChannelEmail(e.target.checked)}
+                        className="rounded border-outline-variant text-primary focus:ring-primary"
+                      />
+                      <span>E-mail</span>
+                    </label>
+                    <label className="flex items-center gap-1.5 cursor-pointer text-xs font-medium">
+                      <input
+                        type="checkbox"
+                        checked={channelSMS}
+                        onChange={(e) => setChannelSMS(e.target.checked)}
+                        className="rounded border-outline-variant text-primary focus:ring-primary"
+                      />
+                      <span>SMS</span>
+                    </label>
+                    <label className="flex items-center gap-1.5 cursor-pointer text-xs font-medium">
+                      <input
+                        type="checkbox"
+                        checked={channelPush}
+                        onChange={(e) => setChannelPush(e.target.checked)}
+                        className="rounded border-outline-variant text-primary focus:ring-primary"
+                      />
+                      <span>Push App</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Subject */}
+              <div className="flex flex-col gap-1">
+                <label className="font-bold text-on-surface text-[11px]">Assunto / Título do Comunicado *</label>
+                <input
+                  type="text"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  placeholder="Ex: Convocatória para Reunião de Avaliação do 1º Trimestre"
+                  className="p-2 border border-border-subtle rounded-lg bg-surface font-medium outline-none focus:border-primary text-xs"
+                  required
+                />
+              </div>
+
+              {/* Message Body (Major Focus) */}
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-on-surface text-[11px]">Conteúdo da Mensagem *</label>
+                  <span className="text-[10px] text-outline">Recomendado &lt; 500 caracteres para SMS</span>
+                </div>
+                <textarea
+                  rows={8}
+                  value={messageBody}
+                  onChange={(e) => setMessageBody(e.target.value)}
+                  placeholder="Escreva aqui a mensagem detalhada a ser enviada aos destinatários..."
+                  className="p-3 border border-border-subtle rounded-lg bg-surface font-medium outline-none focus:border-primary text-xs min-h-[190px] resize-y"
+                  required
+                ></textarea>
               </div>
             </div>
 
-            {/* Subject */}
-            <div>
-              <label className="block text-xs font-bold text-on-surface mb-1">Assunto / Título do Comunicado:</label>
-              <input
-                type="text"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                placeholder="Ex: Convocatória para Reunião de Avaliação do 1º Trimestre"
-                className="w-full text-xs bg-surface-container-low border border-border-subtle rounded-lg p-2 focus:outline-none focus:border-secondary"
-                required
-              />
-            </div>
-
-            {/* Message Body */}
-            <div>
-              <label className="block text-xs font-bold text-on-surface mb-1">Conteúdo da Mensagem:</label>
-              <textarea
-                rows={6}
-                value={messageBody}
-                onChange={(e) => setMessageBody(e.target.value)}
-                placeholder="Escreva aqui a mensagem detalhada a ser enviada aos destinatários..."
-                className="w-full text-xs bg-surface-container-low border border-border-subtle rounded-lg p-2.5 focus:outline-none focus:border-secondary"
-                required
-              ></textarea>
-            </div>
-
-            {/* Submit Action Buttons */}
-            <div className="flex items-center justify-end gap-3 pt-2">
+            {/* Footer */}
+            <div className="px-5 py-3.5 bg-surface-container-low border-t border-border-subtle flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => {
                   setSubject('');
                   setMessageBody('');
+                  setIsModalOpen(false);
                 }}
-                className="px-4 py-2 rounded-lg text-xs font-bold border border-border-subtle hover:bg-surface-container text-on-surface-variant cursor-pointer"
+                className="px-3.5 py-1.5 rounded-lg border border-border-subtle hover:bg-surface-container transition-colors font-medium text-xs text-on-surface-variant cursor-pointer"
               >
-                Limpar
+                Cancelar
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 rounded-lg text-xs font-bold bg-secondary text-surface-white hover:bg-secondary/90 flex items-center gap-2 shadow cursor-pointer"
+                className="px-4 py-1.5 rounded-lg bg-primary text-surface-white hover:bg-primary/90 transition-colors font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm"
               >
-                <span className="material-symbols-outlined text-[16px]">send</span>
+                <Send className="w-4 h-4" />
                 Enviar Comunicado
               </button>
             </div>
           </form>
-        </div>
+        </ModalXL>
       )}
 
       {/* Tab 3: Modelos */}
@@ -554,7 +600,7 @@ export const ComunicacaoView: React.FC<ComunicacaoViewProps> = ({ onShowToast })
             {templates.map((tmpl) => (
               <div
                 key={tmpl.id}
-                className="border border-border-subtle bg-surface-container-low/50 rounded-xl p-4 flex flex-col justify-between hover:border-secondary/50 transition-all shadow-sm"
+                className="border border-border-subtle bg-surface-container-low/50 rounded-xl p-4 flex flex-col justify-between hover:border-primary/50 transition-all shadow-sm"
               >
                 <div>
                   <div className="flex justify-between items-center mb-2">
@@ -571,9 +617,9 @@ export const ComunicacaoView: React.FC<ComunicacaoViewProps> = ({ onShowToast })
 
                 <button
                   onClick={() => applyTemplate(tmpl)}
-                  className="w-full bg-secondary text-surface-white hover:bg-secondary/90 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  className="w-full bg-primary text-surface-white hover:bg-primary/90 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[16px]">content_paste</span>
+                  <Copy className="w-4 h-4" />
                   Usar Este Modelo
                 </button>
               </div>
@@ -596,7 +642,7 @@ export const ComunicacaoView: React.FC<ComunicacaoViewProps> = ({ onShowToast })
             <div className="border border-border-subtle rounded-xl p-4 bg-surface-container-low/30 flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-primary text-xs flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-info text-[18px]">mail</span> Gateway E-mail SMTP
+                  <Mail className="w-4 h-4 text-info" /> Gateway E-mail SMTP
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-800">
                   Operacional
@@ -609,7 +655,7 @@ export const ComunicacaoView: React.FC<ComunicacaoViewProps> = ({ onShowToast })
             <div className="border border-border-subtle rounded-xl p-4 bg-surface-container-low/30 flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-primary text-xs flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-warning text-[18px]">sms</span> Gateway SMS Nacional
+                  <Smartphone className="w-4 h-4 text-warning" /> Gateway SMS Nacional
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-800">
                   Operacional
@@ -622,7 +668,7 @@ export const ComunicacaoView: React.FC<ComunicacaoViewProps> = ({ onShowToast })
             <div className="border border-border-subtle rounded-xl p-4 bg-surface-container-low/30 flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-primary text-xs flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-secondary text-[18px]">notifications_active</span> Push Firebase
+                  <Bell className="w-4 h-4 text-secondary" /> Push Firebase
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-800">
                   Operacional

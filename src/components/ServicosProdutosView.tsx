@@ -5,7 +5,7 @@ import {
   Plus,
   Search,
   Filter,
-  Edit3,
+  Pencil as Edit3,
   Trash2,
   CheckCircle2,
   XCircle,
@@ -441,75 +441,79 @@ export const ServicosProdutosView: React.FC<ServicosProdutosViewProps> = ({ onSh
   const categoriasUnicas = Array.from(new Set(items.map((i) => i.categoria)));
 
   return (
-    <div className="mt-header-height p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex justify-between items-center mb-1">
-        <h1 className="text-xl font-bold text-primary flex items-center gap-2">
-          <ShoppingBag className="w-5 h-5 text-secondary stroke-[2]" />
-          Tabela de Serviços & Produtos
-        </h1>
-
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsRulesModalOpen(true)}
-            className="bg-surface-white border border-border-subtle hover:bg-surface-container-low text-primary text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
-          >
-            <Settings className="w-4 h-4 text-secondary stroke-[2]" />
-            Regras de Cobrança
-          </button>
-          <button
-            onClick={openCreateModal}
-            className="bg-secondary text-surface-white hover:bg-secondary/90 text-xs px-4 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
-          >
-            <Plus className="w-4 h-4 stroke-[2]" />
-            Novo Serviço / Produto
-          </button>
-        </div>
-      </div>
-
-      {/* KPI Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-4 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold text-outline uppercase tracking-wider">Total de Artigos / Serviços</p>
-            <p className="text-xl font-extrabold text-primary mt-1">{totalArtigos} Cadastrados</p>
-            <span className="text-[11px] font-semibold text-success flex items-center gap-1 mt-0.5">
-              <CheckCircle2 className="w-3 h-3" /> {totalAtivos} Ativos e Disponíveis
+    <div className="mt-header-height p-4 w-full flex flex-col gap-3">
+      {/* KPI Stats Cards (Padrão Dashboard — h-[68px], sem redundâncias) */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+        {/* Card 1: TOTAL DE ARTIGOS / SERVIÇOS */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider mb-0.5">
+              TOTAL DE ARTIGOS / SERVIÇOS
+            </span>
+            <span className="text-xl sm:text-2xl font-bold text-primary leading-none">
+              {totalArtigos}
             </span>
           </div>
-          <Layers className="w-6 h-6 stroke-[2] text-primary" />
+          <div className="flex flex-col items-end gap-1">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-success bg-success/10 text-[10px] font-bold">
+              <CheckCircle2 className="w-3 h-3 mr-0.5" /> {totalAtivos}
+            </span>
+            <span className="text-[9px] text-outline font-medium uppercase">ativos</span>
+          </div>
         </div>
 
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-4 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold text-outline uppercase tracking-wider">Propinas & Recorrentes</p>
-            <p className="text-xl font-extrabold text-primary mt-1">{totalRecorrentes} Itens Mensais</p>
-            <span className="text-[11px] font-semibold text-on-surface-variant mt-0.5">
-              Média Propina: {formatKz(mediaPrecoPropinas)}
+        {/* Card 2: PROPINAS & RECORRENTES */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider mb-0.5">
+              PROPINAS & RECORRENTES
+            </span>
+            <span className="text-xl sm:text-2xl font-bold text-primary leading-none">
+              {totalRecorrentes}
             </span>
           </div>
-          <RefreshCw className="w-6 h-6 stroke-[2] text-secondary" />
+          <div className="flex flex-col items-end gap-1">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-primary bg-primary/10 text-[10px] font-bold">
+              {formatKz(mediaPrecoPropinas)}
+            </span>
+            <span className="text-[9px] text-outline font-medium uppercase">média propina</span>
+          </div>
         </div>
 
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-4 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold text-outline uppercase tracking-wider">Multa por Atraso Padrão</p>
-            <p className="text-xl font-extrabold text-error mt-1">{globalBillingRules.multaPadraoPct}% + {globalBillingRules.jurosDiariosPadraoPct}%/dia</p>
-            <span className="text-[11px] font-semibold text-outline mt-0.5">
-              Tolerância: {globalBillingRules.diasToleranciaPadrao} Dias Sem Penalidade
+        {/* Card 3: MULTA POR ATRASO PADRÃO */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider mb-0.5">
+              MULTA POR ATRASO PADRÃO
+            </span>
+            <span className="text-xl sm:text-2xl font-bold text-error leading-none">
+              {globalBillingRules.multaPadraoPct}% + {globalBillingRules.jurosDiariosPadraoPct}%/dia
             </span>
           </div>
-          <Percent className="w-6 h-6 stroke-[2] text-error" />
+          <div className="flex flex-col items-end gap-1">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-error bg-error/10 text-[10px] font-bold">
+              {globalBillingRules.diasToleranciaPadrao} dias
+            </span>
+            <span className="text-[9px] text-outline font-medium uppercase">tolerância</span>
+          </div>
         </div>
 
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-4 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold text-outline uppercase tracking-wider">Categorias de Serviços</p>
-            <p className="text-xl font-extrabold text-primary mt-1">{categoriasUnicas.length} Categorias</p>
-            <span className="text-[11px] font-semibold text-info mt-0.5">
-              Integração Financeira Directa
+        {/* Card 4: CATEGORIAS DE SERVIÇOS */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider mb-0.5">
+              CATEGORIAS DE SERVIÇOS
+            </span>
+            <span className="text-xl sm:text-2xl font-bold text-primary leading-none">
+              {categoriasUnicas.length}
             </span>
           </div>
-          <Tag className="w-6 h-6 stroke-[2] text-info" />
+          <div className="flex flex-col items-end gap-1">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-info bg-info/10 text-[10px] font-bold">
+              Direta
+            </span>
+            <span className="text-[9px] text-outline font-medium uppercase">integração</span>
+          </div>
         </div>
       </div>
 
@@ -554,7 +558,7 @@ export const ServicosProdutosView: React.FC<ServicosProdutosViewProps> = ({ onSh
 
         {/* Tab 1: Catálogo de Serviços & Produtos */}
         {activeTab === 'catalogo' && (
-          <div className="p-5 space-y-4">
+          <div className="bg-surface-white border border-border-subtle rounded-xl p-4 shadow-sm space-y-4">
             {/* Search and Filters Bar */}
             <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3 bg-surface-container-low/50 p-3 rounded-xl border border-border-subtle">
               <div className="relative flex-1">
@@ -564,7 +568,7 @@ export const ServicosProdutosView: React.FC<ServicosProdutosViewProps> = ({ onSh
                   placeholder="Pesquisar por nome, código ou categoria (ex: propina, certificado, transporte...)"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 text-xs bg-surface-white border border-border-subtle rounded-lg focus:outline-none focus:border-secondary font-medium"
+                  className="w-full pl-9 pr-3 py-1.5 text-xs bg-surface-white border border-border-subtle rounded-lg focus:outline-none focus:border-primary font-medium"
                 />
               </div>
 
@@ -575,7 +579,7 @@ export const ServicosProdutosView: React.FC<ServicosProdutosViewProps> = ({ onSh
                   <select
                     value={filterCategoria}
                     onChange={(e) => setFilterCategoria(e.target.value)}
-                    className="text-xs bg-surface-white border border-border-subtle rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-secondary font-semibold"
+                    className="text-xs bg-surface-white border border-border-subtle rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-primary font-semibold text-primary"
                   >
                     <option value="todas">Todas as Categorias</option>
                     <option value="Inscrições">Inscrições</option>
@@ -600,13 +604,22 @@ export const ServicosProdutosView: React.FC<ServicosProdutosViewProps> = ({ onSh
                   <select
                     value={filterTipo}
                     onChange={(e) => setFilterTipo(e.target.value)}
-                    className="text-xs bg-surface-white border border-border-subtle rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-secondary font-semibold"
+                    className="text-xs bg-surface-white border border-border-subtle rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-primary font-semibold text-primary"
                   >
                     <option value="todos">Todos os Tipos</option>
                     <option value="recorrente">Serviços Recorrentes</option>
                     <option value="ocasional">Ocasionais / Avulsos</option>
                   </select>
                 </div>
+
+                <button
+                  onClick={openCreateModal}
+                  className="bg-primary text-surface-white hover:bg-primary/90 text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 transition-all cursor-pointer shadow-sm shrink-0 ml-1"
+                  title="Novo Serviço / Produto"
+                >
+                  <Plus className="w-4 h-4 stroke-[2]" />
+                  <span className="whitespace-nowrap">Novo Item</span>
+                </button>
               </div>
             </div>
 
@@ -737,7 +750,7 @@ export const ServicosProdutosView: React.FC<ServicosProdutosViewProps> = ({ onSh
                 </div>
                 <button
                   onClick={() => setIsRulesModalOpen(true)}
-                  className="bg-secondary text-surface-white hover:bg-secondary/90 text-xs px-3.5 py-2 rounded-lg font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
+                  className="bg-primary text-surface-white hover:bg-primary/90 text-xs px-3.5 py-2 rounded-lg font-bold flex items-center gap-1.5 cursor-pointer shadow-sm transition-all"
                 >
                   <Edit3 className="w-4 h-4" />
                   Editar Parâmetros

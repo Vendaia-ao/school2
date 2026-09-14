@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActiveView } from '../types';
-import { BookOpen, Users, Clock, Edit3, CheckSquare, MessageCircle, FileText } from 'lucide-react';
+import { BookOpen, Users, Clock, Pencil as Edit3, CheckSquare, MessageCircle, FileText, TrendingUp, Award, CheckCircle2 } from 'lucide-react';
 
 interface ProfessorPortalViewProps {
   onSelectView: (view: ActiveView) => void;
@@ -12,11 +12,71 @@ export const ProfessorPortalView: React.FC<ProfessorPortalViewProps> = ({ onShow
   const [selectedTurma, setSelectedTurma] = useState('10A-CIEN');
 
   return (
-    <div className="mt-header-height p-4 w-full flex flex-col gap-4 max-w-7xl mx-auto">
+    <div className="mt-header-height p-4 w-full flex flex-col gap-3">
+      {/* Quick Metrics Bar - Matching Reference Standard */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Card 1: Docente */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div>
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider block mb-0.5">Professor Docente</span>
+            <span className="text-sm font-bold text-primary truncate leading-none">Prof. Domingos Henriques</span>
+          </div>
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-success bg-success/10 text-[10px] font-bold">
+            Docente Efetivo
+          </span>
+        </div>
+
+        {/* Card 2: Turmas Atribuídas */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div>
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider block mb-0.5">Turmas Atribuídas</span>
+            <span className="text-xl font-bold text-primary leading-none">3 <span className="text-xs font-normal text-outline">Turmas</span></span>
+          </div>
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-primary bg-primary/10 text-[10px] font-bold">
+            10ºA • 11ºA • 12ºA
+          </span>
+        </div>
+
+        {/* Card 3: Carga Horária */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center transition-all hover:shadow-md h-[68px]">
+          <div className="w-full flex flex-col justify-center gap-1.5">
+            <div className="flex justify-between items-end">
+              <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider">Carga Letiva Semanal</span>
+              <span className="text-primary font-bold text-[12px]">26 Temps/sem</span>
+            </div>
+            <div className="w-full bg-surface-container-low h-1.5 rounded-full overflow-hidden">
+              <div className="bg-primary h-full rounded-full" style={{ width: '86%' }}></div>
+            </div>
+            <div className="flex justify-between text-[9px] font-medium uppercase text-outline">
+              <span>Capacidade Semanal</span>
+              <span className="text-success font-bold">Normal</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 4: Lançamento de Notas */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-2.5 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider mb-0.5">
+              Lançamento de Notas
+            </span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl font-bold text-primary leading-none">1º Trim.</span>
+              <span className="text-[10px] text-outline font-medium">85%</span>
+            </div>
+          </div>
+          <div className="flex flex-col items-end gap-1.5">
+            <span className="px-2 py-0.5 rounded bg-success/10 text-success text-[10px] font-bold">
+              Em Lançamento
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* Header Profile Banner */}
       <div className="bg-surface-white border border-border-subtle rounded-xl p-4 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-primary text-surface-white font-bold text-xl flex items-center justify-center border-2 border-secondary shadow">
+          <div className="w-14 h-14 rounded-full bg-primary text-surface-white font-bold text-xl flex items-center justify-center border-2 border-primary/40 shadow">
             DH
           </div>
           <div>
@@ -27,7 +87,7 @@ export const ProfessorPortalView: React.FC<ProfessorPortalViewProps> = ({ onShow
               </span>
             </div>
             <p className="text-xs text-on-surface-variant font-medium">
-              E-mail: <span className="text-secondary font-bold">Domingoshenriques1@ispozango.com</span> | Carga Letiva: <span className="font-bold text-primary">26 Temps/sem</span>
+              E-mail: <span className="text-primary font-bold">Domingoshenriques1@ispozango.com</span> | Carga Letiva: <span className="font-bold text-primary">26 Temps/sem</span>
             </p>
             <p className="text-[11px] text-outline">
               Disciplinas: <span className="font-semibold text-on-surface">Matemática I, Matemática II</span> | Direção de Turma: <span className="font-semibold text-on-surface">10º Ano A</span>
@@ -43,7 +103,7 @@ export const ProfessorPortalView: React.FC<ProfessorPortalViewProps> = ({ onShow
               setSelectedTurma(e.target.value);
               onShowToast(`Turma selecionada: ${e.target.value}`);
             }}
-            className="text-xs bg-surface-container-low border border-border-subtle font-bold text-primary rounded-lg px-3 py-1.5 focus:outline-none focus:border-secondary"
+            className="text-xs bg-surface-container-low border border-border-subtle font-bold text-primary rounded-lg px-3 py-1.5 focus:outline-none focus:border-primary"
           >
             <option value="10A-CIEN">10º Ano A - Ciências Físicas</option>
             <option value="11A-INF">11º Ano A - Informática</option>
@@ -126,7 +186,7 @@ export const ProfessorPortalView: React.FC<ProfessorPortalViewProps> = ({ onShow
 
             <button
               onClick={() => onShowToast('Notas submetidas e guardadas com sucesso!')}
-              className="bg-secondary text-surface-white px-4 py-2 rounded-lg font-bold flex items-center gap-1.5 shadow cursor-pointer"
+              className="bg-primary text-surface-white hover:bg-primary/90 px-4 py-2 rounded-lg font-bold flex items-center gap-1.5 shadow-sm cursor-pointer transition-all"
             >
               <span className="material-symbols-outlined text-[16px]">save</span>
               Guardar e Publicar Notas

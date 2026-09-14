@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { ActiveView } from '../types';
-import { TriangleAlert as AlertTriangle, Award, Banknote, BookOpen, Briefcase, Building2, Calendar, CircleCheck as CheckCircle2, Clock, Download, CreditCard as Edit3, FileText, FolderOpen, GraduationCap, Plus, Receipt, Search, Trash2, Users, X, UsersRound } from 'lucide-react';
+import { TriangleAlert as AlertTriangle, Award, Banknote, BookOpen, Briefcase, Building2, Calendar, CircleCheck as CheckCircle2, Clock, Download, Pencil as Edit3, FileText, FolderOpen, GraduationCap, Plus, Receipt, Search, Trash2, Users, X, UsersRound, Eye, FileSignature, UserCheck, Mail, Phone, BadgeCheck } from 'lucide-react';
 
 interface Props { onSelectView: (view: ActiveView) => void; onShowToast: (msg: string) => void; }
-type Tab = 'colaboradores' | 'contratos' | 'departamentos' | 'avaliacoes' | 'formacao' | 'documentos' | 'salarios' | 'ferias_faltas' | 'relatorios';
+type Tab = 'colaboradores' | 'departamentos' | 'avaliacoes' | 'formacao' | 'salarios' | 'ferias_faltas' | 'relatorios';
 type EmployeeStatus = 'Ativo' | 'Inativo' | 'Férias' | 'Licença';
 type ContractType = 'Indefinido' | 'Termo Certo' | 'Estágio' | 'Prestador de Serviços';
 
@@ -24,12 +24,10 @@ interface Employee {
 const money = (value: number) => new Intl.NumberFormat('pt-AO', { style: 'currency', currency: 'AOA', maximumFractionDigits: 0 }).format(value);
 
 const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
-  { key: 'colaboradores', label: 'Colaboradores', icon: <Users className="w-4 h-4" /> },
-  { key: 'contratos', label: 'Contratos', icon: <FileText className="w-4 h-4" /> },
+  { key: 'colaboradores', label: 'Colaboradores & Contratos', icon: <Users className="w-4 h-4" /> },
   { key: 'departamentos', label: 'Departamentos', icon: <Building2 className="w-4 h-4" /> },
   { key: 'avaliacoes', label: 'Avaliações', icon: <Award className="w-4 h-4" /> },
   { key: 'formacao', label: 'Formação', icon: <GraduationCap className="w-4 h-4" /> },
-  { key: 'documentos', label: 'Documentos', icon: <FolderOpen className="w-4 h-4" /> },
   { key: 'salarios', label: 'Salários & Vencimentos', icon: <Banknote className="w-4 h-4" /> },
   { key: 'ferias_faltas', label: 'Férias & Faltas', icon: <Calendar className="w-4 h-4" /> },
   { key: 'relatorios', label: 'Relatórios RH', icon: <BookOpen className="w-4 h-4" /> },
@@ -105,7 +103,10 @@ export const RhColaboradoresView: React.FC<Props> = ({ onShowToast }) => {
   const [leaves] = useState(initialLeaves);
   const [search, setSearch] = useState('');
   const [filterDept, setFilterDept] = useState('Todos');
+  const [filterContract, setFilterContract] = useState('Todos');
   const [filterStatus, setFilterStatus] = useState('Todos');
+  const [selectedProfile, setSelectedProfile] = useState<Employee | null>(null);
+  const [selectedContract, setSelectedContract] = useState<Employee | null>(null);
   const [modal, setModal] = useState<'employee' | 'department' | null>(null);
   const [editing, setEditing] = useState<Employee | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Employee | null>(null);
@@ -124,7 +125,7 @@ export const RhColaboradoresView: React.FC<Props> = ({ onShowToast }) => {
     event.preventDefault();
     const item: Employee = { id: editing?.id || `rh${String(employees.length + 1).padStart(3, '0')}`, nome: form.nome, funcao: form.funcao, departamento: form.departamento, contrato: form.contrato, salarioBase: form.salarioBase, status: 'Ativo', dataAdmissao: '10 Ago 2026', email: form.email, contacto: form.contacto };
     setEmployees(editing ? employees.map((x) => x.id === item.id ? item : x) : [item, ...employees]);
-    onShowToast(editing ? 'Ficha de colaborador atualizada.' : 'Colaborador registado com sucesso.');
+    onShowToast(editing ? 'Ficha de colaborador atualizada.' : 'Colaborador registado e contratado com sucesso.');
     setModal(null);
   };
   const removeEmployee = () => {
@@ -137,29 +138,13 @@ export const RhColaboradoresView: React.FC<Props> = ({ onShowToast }) => {
   const filteredEmployees = useMemo(() => employees.filter((e) => {
     const matchSearch = `${e.nome} ${e.funcao} ${e.email}`.toLowerCase().includes(search.toLowerCase());
     const matchDept = filterDept === 'Todos' || e.departamento === filterDept;
+    const matchContract = filterContract === 'Todos' || e.contrato === filterContract;
     const matchStatus = filterStatus === 'Todos' || e.status === filterStatus;
-    return matchSearch && matchDept && matchStatus;
-  }), [employees, search, filterDept, filterStatus]);
+    return matchSearch && matchDept && matchContract && matchStatus;
+  }), [employees, search, filterDept, filterContract, filterStatus]);
 
   return (
-    <div className="mt-header-height p-4 w-full max-w-7xl mx-auto flex flex-col gap-3">
-      <div className="flex justify-between items-center mb-1">
-        <h1 className="text-xl font-bold text-primary flex items-center gap-2">
-          <UsersRound className="w-5 h-5 text-secondary" />
-          Colaboradores
-        </h1>
-        <div className="flex items-center gap-2">
-          <button onClick={() => onShowToast('Lista de colaboradores exportada.')} className="bg-surface-white border border-border-subtle hover:bg-surface-container-low text-on-surface px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer">
-            <Download className="w-4 h-4" />
-            Exportar
-          </button>
-          <button onClick={() => openEmployee()} className="bg-secondary text-surface-white hover:bg-secondary/90 px-4 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm">
-            <Plus className="w-4 h-4" />
-            Novo Colaborador
-          </button>
-        </div>
-      </div>
-
+    <div className="mt-header-height p-4 w-full flex flex-col gap-3">
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         <Kpi label="Total Colaboradores" value={String(employees.length)} tone="text-primary" note={`${activeCount} ativos`} icon={<Users className="w-4 h-4" />} />
@@ -173,7 +158,7 @@ export const RhColaboradoresView: React.FC<Props> = ({ onShowToast }) => {
         {tabs.map((item) => (
           <button
             key={item.key}
-            onClick={() => { setTab(item.key); setSearch(''); setFilterDept('Todos'); setFilterStatus('Todos'); }}
+            onClick={() => { setTab(item.key); setSearch(''); setFilterDept('Todos'); setFilterContract('Todos'); setFilterStatus('Todos'); }}
             className={`flex-1 min-w-[125px] py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               tab === item.key
                 ? 'bg-primary text-surface-white shadow-sm'
@@ -192,9 +177,22 @@ export const RhColaboradoresView: React.FC<Props> = ({ onShowToast }) => {
           <FilterBar
             search={search} setSearch={setSearch}
             filters={[
-              { value: filterDept, set: setFilterDept, options: ['Todos', 'Académico', 'Secretaria', 'Direção', 'Tecnologias', 'Financeiro'] },
-              { value: filterStatus, set: setFilterStatus, options: ['Todos', 'Ativo', 'Férias', 'Licença', 'Inativo'] },
+              { label: 'Departamento', value: filterDept, set: setFilterDept, options: ['Todos', 'Académico', 'Secretaria', 'Direção', 'Tecnologias', 'Financeiro'] },
+              { label: 'Contrato', value: filterContract, set: setFilterContract, options: ['Todos', 'Indefinido', 'Termo Certo', 'Estágio', 'Prestador de Serviços'] },
+              { label: 'Estado', value: filterStatus, set: setFilterStatus, options: ['Todos', 'Ativo', 'Férias', 'Licença', 'Inativo'] },
             ]}
+            actions={
+              <>
+                <button onClick={() => onShowToast('Lista de colaboradores exportada.')} className="bg-surface-white border border-border-subtle hover:bg-surface-container-low text-on-surface px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer">
+                  <Download className="w-4 h-4" />
+                  Exportar
+                </button>
+                <button onClick={() => openEmployee()} className="bg-primary text-surface-white hover:bg-primary/90 px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-sm">
+                  <Plus className="w-4 h-4" />
+                  Contratar Colaborador
+                </button>
+              </>
+            }
           />
           <DataTable
             headers={['Colaborador', 'Função', 'Departamento', 'Contrato', 'Salário Base', 'Estado', 'Ações']}
@@ -204,12 +202,14 @@ export const RhColaboradoresView: React.FC<Props> = ({ onShowToast }) => {
                 <div className="flex items-center gap-2"><div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-bold">{e.nome.split(' ').map((n) => n[0]).join('').slice(0, 2)}</div><div><div className="font-bold text-primary">{e.nome}</div><div className="text-[10px] text-outline">{e.email}</div></div></div>,
                 e.funcao,
                 <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-[10px] font-bold">{e.departamento}</span>,
-                e.contrato,
+                <span className="font-semibold text-on-surface">{e.contrato}</span>,
                 <span className="font-bold text-primary">{money(e.salarioBase)}</span>,
                 <span className={`${statusChip(e.status)} px-2.5 py-1 rounded-full text-[11px] font-bold`}>{e.status}</span>,
                 <div className="flex items-center justify-end gap-1">
-                  <button onClick={() => openEmployee(e)} className="p-1.5 text-outline hover:text-info rounded hover:bg-info/10 transition-colors cursor-pointer"><Edit3 className="w-4 h-4" /></button>
-                  <button onClick={() => setConfirmDelete(e)} className="p-1.5 text-outline hover:text-error rounded hover:bg-error/10 transition-colors cursor-pointer"><Trash2 className="w-4 h-4" /></button>
+                  <button onClick={() => setSelectedProfile(e)} title="Ver Perfil do Colaborador" className="p-1.5 text-outline hover:text-primary rounded hover:bg-surface-container transition-colors cursor-pointer"><Eye className="w-4 h-4" /></button>
+                  <button onClick={() => setSelectedContract(e)} title="Gerir Contrato / Adenda" className="p-1.5 text-outline hover:text-primary rounded hover:bg-primary/10 transition-colors cursor-pointer"><FileSignature className="w-4 h-4" /></button>
+                  <button onClick={() => openEmployee(e)} title="Editar Ficha" className="p-1.5 text-outline hover:text-info rounded hover:bg-info/10 transition-colors cursor-pointer"><Edit3 className="w-4 h-4" /></button>
+                  <button onClick={() => setConfirmDelete(e)} title="Remover Colaborador" className="p-1.5 text-outline hover:text-error rounded hover:bg-error/10 transition-colors cursor-pointer"><Trash2 className="w-4 h-4" /></button>
                 </div>,
               ],
             }))}
@@ -218,35 +218,11 @@ export const RhColaboradoresView: React.FC<Props> = ({ onShowToast }) => {
         </Panel>
       )}
 
-      {tab === 'contratos' && (
-        <Panel>
-          <SectionTitle title="Contratos de Trabalho" subtitle="Gestão e acompanhamento de contratos ativos." />
-          <DataTable
-            headers={['Colaborador', 'Tipo de Contrato', 'Data Admissão', 'Departamento', 'Estado', 'Ações']}
-            rows={employees.map((e) => ({
-              id: e.id,
-              cells: [
-                <span className="font-bold text-primary">{e.nome}</span>,
-                <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-[10px] font-bold">{e.contrato}</span>,
-                e.dataAdmissao,
-                e.departamento,
-                <span className={`${statusChip(e.status)} px-2.5 py-1 rounded-full text-[11px] font-bold`}>{e.status}</span>,
-                <div className="flex items-center justify-end gap-1">
-                  <button onClick={() => onShowToast(`Contrato de ${e.nome} enviado para renovação.`)} className="p-1.5 text-outline hover:text-success rounded hover:bg-success/10 transition-colors cursor-pointer"><CheckCircle2 className="w-4 h-4" /></button>
-                  <button onClick={() => onShowToast(`Contrato de ${e.nome} exportado em PDF.`)} className="p-1.5 text-outline hover:text-info rounded hover:bg-info/10 transition-colors cursor-pointer"><Download className="w-4 h-4" /></button>
-                </div>,
-              ],
-            }))}
-            emptyMessage="Nenhum contrato encontrado."
-          />
-        </Panel>
-      )}
-
       {tab === 'departamentos' && (
         <Panel>
           <div className="flex justify-between items-center mb-4">
             <SectionTitle title="Departamentos" subtitle="Estrutura departamental e orçamentos." inline />
-            <button onClick={() => onShowToast('Formulário de departamento aberto.')} className="bg-secondary text-surface-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer hover:bg-secondary/90 transition-all">
+            <button onClick={() => onShowToast('Formulário de departamento aberto.')} className="bg-primary text-surface-white hover:bg-primary/90 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer transition-all shadow-sm">
               <Plus className="w-4 h-4" />Novo Departamento
             </button>
           </div>
@@ -296,7 +272,7 @@ export const RhColaboradoresView: React.FC<Props> = ({ onShowToast }) => {
         <Panel>
           <div className="flex justify-between items-center mb-4">
             <SectionTitle title="Formação & Desenvolvimento" subtitle="Ações de formação para colaboradores." inline />
-            <button onClick={() => onShowToast('Formulário de formação aberto.')} className="bg-secondary text-surface-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer hover:bg-secondary/90 transition-all">
+            <button onClick={() => onShowToast('Formulário de formação aberto.')} className="bg-primary text-surface-white hover:bg-primary/90 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer transition-all shadow-sm">
               <Plus className="w-4 h-4" />Nova Formação
             </button>
           </div>
@@ -305,7 +281,7 @@ export const RhColaboradoresView: React.FC<Props> = ({ onShowToast }) => {
             rows={trainings.map((f) => ({
               id: f.id,
               cells: [
-                <div className="flex items-center gap-2"><GraduationCap className="w-4 h-4 text-secondary" /><span className="font-bold text-primary">{f.titulo}</span></div>,
+                <div className="flex items-center gap-2"><GraduationCap className="w-4 h-4 text-primary" /><span className="font-bold text-primary">{f.titulo}</span></div>,
                 <span className="font-bold text-primary">{f.colaboradores}</span>,
                 f.data,
                 <span className={`${statusChip(f.estado)} px-2.5 py-1 rounded-full text-[11px] font-bold`}>{f.estado}</span>,
@@ -319,34 +295,11 @@ export const RhColaboradoresView: React.FC<Props> = ({ onShowToast }) => {
         </Panel>
       )}
 
-      {tab === 'documentos' && (
-        <Panel>
-          <SectionTitle title="Documentos de Colaboradores" subtitle="Gestão documental dos recursos humanos." />
-          <DataTable
-            headers={['Tipo de Documento', 'Colaborador', 'Data Upload', 'Estado', 'Ações']}
-            rows={documents.map((doc) => ({
-              id: doc.id,
-              cells: [
-                <div className="flex items-center gap-2"><FileText className="w-4 h-4 text-secondary" /><span className="font-bold text-primary">{doc.tipo}</span></div>,
-                doc.colaborador,
-                doc.data,
-                <span className={`${statusChip(doc.estado)} px-2.5 py-1 rounded-full text-[11px] font-bold`}>{doc.estado}</span>,
-                <div className="flex items-center justify-end gap-1">
-                  <button onClick={() => onShowToast(`Documento "${doc.tipo}" validado.`)} className="p-1.5 text-outline hover:text-success rounded hover:bg-success/10 transition-colors cursor-pointer"><CheckCircle2 className="w-4 h-4" /></button>
-                  <button onClick={() => onShowToast(`Documento "${doc.tipo}" descarregado.`)} className="p-1.5 text-outline hover:text-info rounded hover:bg-info/10 transition-colors cursor-pointer"><Download className="w-4 h-4" /></button>
-                </div>,
-              ],
-            }))}
-            emptyMessage="Nenhum documento encontrado."
-          />
-        </Panel>
-      )}
-
       {tab === 'salarios' && (
         <Panel>
           <div className="flex justify-between items-center mb-4">
             <SectionTitle title="Salários & Vencimentos" subtitle="Critérios de pagamento, subsídios, horas extras e descontos." inline />
-            <button onClick={() => onShowToast('Processamento salarial do mês iniciado.')} className="bg-secondary text-surface-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer hover:bg-secondary/90 transition-all">
+            <button onClick={() => onShowToast('Processamento salarial do mês iniciado.')} className="bg-primary text-surface-white hover:bg-primary/90 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer transition-all shadow-sm">
               <Banknote className="w-4 h-4" />Processar Folha
             </button>
           </div>
@@ -381,7 +334,7 @@ export const RhColaboradoresView: React.FC<Props> = ({ onShowToast }) => {
         <Panel>
           <div className="flex justify-between items-center mb-4">
             <SectionTitle title="Férias & Faltas" subtitle="Gestão de ausências dos colaboradores." inline />
-            <button onClick={() => onShowToast('Formulário de pedido de ausência aberto.')} className="bg-secondary text-surface-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer hover:bg-secondary/90 transition-all">
+            <button onClick={() => onShowToast('Formulário de pedido de ausência aberto.')} className="bg-primary text-surface-white hover:bg-primary/90 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer transition-all shadow-sm">
               <Plus className="w-4 h-4" />Nova Ausência
             </button>
           </div>
@@ -411,14 +364,14 @@ export const RhColaboradoresView: React.FC<Props> = ({ onShowToast }) => {
         <Panel>
           <div className="flex justify-between items-center mb-4">
             <SectionTitle title="Relatórios de Recursos Humanos" subtitle="Relatórios para a direção e auditoria." inline />
-            <button onClick={() => onShowToast('Relatório consolidado de RH exportado.')} className="bg-secondary text-surface-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer hover:bg-secondary/90 transition-all">
+            <button onClick={() => onShowToast('Relatório consolidado de RH exportado.')} className="bg-primary text-surface-white hover:bg-primary/90 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer transition-all shadow-sm">
               <Download className="w-4 h-4" />Exportar Consolidado
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {['Mapa de Pessoal', 'Folha Salarial Mensal', 'Relatório de Avaliações', 'Relatório de Formação', 'Mapa de Férias e Faltas', 'Indicadores de RH'].map((item) => (
               <button key={item} onClick={() => onShowToast(`Relatório "${item}" gerado.`)} className="text-left border border-border-subtle rounded-lg p-4 hover:shadow-md transition-all cursor-pointer">
-                <BookOpen className="w-5 h-5 text-secondary mb-2" />
+                <BookOpen className="w-5 h-5 text-primary mb-2" />
                 <h3 className="text-sm font-bold text-primary">{item}</h3>
                 <p className="text-[11px] text-on-surface-variant mt-1">Gerar e descarregar relatório detalhado.</p>
               </button>
@@ -434,10 +387,10 @@ export const RhColaboradoresView: React.FC<Props> = ({ onShowToast }) => {
             <Field label="Nome Completo" value={form.nome} onChange={(v) => setForm({ ...form, nome: v })} required />
             <div className="grid grid-cols-2 gap-3">
               <Field label="Função" value={form.funcao} onChange={(v) => setForm({ ...form, funcao: v })} required />
-              <label className="block text-outline font-bold">Departamento<select value={form.departamento} onChange={(e) => setForm({ ...form, departamento: e.target.value })} className="mt-1 w-full border border-border-subtle rounded p-2 text-xs focus:border-secondary focus:outline-none bg-surface-white"><option>Académico</option><option>Secretaria</option><option>Direção</option><option>Tecnologias</option><option>Financeiro</option></select></label>
+              <label className="block text-outline font-bold">Departamento<select value={form.departamento} onChange={(e) => setForm({ ...form, departamento: e.target.value })} className="mt-1 w-full border border-border-subtle rounded p-2 text-xs focus:border-primary focus:outline-none bg-surface-white"><option>Académico</option><option>Secretaria</option><option>Direção</option><option>Tecnologias</option><option>Financeiro</option></select></label>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <label className="block text-outline font-bold">Tipo de Contrato<select value={form.contrato} onChange={(e) => setForm({ ...form, contrato: e.target.value as ContractType })} className="mt-1 w-full border border-border-subtle rounded p-2 text-xs focus:border-secondary focus:outline-none bg-surface-white"><option>Indefinido</option><option>Termo Certo</option><option>Estágio</option><option>Prestador de Serviços</option></select></label>
+              <label className="block text-outline font-bold">Tipo de Contrato<select value={form.contrato} onChange={(e) => setForm({ ...form, contrato: e.target.value as ContractType })} className="mt-1 w-full border border-border-subtle rounded p-2 text-xs focus:border-primary focus:outline-none bg-surface-white"><option>Indefinido</option><option>Termo Certo</option><option>Estágio</option><option>Prestador de Serviços</option></select></label>
               <Field label="Salário Base (Kz)" type="number" value={String(form.salarioBase)} onChange={(v) => setForm({ ...form, salarioBase: Number(v) })} required />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -446,7 +399,7 @@ export const RhColaboradoresView: React.FC<Props> = ({ onShowToast }) => {
             </div>
             <div className="flex justify-end gap-2 border-t border-border-subtle pt-3">
               <button type="button" onClick={() => setModal(null)} className="border border-border-subtle px-4 py-2 rounded-lg font-semibold cursor-pointer hover:bg-surface-container transition-all">Cancelar</button>
-              <button className="bg-secondary text-surface-white px-4 py-2 rounded-lg font-bold cursor-pointer hover:bg-secondary/90 transition-all">Guardar</button>
+              <button className="bg-primary text-surface-white hover:bg-primary/90 px-4 py-2 rounded-lg font-bold cursor-pointer transition-all shadow-sm">Guardar</button>
             </div>
           </form>
         </Modal>
@@ -460,6 +413,116 @@ export const RhColaboradoresView: React.FC<Props> = ({ onShowToast }) => {
             <div className="flex justify-end gap-2">
               <button onClick={() => setConfirmDelete(null)} className="border border-border-subtle px-4 py-2 rounded-lg font-semibold cursor-pointer hover:bg-surface-container transition-all">Cancelar</button>
               <button onClick={removeEmployee} className="bg-error text-surface-white px-4 py-2 rounded-lg font-bold cursor-pointer hover:bg-error/90 transition-all">Sim, Remover</button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Profile Detail Modal */}
+      {selectedProfile && (
+        <Modal title="Perfil do Colaborador" onClose={() => setSelectedProfile(null)}>
+          <div className="space-y-4 text-xs">
+            <div className="flex items-center gap-3 bg-surface-container-low p-3 rounded-lg border border-border-subtle">
+              <div className="w-12 h-12 rounded-full bg-primary text-surface-white flex items-center justify-center text-sm font-bold shadow-sm">
+                {selectedProfile.nome.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+              </div>
+              <div>
+                <h3 className="font-bold text-sm text-primary">{selectedProfile.nome}</h3>
+                <p className="text-on-surface-variant font-medium">{selectedProfile.funcao}</p>
+                <span className={`${statusChip(selectedProfile.status)} px-2 py-0.5 rounded-full text-[10px] font-bold mt-1 inline-block`}>
+                  {selectedProfile.status}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 bg-surface-white p-3 rounded-lg border border-border-subtle">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-outline block">Departamento</span>
+                <span className="font-bold text-primary">{selectedProfile.departamento}</span>
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-outline block">Tipo de Contrato</span>
+                <span className="font-bold text-primary">{selectedProfile.contrato}</span>
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-outline block">Data de Admissão</span>
+                <span className="font-medium text-on-surface">{selectedProfile.dataAdmissao}</span>
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-outline block">Salário Base</span>
+                <span className="font-bold text-primary">{money(selectedProfile.salarioBase)}</span>
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-outline block">Email Institucional</span>
+                <span className="font-medium text-on-surface">{selectedProfile.email}</span>
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-outline block">Contacto Telefónico</span>
+                <span className="font-medium text-on-surface">{selectedProfile.contacto}</span>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 border-t border-border-subtle pt-3">
+              <button
+                onClick={() => { const emp = selectedProfile; setSelectedProfile(null); openEmployee(emp); }}
+                className="border border-border-subtle px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 hover:bg-surface-container transition-all cursor-pointer"
+              >
+                <Edit3 className="w-3.5 h-3.5" /> Editar Ficha
+              </button>
+              <button
+                onClick={() => { const emp = selectedProfile; setSelectedProfile(null); setSelectedContract(emp); }}
+                className="bg-primary text-surface-white hover:bg-primary/90 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 transition-all cursor-pointer shadow-sm"
+              >
+                <FileSignature className="w-3.5 h-3.5" /> Ver Contrato
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Contract Management Modal */}
+      {selectedContract && (
+        <Modal title="Gestão & Minuta de Contrato" onClose={() => setSelectedContract(null)}>
+          <div className="space-y-4 text-xs">
+            <div className="bg-surface-container-low p-3 rounded-lg border border-border-subtle flex justify-between items-center">
+              <div>
+                <p className="text-[10px] uppercase font-bold text-outline">Colaborador</p>
+                <h3 className="font-bold text-sm text-primary">{selectedContract.nome}</h3>
+                <p className="text-[11px] text-on-surface-variant">{selectedContract.funcao} · {selectedContract.departamento}</p>
+              </div>
+              <span className="bg-primary/15 text-primary px-3 py-1 rounded-full text-xs font-bold">
+                {selectedContract.contrato}
+              </span>
+            </div>
+
+            <div className="space-y-2 border border-border-subtle p-3 rounded-lg bg-surface-white">
+              <div className="flex justify-between items-center border-b border-border-subtle pb-2">
+                <span className="text-outline font-bold">Data de Início do Vínculo:</span>
+                <span className="font-bold text-primary">{selectedContract.dataAdmissao}</span>
+              </div>
+              <div className="flex justify-between items-center border-b border-border-subtle pb-2">
+                <span className="text-outline font-bold">Vencimento Base Acordado:</span>
+                <span className="font-bold text-primary">{money(selectedContract.salarioBase)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-outline font-bold">Estado do Contrato:</span>
+                <span className="bg-success/15 text-success px-2 py-0.5 rounded text-[10px] font-bold">Ativo & Válido</span>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 border-t border-border-subtle pt-3">
+              <button
+                onClick={() => { onShowToast(`Minuta de contrato de ${selectedContract.nome} gerada em PDF.`); setSelectedContract(null); }}
+                className="border border-border-subtle px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 hover:bg-surface-container transition-all cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" /> Exportar PDF
+              </button>
+              <button
+                onClick={() => { onShowToast(`Contrato de ${selectedContract.nome} renovado com sucesso!`); setSelectedContract(null); }}
+                className="bg-primary text-surface-white hover:bg-primary/90 px-3.5 py-1.5 rounded-lg font-bold flex items-center gap-1 transition-all cursor-pointer shadow-sm"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" /> Renovar Contrato
+              </button>
             </div>
           </div>
         </Modal>
@@ -506,18 +569,30 @@ const Modal = ({ title, onClose, children }: { title: string; onClose: () => voi
   </div>
 );
 
-const FilterBar = ({ search, setSearch, filters }: { search: string; setSearch: (x: string) => void; filters: { value: string; set: (x: string) => void; options: string[] }[] }) => (
+const FilterBar = ({ search, setSearch, filters, actions }: { search: string; setSearch: (x: string) => void; filters: { label?: string; value: string; set: (x: string) => void; options: string[] }[]; actions?: React.ReactNode }) => (
   <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div className="flex flex-wrap items-center gap-2">
       {filters.map((f, i) => (
-        <select key={i} value={f.value} onChange={(e) => f.set(e.target.value)} className="appearance-none bg-surface border border-border-subtle rounded-md pl-2 pr-7 text-xs focus:outline-none focus:border-secondary py-1 cursor-pointer">
-          {f.options.map((o) => <option key={o}>{o}</option>)}
-        </select>
+        <div key={i} className="flex items-center gap-1.5 bg-surface border border-border-subtle rounded-lg px-2.5 py-1 font-medium text-xs">
+          {f.label && <span className="font-bold text-primary">{f.label}:</span>}
+          <select
+            value={f.value}
+            onChange={(e) => f.set(e.target.value)}
+            className="bg-transparent text-xs focus:outline-none font-medium text-on-surface cursor-pointer"
+          >
+            {f.options.map((o) => (
+              <option key={o} value={o}>{o}</option>
+            ))}
+          </select>
+        </div>
       ))}
     </div>
-    <div className="relative">
-      <Search className="w-4 h-4 text-outline absolute left-3 top-2.5" />
-      <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Pesquisar..." className="pl-9 pr-3 py-1.5 text-xs bg-surface-white border border-border-subtle rounded-lg focus:outline-none focus:border-secondary font-medium" />
+    <div className="flex items-center gap-2">
+      <div className="relative">
+        <Search className="w-4 h-4 text-outline absolute left-3 top-2.5" />
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Pesquisar..." className="pl-9 pr-3 py-1.5 text-xs bg-surface-white border border-border-subtle rounded-lg focus:outline-none focus:border-secondary font-medium" />
+      </div>
+      {actions}
     </div>
   </div>
 );

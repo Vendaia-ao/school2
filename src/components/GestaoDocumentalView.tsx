@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { ActiveView } from '../types';
-import { TriangleAlert as AlertTriangle, Archive, Calendar, Clock, Download, CreditCard as Edit3, Eye, FileText, ListFilter as Filter, FolderOpen, History, Plus, Search, Trash2, Upload, User, X, FolderArchive, FileCheck, FileClock, Layers } from 'lucide-react';
+import { TriangleAlert as AlertTriangle, Archive, Calendar, Clock, Download, Pencil as Edit3, Eye, FileText, ListFilter as Filter, FolderOpen, History, Plus, Search, Trash2, Upload, User, X, FolderArchive, FileCheck, FileClock, Layers, List, LayoutGrid } from 'lucide-react';
 
 interface Props { onSelectView: (view: ActiveView) => void; onShowToast: (msg: string) => void; }
-type Tab = 'arquivo' | 'categorias' | 'consulta' | 'historico';
+type Tab = 'arquivo' | 'categorias' | 'historico';
 type DocStatus = 'Arquivado' | 'Pendente' | 'Expirado' | 'Em Revisão';
 type DocCategory = 'Académico' | 'Financeiro' | 'RH' | 'Jurídico' | 'Administrativo' | 'Comunicação';
 
@@ -41,7 +41,6 @@ interface HistoryEntry {
 const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
   { key: 'arquivo', label: 'Arquivo Documental', icon: <Archive className="w-4 h-4" /> },
   { key: 'categorias', label: 'Categorias', icon: <Layers className="w-4 h-4" /> },
-  { key: 'consulta', label: 'Consulta', icon: <Eye className="w-4 h-4" /> },
   { key: 'historico', label: 'Histórico', icon: <History className="w-4 h-4" /> },
 ];
 
@@ -117,6 +116,10 @@ export const GestaoDocumentalView: React.FC<Props> = ({ onShowToast }) => {
   const [search, setSearch] = useState('');
   const [filterCat, setFilterCat] = useState('Todos');
   const [filterStatus, setFilterStatus] = useState('Todos');
+  const [filterTipo, setFilterTipo] = useState('Todos');
+  const [filterValidade, setFilterValidade] = useState('Todos');
+  const [filterResponsavel, setFilterResponsavel] = useState('Todos');
+  const [viewMode, setViewMode] = useState<'tabela' | 'grelha'>('tabela');
   const [modal, setModal] = useState<'document' | null>(null);
   const [viewDoc, setViewDoc] = useState<ArchiveDoc | null>(null);
   const [editing, setEditing] = useState<ArchiveDoc | null>(null);
@@ -171,28 +174,18 @@ export const GestaoDocumentalView: React.FC<Props> = ({ onShowToast }) => {
     const matchSearch = `${d.titulo} ${d.categoria} ${d.responsavel} ${d.descricao}`.toLowerCase().includes(search.toLowerCase());
     const matchCat = filterCat === 'Todos' || d.categoria === filterCat;
     const matchStatus = filterStatus === 'Todos' || d.estado === filterStatus;
-    return matchSearch && matchCat && matchStatus;
-  }), [documents, search, filterCat, filterStatus]);
+    const matchTipo = filterTipo === 'Todos' || d.tipo === filterTipo;
+    const matchValidade = filterValidade === 'Todos' ||
+      (filterValidade === 'Sem Validade' && d.dataValidade === '—') ||
+      (filterValidade === 'Com Validade' && d.dataValidade !== '—' && d.estado !== 'Expirado') ||
+      (filterValidade === 'Expirados' && d.estado === 'Expirado');
+    const matchResponsavel = filterResponsavel === 'Todos' || d.responsavel === filterResponsavel;
+
+    return matchSearch && matchCat && matchStatus && matchTipo && matchValidade && matchResponsavel;
+  }), [documents, search, filterCat, filterStatus, filterTipo, filterValidade, filterResponsavel]);
 
   return (
-    <div className="mt-header-height p-4 w-full max-w-7xl mx-auto flex flex-col gap-3">
-      <div className="flex justify-between items-center mb-1">
-        <h1 className="text-xl font-bold text-primary flex items-center gap-2">
-          <FolderArchive className="w-5 h-5 text-secondary" />
-          Arquivo Documental
-        </h1>
-        <div className="flex items-center gap-2">
-          <button onClick={() => onShowToast('Inventário documental exportado.')} className="bg-surface-white border border-border-subtle hover:bg-surface-container-low text-on-surface px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer">
-            <Download className="w-4 h-4" />
-            Exportar
-          </button>
-          <button onClick={() => openDocument()} className="bg-secondary text-surface-white hover:bg-secondary/90 px-4 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm">
-            <Upload className="w-4 h-4" />
-            Arquivar Documento
-          </button>
-        </div>
-      </div>
-
+    <div className="mt-header-height p-4 w-full flex flex-col gap-3">
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         <Kpi label="Total Documentos" value={String(documents.length)} tone="text-primary" note={`${archivedCount} arquivados`} icon={<Archive className="w-4 h-4" />} />
@@ -204,115 +197,111 @@ export const GestaoDocumentalView: React.FC<Props> = ({ onShowToast }) => {
       {/* Tabs */}
       <div className="bg-surface-white border border-border-subtle rounded-xl p-1 shadow-sm flex items-center gap-1 overflow-x-auto">
         {tabs.map((item) => (
-          <button key={item.key} onClick={() => { setTab(item.key); setSearch(''); setFilterCat('Todos'); setFilterStatus('Todos'); }} className={`flex-1 min-w-[125px] py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${tab === item.key ? 'bg-primary text-surface-white shadow-sm' : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'}`}>
+          <button key={item.key} onClick={() => { setTab(item.key); setSearch(''); setFilterCat('Todos'); setFilterStatus('Todos'); setFilterTipo('Todos'); setFilterValidade('Todos'); setFilterResponsavel('Todos'); }} className={`flex-1 min-w-[125px] py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${tab === item.key ? 'bg-primary text-surface-white shadow-sm' : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'}`}>
             {item.icon}{item.label}
           </button>
         ))}
       </div>
 
-      {/* Tab: Arquivo */}
+      {/* Tab: Arquivo Documental (Fusão com Consulta) */}
       {tab === 'arquivo' && (
         <Panel>
           <FilterBar
             search={search} setSearch={setSearch}
             filters={[
-              { value: filterCat, set: setFilterCat, options: ['Todos', 'Académico', 'Financeiro', 'RH', 'Jurídico', 'Administrativo', 'Comunicação'] },
-              { value: filterStatus, set: setFilterStatus, options: ['Todos', 'Arquivado', 'Pendente', 'Em Revisão', 'Expirado'] },
+              { label: 'Categoria', value: filterCat, set: setFilterCat, options: ['Todos', 'Académico', 'Financeiro', 'RH', 'Jurídico', 'Administrativo', 'Comunicação'] },
+              { label: 'Estado', value: filterStatus, set: setFilterStatus, options: ['Todos', 'Arquivado', 'Pendente', 'Em Revisão', 'Expirado'] },
+              { label: 'Tipo', value: filterTipo, set: setFilterTipo, options: ['Todos', 'PDF', 'DOCX', 'XLSX'] },
+              { label: 'Validade', value: filterValidade, set: setFilterValidade, options: ['Todos', 'Sem Validade', 'Com Validade', 'Expirados'] },
+              { label: 'Responsável', value: filterResponsavel, set: setFilterResponsavel, options: ['Todos', 'Sara Silva', 'Carlos Mendes', 'Beatriz Ferreira', 'João Pinto', 'Domingos Henriques'] },
             ]}
-          />
-          <DataTable
-            headers={['Documento', 'Categoria', 'Tipo', 'Data Arquivo', 'Validade', 'Responsável', 'Estado', 'Ações']}
-            rows={filteredDocs.map((d) => ({
-              id: d.id,
-              cells: [
-                <div className="flex items-center gap-2"><div className="w-8 h-8 rounded bg-primary/10 text-primary flex items-center justify-center"><FileText className="w-4 h-4" /></div><div><div className="font-bold text-primary">{d.titulo}</div><div className="text-[10px] text-outline">{d.id} · {d.tamanho}</div></div></div>,
-                <span className={`${categoryColors[d.categoria]} px-2 py-0.5 rounded text-[10px] font-bold`}>{d.categoria}</span>,
-                <span className="text-on-surface-variant font-medium">{d.tipo}</span>,
-                d.dataArquivo,
-                d.dataValidade,
-                <span className="text-on-surface-variant">{d.responsavel}</span>,
-                <span className={`${statusChip(d.estado)} px-2.5 py-1 rounded-full text-[11px] font-bold`}>{d.estado}</span>,
-                <div className="flex items-center justify-end gap-1">
-                  <button onClick={() => setViewDoc(d)} className="p-1.5 text-outline hover:text-info rounded hover:bg-info/10 transition-colors cursor-pointer" title="Consultar"><Eye className="w-4 h-4" /></button>
-                  <button onClick={() => openDocument(d)} className="p-1.5 text-outline hover:text-primary rounded hover:bg-primary/10 transition-colors cursor-pointer" title="Editar"><Edit3 className="w-4 h-4" /></button>
-                  <button onClick={() => onShowToast(`Documento "${d.titulo}" descarregado.`)} className="p-1.5 text-outline hover:text-success rounded hover:bg-success/10 transition-colors cursor-pointer" title="Download"><Download className="w-4 h-4" /></button>
-                  <button onClick={() => setConfirmDelete(d)} className="p-1.5 text-outline hover:text-error rounded hover:bg-error/10 transition-colors cursor-pointer" title="Remover"><Trash2 className="w-4 h-4" /></button>
-                </div>,
-              ],
-            }))}
-            emptyMessage="Nenhum documento encontrado."
-          />
-        </Panel>
-      )}
-
-      {/* Tab: Categorias */}
-      {tab === 'categorias' && (
-        <Panel>
-          <div className="flex justify-between items-center mb-4">
-            <SectionTitle title="Organização por Categorias" subtitle="Categorias documentais da instituição." inline />
-            <button onClick={() => onShowToast('Formulário de nova categoria aberto.')} className="bg-secondary text-surface-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer hover:bg-secondary/90 transition-all">
-              <Plus className="w-4 h-4" />Nova Categoria
-            </button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {categories.map((cat) => (
-              <div key={cat.id} className="border border-border-subtle rounded-lg p-4 hover:shadow-md transition-all cursor-pointer" onClick={() => { setTab('arquivo'); setFilterCat(cat.nome); }}>
-                <div className="flex justify-between items-start mb-3">
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${cat.cor}`}>{cat.icon}</div>
-                  <span className="bg-surface-container text-on-surface-variant px-2 py-0.5 rounded-full text-[10px] font-bold">{cat.totalDocs} docs</span>
+            actions={
+              <>
+                <div className="flex items-center bg-surface border border-border-subtle rounded-lg p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setViewMode('tabela')}
+                    className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                      viewMode === 'tabela'
+                        ? 'bg-surface-white text-primary shadow-xs'
+                        : 'text-outline hover:text-on-surface'
+                    }`}
+                    title="Vista em Tabela"
+                  >
+                    <List className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setViewMode('grelha')}
+                    className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                      viewMode === 'grelha'
+                        ? 'bg-surface-white text-primary shadow-xs'
+                        : 'text-outline hover:text-on-surface'
+                    }`}
+                    title="Vista em Cartões"
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                  </button>
                 </div>
-                <h3 className="text-sm font-bold text-primary">{cat.nome}</h3>
-                <p className="text-[11px] text-on-surface-variant mt-1">Responsável: {cat.responsavel}</p>
-                <div className="border-t border-border-subtle mt-3 pt-3 flex items-center justify-between text-xs">
-                  <span className="text-[10px] uppercase font-bold text-outline tracking-wider">Ver documentos</span>
-                  <Eye className="w-4 h-4 text-secondary" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </Panel>
-      )}
+                <button onClick={() => onShowToast('Inventário documental exportado.')} className="bg-surface-white border border-border-subtle hover:bg-surface-container-low text-on-surface px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer">
+                  <Download className="w-4 h-4" />
+                  Exportar
+                </button>
+                <button onClick={() => openDocument()} className="bg-primary text-surface-white hover:bg-primary/90 px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-sm">
+                  <Upload className="w-4 h-4" />
+                  Arquivar Documento
+                </button>
+              </>
+            }
+          />
 
-      {/* Tab: Consulta */}
-      {tab === 'consulta' && (
-        <Panel>
-          <SectionTitle title="Consulta de Documentos" subtitle="Pesquisa avançada e visualização de documentos arquivados." />
-          <div className="bg-surface-container-low/40 border border-border-subtle rounded-lg p-4 mb-4">
-            <div className="flex flex-col md:flex-row gap-3">
-              <div className="flex-1 relative">
-                <Search className="w-4 h-4 text-outline absolute left-3 top-3" />
-                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Pesquisar por título, descrição, responsável..." className="w-full pl-9 pr-3 py-2 text-xs bg-surface-white border border-border-subtle rounded-lg focus:outline-none focus:border-secondary font-medium" />
-              </div>
-              <select value={filterCat} onChange={(e) => setFilterCat(e.target.value)} className="appearance-none bg-surface-white border border-border-subtle rounded-md pl-2 pr-7 text-xs focus:outline-none focus:border-secondary py-2 cursor-pointer">
-                <option>Todos</option><option>Académico</option><option>Financeiro</option><option>RH</option><option>Jurídico</option><option>Administrativo</option><option>Comunicação</option>
-              </select>
-              <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="appearance-none bg-surface-white border border-border-subtle rounded-md pl-2 pr-7 text-xs focus:outline-none focus:border-secondary py-2 cursor-pointer">
-                <option>Todos</option><option>Arquivado</option><option>Pendente</option><option>Em Revisão</option><option>Expirado</option>
-              </select>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {filteredDocs.map((d) => (
-              <div key={d.id} className="border border-border-subtle rounded-lg p-4 hover:shadow-md transition-all cursor-pointer" onClick={() => setViewDoc(d)}>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-9 h-9 rounded bg-primary/10 text-primary flex items-center justify-center"><FileText className="w-5 h-5" /></div>
-                    <div>
-                      <h3 className="text-sm font-bold text-primary line-clamp-1">{d.titulo}</h3>
-                      <span className="text-[10px] text-outline">{d.id} · {d.tipo} · {d.tamanho}</span>
+          {viewMode === 'tabela' ? (
+            <DataTable
+              headers={['Documento', 'Categoria', 'Tipo', 'Data Arquivo', 'Validade', 'Responsável', 'Estado', 'Ações']}
+              rows={filteredDocs.map((d) => ({
+                id: d.id,
+                cells: [
+                  <div className="flex items-center gap-2"><div className="w-8 h-8 rounded bg-primary/10 text-primary flex items-center justify-center"><FileText className="w-4 h-4" /></div><div><div className="font-bold text-primary">{d.titulo}</div><div className="text-[10px] text-outline">{d.id} · {d.tamanho}</div></div></div>,
+                  <span className={`${categoryColors[d.categoria]} px-2 py-0.5 rounded text-[10px] font-bold`}>{d.categoria}</span>,
+                  <span className="text-on-surface-variant font-medium">{d.tipo}</span>,
+                  d.dataArquivo,
+                  d.dataValidade,
+                  <span className="text-on-surface-variant">{d.responsavel}</span>,
+                  <span className={`${statusChip(d.estado)} px-2.5 py-1 rounded-full text-[11px] font-bold`}>{d.estado}</span>,
+                  <div className="flex items-center justify-end gap-1">
+                    <button onClick={() => setViewDoc(d)} className="p-1.5 text-outline hover:text-info rounded hover:bg-info/10 transition-colors cursor-pointer" title="Consultar"><Eye className="w-4 h-4" /></button>
+                    <button onClick={() => openDocument(d)} className="p-1.5 text-outline hover:text-primary rounded hover:bg-primary/10 transition-colors cursor-pointer" title="Editar"><Edit3 className="w-4 h-4" /></button>
+                    <button onClick={() => onShowToast(`Documento "${d.titulo}" descarregado.`)} className="p-1.5 text-outline hover:text-success rounded hover:bg-success/10 transition-colors cursor-pointer" title="Download"><Download className="w-4 h-4" /></button>
+                    <button onClick={() => setConfirmDelete(d)} className="p-1.5 text-outline hover:text-error rounded hover:bg-error/10 transition-colors cursor-pointer" title="Remover"><Trash2 className="w-4 h-4" /></button>
+                  </div>,
+                ],
+              }))}
+              emptyMessage="Nenhum documento encontrado."
+            />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+              {filteredDocs.map((d) => (
+                <div key={d.id} className="border border-border-subtle rounded-lg p-4 hover:shadow-md transition-all cursor-pointer bg-surface-white" onClick={() => setViewDoc(d)}>
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-9 h-9 rounded bg-primary/10 text-primary flex items-center justify-center"><FileText className="w-5 h-5" /></div>
+                      <div>
+                        <h3 className="text-sm font-bold text-primary line-clamp-1">{d.titulo}</h3>
+                        <span className="text-[10px] text-outline">{d.id} · {d.tipo} · {d.tamanho}</span>
+                      </div>
                     </div>
+                    <span className={`${statusChip(d.estado)} px-2.5 py-1 rounded-full text-[11px] font-bold`}>{d.estado}</span>
                   </div>
-                  <span className={`${statusChip(d.estado)} px-2.5 py-1 rounded-full text-[11px] font-bold`}>{d.estado}</span>
+                  <p className="text-[11px] text-on-surface-variant line-clamp-2">{d.descricao}</p>
+                  <div className="border-t border-border-subtle mt-3 pt-2 flex items-center justify-between text-[10px]">
+                    <span className={`${categoryColors[d.categoria]} px-2 py-0.5 rounded font-bold`}>{d.categoria}</span>
+                    <span className="text-outline">Arquivado: {d.dataArquivo}</span>
+                  </div>
                 </div>
-                <p className="text-[11px] text-on-surface-variant line-clamp-2">{d.descricao}</p>
-                <div className="border-t border-border-subtle mt-3 pt-2 flex items-center justify-between text-[10px]">
-                  <span className={`${categoryColors[d.categoria]} px-2 py-0.5 rounded font-bold`}>{d.categoria}</span>
-                  <span className="text-outline">{d.dataArquivo}</span>
-                </div>
-              </div>
-            ))}
-            {filteredDocs.length === 0 && <div className="col-span-2 text-center py-8 text-on-surface-variant font-medium text-xs">Nenhum documento encontrado.</div>}
-          </div>
+              ))}
+              {filteredDocs.length === 0 && <div className="col-span-2 text-center py-8 text-on-surface-variant font-medium text-xs">Nenhum documento encontrado.</div>}
+            </div>
+          )}
         </Panel>
       )}
 
@@ -343,24 +332,24 @@ export const GestaoDocumentalView: React.FC<Props> = ({ onShowToast }) => {
           <form onSubmit={saveDocument} className="space-y-3 text-xs">
             <Field label="Título do Documento" value={form.titulo} onChange={(v) => setForm({ ...form, titulo: v })} required />
             <div className="grid grid-cols-2 gap-3">
-              <label className="block text-outline font-bold">Categoria<select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value as DocCategory })} className="mt-1 w-full border border-border-subtle rounded p-2 text-xs focus:border-secondary focus:outline-none bg-surface-white"><option>Académico</option><option>Financeiro</option><option>RH</option><option>Jurídico</option><option>Administrativo</option><option>Comunicação</option></select></label>
-              <label className="block text-outline font-bold">Tipo de Ficheiro<select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="mt-1 w-full border border-border-subtle rounded p-2 text-xs focus:border-secondary focus:outline-none bg-surface-white"><option>PDF</option><option>DOCX</option><option>XLSX</option><option>JPG</option><option>PNG</option></select></label>
+              <label className="block text-outline font-bold">Categoria<select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value as DocCategory })} className="mt-1 w-full border border-border-subtle rounded p-2 text-xs focus:border-primary focus:outline-none bg-surface-white"><option>Académico</option><option>Financeiro</option><option>RH</option><option>Jurídico</option><option>Administrativo</option><option>Comunicação</option></select></label>
+              <label className="block text-outline font-bold">Tipo de Ficheiro<select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })} className="mt-1 w-full border border-border-subtle rounded p-2 text-xs focus:border-primary focus:outline-none bg-surface-white"><option>PDF</option><option>DOCX</option><option>XLSX</option><option>JPG</option><option>PNG</option></select></label>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Responsável" value={form.responsavel} onChange={(v) => setForm({ ...form, responsavel: v })} placeholder="Nome do responsável" />
               <Field label="Data de Validade (opcional)" type="text" value={form.dataValidade} onChange={(v) => setForm({ ...form, dataValidade: v })} placeholder="ex: 31 Dez 2027" />
             </div>
-            <label className="block text-outline font-bold">Descrição<textarea value={form.descricao} onChange={(e) => setForm({ ...form, descricao: e.target.value })} rows={3} className="mt-1 w-full border border-border-subtle rounded p-2 text-xs focus:border-secondary focus:outline-none resize-none" placeholder="Breve descrição do conteúdo do documento..." /></label>
+            <label className="block text-outline font-bold">Descrição<textarea value={form.descricao} onChange={(e) => setForm({ ...form, descricao: e.target.value })} rows={3} className="mt-1 w-full border border-border-subtle rounded p-2 text-xs focus:border-primary focus:outline-none resize-none" placeholder="Breve descrição do conteúdo do documento..." /></label>
             <div className="border-t border-border-subtle pt-3">
               <div className="flex items-center gap-2 text-[10px] text-outline font-bold uppercase tracking-wider mb-2"><Upload className="w-3.5 h-3.5" />Anexar Ficheiro</div>
-              <div className="border-2 border-dashed border-border-subtle rounded-lg p-4 text-center hover:border-secondary transition-colors cursor-pointer" onClick={() => onShowToast('Seletor de ficheiro aberto.')}>
+              <div className="border-2 border-dashed border-border-subtle rounded-lg p-4 text-center hover:border-primary transition-colors cursor-pointer" onClick={() => onShowToast('Seletor de ficheiro aberto.')}>
                 <Upload className="w-5 h-5 text-outline mx-auto mb-1" />
                 <p className="text-[10px] text-on-surface-variant">Clique para selecionar ou arraste o ficheiro aqui</p>
               </div>
             </div>
             <div className="flex justify-end gap-2 border-t border-border-subtle pt-3">
               <button type="button" onClick={() => setModal(null)} className="border border-border-subtle px-4 py-2 rounded-lg font-semibold cursor-pointer hover:bg-surface-container transition-all">Cancelar</button>
-              <button className="bg-secondary text-surface-white px-4 py-2 rounded-lg font-bold cursor-pointer hover:bg-secondary/90 transition-all">Arquivar</button>
+              <button className="bg-primary text-surface-white hover:bg-primary/90 px-4 py-2 rounded-lg font-bold cursor-pointer transition-all shadow-sm">Arquivar</button>
             </div>
           </form>
         </Modal>
@@ -391,8 +380,8 @@ export const GestaoDocumentalView: React.FC<Props> = ({ onShowToast }) => {
             </div>
             <div className="flex justify-end gap-2 border-t border-border-subtle pt-3">
               <button onClick={() => setViewDoc(null)} className="border border-border-subtle px-4 py-2 rounded-lg font-semibold cursor-pointer hover:bg-surface-container transition-all">Fechar</button>
-              <button onClick={() => { setViewDoc(null); openDocument(viewDoc); }} className="bg-primary text-surface-white px-4 py-2 rounded-lg font-bold cursor-pointer hover:bg-primary/90 transition-all flex items-center gap-1.5"><Edit3 className="w-3.5 h-3.5" />Editar</button>
-              <button onClick={() => onShowToast(`Documento "${viewDoc.titulo}" descarregado.`)} className="bg-secondary text-surface-white px-4 py-2 rounded-lg font-bold cursor-pointer hover:bg-secondary/90 transition-all flex items-center gap-1.5"><Download className="w-3.5 h-3.5" />Download</button>
+              <button onClick={() => { setViewDoc(null); openDocument(viewDoc); }} className="border border-border-subtle px-4 py-2 rounded-lg font-bold cursor-pointer hover:bg-surface-container transition-all flex items-center gap-1.5"><Edit3 className="w-3.5 h-3.5" />Editar</button>
+              <button onClick={() => onShowToast(`Documento "${viewDoc.titulo}" descarregado.`)} className="bg-primary text-surface-white hover:bg-primary/90 px-4 py-2 rounded-lg font-bold cursor-pointer transition-all flex items-center gap-1.5 shadow-sm"><Download className="w-3.5 h-3.5" />Download</button>
             </div>
           </div>
         </Modal>
@@ -437,7 +426,7 @@ const SectionTitle = ({ title, subtitle, inline = false }: { title: string; subt
 );
 
 const Field = ({ label, value, onChange, type = 'text', required = false, placeholder = '' }: { label: string; value: string; onChange: (value: string) => void; type?: string; required?: boolean; placeholder?: string }) => (
-  <label className="block text-outline font-bold">{label}<input type={type} required={required} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="mt-1 w-full border border-border-subtle rounded p-2 text-xs focus:border-secondary focus:outline-none" /></label>
+  <label className="block text-outline font-bold">{label}<input type={type} required={required} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="mt-1 w-full border border-border-subtle rounded p-2 text-xs focus:border-primary focus:outline-none" /></label>
 );
 
 const InfoField = ({ label, value }: { label: string; value: string }) => (
@@ -451,7 +440,7 @@ const Modal = ({ title, onClose, children }: { title: string; onClose: () => voi
   <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
     <div className="bg-surface-white rounded-xl shadow-2xl border border-border-subtle w-full max-w-lg p-6 my-8">
       <div className="flex justify-between items-center border-b border-border-subtle pb-3 mb-4">
-        <h2 className="text-lg font-bold text-primary flex items-center gap-2"><Archive className="w-5 h-5 text-secondary" />{title}</h2>
+        <h2 className="text-lg font-bold text-primary flex items-center gap-2"><Archive className="w-5 h-5 text-primary" />{title}</h2>
         <button onClick={onClose} className="text-outline hover:text-primary p-1 rounded hover:bg-surface-container cursor-pointer"><X className="w-4 h-4" /></button>
       </div>
       {children}
@@ -459,18 +448,30 @@ const Modal = ({ title, onClose, children }: { title: string; onClose: () => voi
   </div>
 );
 
-const FilterBar = ({ search, setSearch, filters }: { search: string; setSearch: (x: string) => void; filters: { value: string; set: (x: string) => void; options: string[] }[] }) => (
+const FilterBar = ({ search, setSearch, filters, actions }: { search: string; setSearch: (x: string) => void; filters: { label?: string; value: string; set: (x: string) => void; options: string[] }[]; actions?: React.ReactNode }) => (
   <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div className="flex flex-wrap items-center gap-2">
       {filters.map((f, i) => (
-        <select key={i} value={f.value} onChange={(e) => f.set(e.target.value)} className="appearance-none bg-surface border border-border-subtle rounded-md pl-2 pr-7 text-xs focus:outline-none focus:border-secondary py-1 cursor-pointer">
-          {f.options.map((o) => <option key={o}>{o}</option>)}
-        </select>
+        <div key={i} className="flex items-center gap-1.5 bg-surface border border-border-subtle rounded-lg px-2.5 py-1 font-medium text-xs">
+          {f.label && <span className="font-bold text-primary">{f.label}:</span>}
+          <select
+            value={f.value}
+            onChange={(e) => f.set(e.target.value)}
+            className="bg-transparent text-xs focus:outline-none font-medium text-on-surface cursor-pointer"
+          >
+            {f.options.map((o) => (
+              <option key={o} value={o}>{o}</option>
+            ))}
+          </select>
+        </div>
       ))}
     </div>
-    <div className="relative">
-      <Search className="w-4 h-4 text-outline absolute left-3 top-2.5" />
-      <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Pesquisar..." className="pl-9 pr-3 py-1.5 text-xs bg-surface-white border border-border-subtle rounded-lg focus:outline-none focus:border-secondary font-medium" />
+    <div className="flex items-center gap-2">
+      <div className="relative">
+        <Search className="w-4 h-4 text-outline absolute left-3 top-2.5" />
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Pesquisar..." className="pl-9 pr-3 py-1.5 text-xs bg-surface-white border border-border-subtle rounded-lg focus:outline-none focus:border-primary font-medium" />
+      </div>
+      {actions}
     </div>
   </div>
 );

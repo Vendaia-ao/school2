@@ -7,6 +7,8 @@ import {
   ChevronDown,
   ChevronRight,
   Filter,
+  Briefcase,
+  Globe,
 } from 'lucide-react';
 import { useAccess } from '../context/AccessContext';
 
@@ -54,14 +56,16 @@ type MatrixMap = Record<string, Set<Operation>>;
 export const PermissionWizardView: React.FC<Props> = ({ target, onBack, onSave, onShowToast }) => {
   const { structures } = useAccess();
 
-  // Form State — Scope & Mode
+  // Form State — Scope & Mode (Defaults matching reference image: Por Polos & Acórdão por Polo)
   const [scopeType, setScopeType] = useState<'global' | 'restricted'>('restricted');
   const [scopeMode, setScopeMode] = useState<'uniform' | 'contextual'>('contextual');
-  const [selectedStructures, setSelectedStructures] = useState<string[]>(['str-01', 'str-02']);
-  const [domainFilter, setDomainFilter] = useState<string>('Todos os Domínios');
+  const [selectedStructures, setSelectedStructures] = useState<string[]>(['str-02']); // Talatona default active
+  const [domainFilter, setDomainFilter] = useState<string>('Todos');
 
-  // Accordion Expanded State (Key: structure ID or 'global')
-  const [expandedAccordions, setExpandedAccordions] = useState<Record<string, boolean>>({});
+  // Accordion Expanded State (Key: structure ID)
+  const [expandedAccordions, setExpandedAccordions] = useState<Record<string, boolean>>({
+    'str-02': true, // Talatona expanded by default matching reference image
+  });
 
   const toggleAccordion = (key: string) => {
     setExpandedAccordions((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -69,44 +73,55 @@ export const PermissionWizardView: React.FC<Props> = ({ target, onBack, onSave, 
 
   // Matrix State per Structure (Key: structure ID or 'global')
   const [structureMatrices, setStructureMatrices] = useState<Record<string, MatrixMap>>(() => {
-    const defaultMatrix: MatrixMap = {
-      estudantes: new Set<Operation>(['VER', 'CRIAR', 'EDITAR']),
-      turmas: new Set<Operation>(['VER', 'EDITAR']),
-      pautas: new Set<Operation>(['VER', 'CRIAR', 'EDITAR', 'APROVAR']),
-    };
-
-    const kilambaMatrix: MatrixMap = {
-      estudantes: new Set<Operation>(['VER', 'CRIAR', 'EDITAR', 'APROVAR', 'EXPORTAR', 'ADMINISTRAR']),
-      turmas: new Set<Operation>(['VER', 'CRIAR', 'EDITAR', 'ADMINISTRAR']),
+    // Global Matrix defaults matching reference screenshot: 19 active rules
+    const globalMatrix: MatrixMap = {
       pautas: new Set<Operation>(['VER', 'CRIAR', 'EDITAR', 'APROVAR']),
       gestao_financeira: new Set<Operation>(['VER', 'CRIAR', 'EDITAR', 'APROVAR', 'EXPORTAR']),
+      estudantes: new Set<Operation>(['VER', 'CRIAR', 'EDITAR', 'APROVAR', 'EXPORTAR']),
+      turmas: new Set<Operation>(['VER', 'CRIAR', 'EDITAR', 'ADMINISTRAR']),
+      dashboard: new Set<Operation>(['VER']),
     };
 
+    // Talatona matrix matching reference screenshot: 3 active rules (Estudantes VER, Turmas VER, Pautas & Notas VER)
     const talatonaMatrix: MatrixMap = {
       estudantes: new Set<Operation>(['VER']),
       turmas: new Set<Operation>(['VER']),
       pautas: new Set<Operation>(['VER']),
     };
 
+    const kilambaMatrix: MatrixMap = {
+      estudantes: new Set<Operation>(['VER', 'CRIAR', 'EDITAR']),
+      turmas: new Set<Operation>(['VER', 'EDITAR']),
+    };
+
     return {
-      global: defaultMatrix,
+      global: globalMatrix,
       'str-01': kilambaMatrix,
       'str-02': talatonaMatrix,
     };
   });
 
-  // Calculate Total Active Rules
+  // Calculate Total Active Rules across Global Base + Active Selected Polos
   const calculateActiveRulesCount = (): number => {
-    if (scopeMode === 'uniform' || scopeType === 'global') {
-      const globalMat = structureMatrices['global'] || {};
-      return (Object.values(globalMat) as Set<Operation>[]).reduce((acc, curr) => acc + curr.size, 0);
-    }
-    let total = 0;
-    selectedStructures.forEach((strId) => {
-      const mat = structureMatrices[strId] || structureMatrices['global'] || {};
-      total += (Object.values(mat) as Set<Operation>[]).reduce((acc, curr) => acc + curr.size, 0);
+    let globalTotal = 0;
+    const globalMat = structureMatrices['global'] || {};
+    (Object.values(globalMat) as Set<Operation>[]).forEach((set) => {
+      globalTotal += set.size;
     });
-    return total;
+
+    if (scopeType === 'global' || scopeMode === 'uniform') {
+      return globalTotal;
+    }
+
+    let poloTotal = 0;
+    selectedStructures.forEach((strId) => {
+      const mat = structureMatrices[strId] || {};
+      (Object.values(mat) as Set<Operation>[]).forEach((set) => {
+        poloTotal += set.size;
+      });
+    });
+
+    return globalTotal + poloTotal;
   };
 
   const activeRulesCount = calculateActiveRulesCount();
@@ -160,108 +175,109 @@ export const PermissionWizardView: React.FC<Props> = ({ target, onBack, onSave, 
   };
 
   const filteredResources = MATRIX_RESOURCES.filter(
-    (r) => domainFilter === 'Todos os Domínios' || r.domain === domainFilter
+    (r) => domainFilter === 'Todos' || r.domain === domainFilter
   );
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 overflow-hidden backdrop-blur-xs">
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 sm:p-4 overflow-hidden backdrop-blur-xs">
       {/* Fixed Height Modal Container */}
-      <div className="bg-surface-white rounded-2xl shadow-2xl border border-border-subtle w-full max-w-5xl h-[88vh] overflow-hidden flex flex-col">
-        {/* Modal Top Header (Fixed Height) */}
-        <div className="px-4 py-3 border-b border-border-subtle bg-surface-white flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center font-bold">
-              <Lock className="w-4 h-4" />
+      <div className="bg-surface-white rounded-2xl shadow-2xl border border-border-subtle w-full max-w-5xl h-[90vh] overflow-hidden flex flex-col">
+        
+        {/* Modal Header (Dark Navy Theme matching reference image) */}
+        <div className="px-5 py-3.5 bg-primary border-b border-primary-container flex items-center justify-between shrink-0 shadow-md">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-secondary-container/20 border border-secondary-container/40 text-secondary-container flex items-center justify-center font-bold shrink-0 shadow-inner">
+              <Lock className="w-4.5 h-4.5 text-secondary-container stroke-[2.25]" />
             </div>
             <div>
-              <h2 className="text-sm sm:text-base font-bold text-primary flex items-center gap-2 leading-tight">
-                Atribuir Permissões: <span className="text-secondary">{target.name}</span>
+              <h2 className="text-sm sm:text-base font-bold text-surface-white flex items-center gap-1.5 leading-tight">
+                Atribuir Permissões: <span className="text-secondary-container font-bold">{target.name}</span>
               </h2>
-              <p className="text-[10px] text-outline">
-                {target.role ? `Perfil Base: ${target.role}` : 'Governação de Acesso Vendaia OS® (RN9.08)'}
+              <p className="text-[11px] text-[#b5c7ef] font-medium leading-tight">
+                Perfil Base: <span className="font-semibold text-surface-white">{target.role || 'Administrador'}</span>
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-2">
-              <div className="bg-surface-container-low border border-border-subtle px-2 py-0.5 rounded text-center">
-                <span className="text-[8px] uppercase font-bold text-outline block leading-none">ALVO</span>
-                <span className="font-bold text-primary text-[11px] leading-tight">
+              <div className="bg-surface-white/10 border border-surface-white/20 px-2.5 py-1 rounded-lg text-center backdrop-blur-xs">
+                <span className="text-[8px] uppercase font-bold text-surface-white/60 block leading-none tracking-wider">ALVO</span>
+                <span className="font-bold text-surface-white text-[11px] leading-tight">
                   {target.type === 'user' ? 'Utilizador Individual' : 'Grupo'}
                 </span>
               </div>
-              <div className="bg-success/10 border border-success/20 px-2 py-0.5 rounded text-center">
-                <span className="text-[8px] uppercase font-bold text-success block leading-none">REGRAS</span>
-                <span className="font-bold text-success text-[11px] leading-tight">{activeRulesCount} Ativas</span>
+              <div className="bg-success/20 border border-success/40 px-2.5 py-1 rounded-lg text-center backdrop-blur-xs">
+                <span className="text-[8px] uppercase font-bold text-green-300 block leading-none tracking-wider">REGRAS</span>
+                <span className="font-bold text-green-200 text-[11px] leading-tight">{activeRulesCount} Ativas</span>
               </div>
             </div>
             <button
               onClick={onBack}
-              className="text-outline hover:text-primary p-1 rounded-lg hover:bg-surface-container transition-colors cursor-pointer"
+              className="text-surface-white/70 hover:text-surface-white p-1.5 rounded-lg hover:bg-surface-white/10 transition-colors cursor-pointer"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4.5 h-4.5" />
             </button>
           </div>
         </div>
 
-        {/* Global Toolbar & Reorganized Cohesive Controls */}
+        {/* Toolbar & Controls */}
         <div className="bg-surface-container-low border-b border-border-subtle px-4 py-2 text-xs shrink-0">
           <div className="flex items-center justify-between gap-3 overflow-x-auto">
             {/* Left Group: Escopo & Modo */}
             <div className="flex items-center gap-2 shrink-0">
               {/* Scope Type Toggle */}
               <div className="flex items-center gap-1 bg-surface-white border border-border-subtle p-1 rounded-xl shadow-2xs">
-                <span className="text-[9px] uppercase font-bold text-outline px-1.5 flex items-center gap-1">
+                <span className="text-[9px] uppercase font-bold text-outline px-1 flex items-center gap-1">
                   ESCOPO:
                 </span>
                 <button
                   onClick={() => setScopeType('global')}
-                  className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer flex items-center gap-1.5 ${
                     scopeType === 'global'
                       ? 'bg-secondary text-surface-white shadow-xs'
-                      : 'text-outline hover:text-primary hover:bg-surface-container-low'
+                      : 'bg-surface-white text-primary hover:bg-surface-container-low'
                   }`}
                 >
-                  🌐 Global
+                  <Globe className="w-3.5 h-3.5" /> Global
                 </button>
                 <button
                   onClick={() => setScopeType('restricted')}
-                  className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer flex items-center gap-1.5 ${
                     scopeType === 'restricted'
                       ? 'bg-secondary text-surface-white shadow-xs'
-                      : 'text-outline hover:text-primary hover:bg-surface-container-low'
+                      : 'bg-surface-white text-primary hover:bg-surface-container-low'
                   }`}
                 >
-                  🏢 Por Polos
+                  <Briefcase className="w-3.5 h-3.5" /> Por Polos
                 </button>
               </div>
 
-              {/* Scope Mode Toggle (Only when Restricted) */}
+              {/* Scope Mode Toggle (Only when Restricted / Por Polos) */}
               {scopeType === 'restricted' && (
                 <div className="flex items-center gap-1 bg-surface-white border border-border-subtle p-1 rounded-xl shadow-2xs">
-                  <span className="text-[9px] uppercase font-bold text-outline px-1.5 flex items-center gap-1">
+                  <span className="text-[9px] uppercase font-bold text-outline px-1 flex items-center gap-1">
                     MATRIZ:
                   </span>
                   <button
                     onClick={() => setScopeMode('uniform')}
-                    className={`px-2.5 py-1 rounded-lg font-bold text-[10px] transition-all cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-lg font-bold text-[10px] transition-all cursor-pointer flex items-center gap-1 ${
                       scopeMode === 'uniform'
                         ? 'bg-primary text-surface-white shadow-xs'
-                        : 'text-outline hover:text-primary hover:bg-surface-container-low'
+                        : 'bg-surface-white text-primary hover:bg-surface-container-low'
                     }`}
                   >
-                    🟢 Uniforme
+                    <span className="w-2 h-2 rounded-full bg-success inline-block"></span> Uniforme
                   </button>
                   <button
                     onClick={() => setScopeMode('contextual')}
-                    className={`px-2.5 py-1 rounded-lg font-bold text-[10px] transition-all cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-lg font-bold text-[10px] transition-all cursor-pointer flex items-center gap-1 ${
                       scopeMode === 'contextual'
                         ? 'bg-primary text-surface-white shadow-xs'
-                        : 'text-outline hover:text-primary hover:bg-surface-container-low'
+                        : 'bg-surface-white text-primary hover:bg-surface-container-low'
                     }`}
                   >
-                    🟡 Acórdão por Polo
+                    <span className="w-2 h-2 rounded-full bg-amber-400 inline-block"></span> Acórdão por Polo
                   </button>
                 </div>
               )}
@@ -269,23 +285,22 @@ export const PermissionWizardView: React.FC<Props> = ({ target, onBack, onSave, 
 
             {/* Right Group: Domain Filter Pills */}
             <div className="flex items-center gap-1 bg-surface-white border border-border-subtle p-1 rounded-xl shadow-2xs shrink-0">
-              <span className="text-[9px] uppercase font-bold text-outline px-1.5 flex items-center gap-1">
+              <span className="text-[9px] uppercase font-bold text-outline px-1 flex items-center gap-1">
                 <Filter className="w-3 h-3 text-secondary" /> DOMÍNIOS:
               </span>
-              {['Todos os Domínios', 'Geral', 'Académico', 'Financeiro', 'Utilizadores', 'Administração'].map((domain) => {
-                const label = domain === 'Todos os Domínios' ? 'Todos' : domain;
+              {['Todos', 'Geral', 'Académico', 'Financeiro', 'Utilizadores', 'Administração'].map((domain) => {
                 const isSelected = domainFilter === domain;
                 return (
                   <button
                     key={domain}
                     onClick={() => setDomainFilter(domain)}
-                    className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all cursor-pointer ${
+                    className={`px-2.5 py-0.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-secondary text-surface-white shadow-2xs'
-                        : 'text-outline hover:text-primary hover:bg-surface-container-low'
+                        : 'text-primary hover:bg-surface-container-low'
                     }`}
                   >
-                    {label}
+                    {domain}
                   </button>
                 );
               })}
@@ -293,150 +308,122 @@ export const PermissionWizardView: React.FC<Props> = ({ target, onBack, onSave, 
           </div>
         </div>
 
-        {/* Modal Scrollable Body (Takes Remaining Fixed Space) */}
-        <div className="p-3 overflow-y-auto flex-1 min-h-0 text-xs">
-          {/* Global / Uniform Matrix Panel */}
-          {(scopeType === 'global' || scopeMode === 'uniform') ? (
-            <div className="border border-border-subtle rounded-xl bg-surface-white shadow-2xs overflow-hidden h-full flex flex-col">
-              <div className="px-3 py-2 bg-secondary text-surface-white flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-2">
-                  <Building2 className="w-3.5 h-3.5" />
-                  <span className="font-bold text-xs">
-                    {scopeType === 'global' ? '🌐 Matriz Institucional Global' : '🌐 Matriz Uniforme (Todas as Estruturas Selecionadas)'}
-                  </span>
-                </div>
-                <span className="bg-surface-white/20 px-2 py-0.5 rounded-full text-[9px] font-bold">
-                  {((Object.values(structureMatrices['global'] || {}) as Set<Operation>[]).reduce((acc, curr) => acc + curr.size, 0))} regras
-                </span>
-              </div>
+        {/* Modal Scrollable Body */}
+        <div className="p-3 overflow-y-auto flex-1 min-h-0 text-xs space-y-3">
+          
+          {/* Base / Global Matrix Table Section (Always Visible) */}
+          <div className="border border-border-subtle rounded-xl bg-surface-white shadow-2xs overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-[10px]">
+                <thead className="sticky top-0 z-10 bg-surface-container-low border-b border-border-subtle text-[8px]">
+                  <tr>
+                    <th className="px-3 py-2 font-bold text-primary min-w-[200px]">MÓDULO / RECURSO</th>
+                    {OPERATIONS.map((op) => (
+                      <th key={op} className="px-1 py-2 text-center font-bold text-outline min-w-[60px]">
+                        {op}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border-subtle">
+                  {filteredResources.map((res) => {
+                    const set = (structureMatrices['global'] || {})[res.id] || new Set();
+                    const isAll = set.size === OPERATIONS.length;
+                    return (
+                      <tr key={res.id} className="hover:bg-surface-container-low/30 transition-colors">
+                        <td className="px-3 py-1.5">
+                          <div className="flex items-center justify-between gap-2">
+                            <div>
+                              <span className="text-[7px] uppercase font-bold text-outline leading-none block tracking-wider">{res.module}</span>
+                              <span className="font-bold text-primary text-[11px] leading-tight">{res.name}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => toggleResourceAll('global', res.id)}
+                              className="text-[9px] text-secondary hover:underline font-semibold cursor-pointer shrink-0"
+                            >
+                              [{isAll ? 'Desmarcar' : 'Marcar'}]
+                            </button>
+                          </div>
+                        </td>
 
-              <div className="p-2 bg-surface-white flex-1 min-h-0 overflow-y-auto">
-                <div className="border border-border-subtle rounded-lg h-full overflow-y-auto">
-                  <table className="w-full text-left border-collapse text-[10px]">
-                    <thead className="sticky top-0 z-10 bg-surface-container-low border-b border-border-subtle text-[8px]">
-                      <tr>
-                        <th className="px-2 py-1.5 font-bold text-primary min-w-[170px]">MÓDULO / RECURSO</th>
-                        {OPERATIONS.map((op) => (
-                          <th key={op} className="px-1 py-1.5 text-center font-bold text-outline min-w-[60px]">
-                            {op}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border-subtle">
-                      {filteredResources.map((res) => {
-                        const set = (structureMatrices['global'] || {})[res.id] || new Set();
-                        const isAll = set.size === OPERATIONS.length;
-                        return (
-                          <tr key={res.id} className="hover:bg-surface-container-low/30 transition-colors">
-                            <td className="px-2 py-1">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <span className="text-[7px] uppercase font-bold text-outline leading-none block">{res.module}</span>
-                                  <span className="font-bold text-primary text-[10px] leading-tight">{res.name}</span>
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={() => toggleResourceAll('global', res.id)}
-                                  className="text-[8px] text-secondary hover:underline font-semibold cursor-pointer"
-                                >
-                                  [{isAll ? 'Desmarcar' : 'Marcar'}]
-                                </button>
-                              </div>
+                        {OPERATIONS.map((op) => {
+                          const checked = set.has(op);
+                          return (
+                            <td key={op} className="px-1 py-1.5 text-center">
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => toggleMatrixCell('global', res.id, op)}
+                                className="w-3.5 h-3.5 rounded border-border-subtle text-secondary focus:ring-secondary cursor-pointer"
+                              />
                             </td>
-
-                            {OPERATIONS.map((op) => {
-                              const checked = set.has(op);
-                              return (
-                                <td key={op} className="px-1 py-1 text-center">
-                                  <input
-                                    type="checkbox"
-                                    checked={checked}
-                                    onChange={() => toggleMatrixCell('global', res.id, op)}
-                                    className="w-3 h-3 rounded border-border-subtle text-success focus:ring-success cursor-pointer"
-                                  />
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-          ) : (
-            /* Ultra-Compact Accordion List View per Polo */
-            <div className="border border-border-subtle rounded-xl divide-y divide-border-subtle bg-surface-white overflow-hidden shadow-2xs">
+          </div>
+
+          {/* Per-Polo Accordions (Visible in Restricted + Contextual / Acórdão por Polo mode) */}
+          {scopeType === 'restricted' && scopeMode === 'contextual' && (
+            <div className="space-y-2">
               {structures.map((s) => {
                 const isSelected = selectedStructures.includes(s.id);
-                const isExpanded = expandedAccordions[s.id] === true && isSelected;
+                const isExpanded = expandedAccordions[s.id] === true;
                 const itemMatrix = structureMatrices[s.id] || {};
                 const rulesCount = (Object.values(itemMatrix) as Set<Operation>[]).reduce((acc, curr) => acc + curr.size, 0);
 
                 return (
-                  <div key={s.id} className="transition-all">
-                    {/* Compact Single-Row Accordion Header */}
-                    <div
-                      className={`px-3 py-1.5 flex items-center justify-between transition-colors text-left select-none ${
-                        isSelected
-                          ? isExpanded
-                            ? 'bg-secondary/10 border-l-4 border-l-secondary text-primary'
-                            : 'bg-surface-white hover:bg-surface-container-low/40 text-primary'
-                          : 'bg-surface-container-low/20 text-outline opacity-70'
-                      }`}
-                    >
+                  <div key={s.id} className="border border-[#f0d8c8] rounded-xl overflow-hidden shadow-2xs transition-all bg-surface-white">
+                    {/* Warm Accordion Banner Matching Reference Screenshot */}
+                    <div className="bg-[#fdf4ef] px-3.5 py-2 flex items-center justify-between border-b border-[#f5e6dc] select-none">
                       <div className="flex items-center gap-2">
                         <input
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => toggleStructureSelection(s.id)}
-                          className="w-3.5 h-3.5 rounded border-border-subtle text-secondary focus:ring-secondary cursor-pointer"
+                          className="w-4 h-4 rounded border-secondary/40 text-secondary focus:ring-secondary cursor-pointer"
                         />
                         <button
-                          onClick={() => isSelected && toggleAccordion(s.id)}
-                          disabled={!isSelected}
-                          className="flex items-center gap-2 cursor-pointer focus:outline-none disabled:cursor-not-allowed"
+                          onClick={() => toggleAccordion(s.id)}
+                          className="flex items-center gap-2 cursor-pointer focus:outline-none"
                         >
-                          {isSelected ? (
-                            isExpanded ? (
-                              <ChevronDown className="w-3.5 h-3.5 text-secondary" />
-                            ) : (
-                              <ChevronRight className="w-3.5 h-3.5 text-outline" />
-                            )
+                          {isExpanded ? (
+                            <ChevronDown className="w-4 h-4 text-secondary font-bold" />
                           ) : (
-                            <ChevronRight className="w-3.5 h-3.5 text-outline/40" />
+                            <ChevronRight className="w-4 h-4 text-secondary/70 font-bold" />
                           )}
 
-                          <Building2 className={`w-3.5 h-3.5 ${isSelected ? 'text-secondary' : 'text-outline/50'}`} />
+                          <div className="w-6 h-6 rounded-md bg-[#faebe1] border border-[#f0d8c8] text-secondary flex items-center justify-center">
+                            <Building2 className="w-3.5 h-3.5 text-secondary" />
+                          </div>
+
                           <span className="font-bold text-xs text-primary">{s.nome}</span>
-                          <span className="text-[10px] text-outline">({s.codigo})</span>
+                          <span className="text-[10px] text-outline font-medium">({s.codigo})</span>
                         </button>
                       </div>
 
                       <div className="flex items-center gap-2">
-                        {isSelected && (
-                          <span
-                            onClick={() => toggleAccordion(s.id)}
-                            className="px-2 py-0.5 rounded text-[9px] font-bold bg-secondary/10 text-secondary border border-secondary/20 cursor-pointer"
-                          >
-                            {rulesCount} regras ativas
-                          </span>
-                        )}
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#fbebe1] text-secondary border border-[#f5e6dc]">
+                          {rulesCount} regras ativas
+                        </span>
                       </div>
                     </div>
 
-                    {/* Compact Accordion Body (Matrix Table) */}
-                    {isSelected && isExpanded && (
-                      <div className="p-2 border-t border-border-subtle bg-surface-white">
-                        <div className="overflow-x-auto border border-border-subtle rounded-lg max-h-[280px] overflow-y-auto">
+                    {/* Accordion Body — Specific Polo Matrix Table */}
+                    {isExpanded && (
+                      <div className="p-2 bg-surface-white">
+                        <div className="overflow-x-auto border border-border-subtle rounded-lg max-h-[300px] overflow-y-auto">
                           <table className="w-full text-left border-collapse text-[10px]">
                             <thead className="sticky top-0 z-10 bg-surface-container-low border-b border-border-subtle text-[8px]">
                               <tr>
-                                <th className="px-2 py-1.5 font-bold text-primary min-w-[170px]">MÓDULO / RECURSO</th>
+                                <th className="px-3 py-2 font-bold text-primary min-w-[200px]">MÓDULO / RECURSO</th>
                                 {OPERATIONS.map((op) => (
-                                  <th key={op} className="px-1 py-1.5 text-center font-bold text-outline min-w-[60px]">
+                                  <th key={op} className="px-1 py-2 text-center font-bold text-outline min-w-[60px]">
                                     {op}
                                   </th>
                                 ))}
@@ -448,16 +435,16 @@ export const PermissionWizardView: React.FC<Props> = ({ target, onBack, onSave, 
                                 const isAll = set.size === OPERATIONS.length;
                                 return (
                                   <tr key={res.id} className="hover:bg-surface-container-low/30 transition-colors">
-                                    <td className="px-2 py-1">
-                                      <div className="flex items-center justify-between">
+                                    <td className="px-3 py-1.5">
+                                      <div className="flex items-center justify-between gap-2">
                                         <div>
-                                          <span className="text-[7px] uppercase font-bold text-outline leading-none block">{res.module}</span>
-                                          <span className="font-bold text-primary text-[10px] leading-tight">{res.name}</span>
+                                          <span className="text-[7px] uppercase font-bold text-outline leading-none block tracking-wider">{res.module}</span>
+                                          <span className="font-bold text-primary text-[11px] leading-tight">{res.name}</span>
                                         </div>
                                         <button
                                           type="button"
                                           onClick={() => toggleResourceAll(s.id, res.id)}
-                                          className="text-[8px] text-secondary hover:underline font-semibold cursor-pointer"
+                                          className="text-[9px] text-secondary hover:underline font-semibold cursor-pointer shrink-0"
                                         >
                                           [{isAll ? 'Desmarcar' : 'Marcar'}]
                                         </button>
@@ -467,12 +454,12 @@ export const PermissionWizardView: React.FC<Props> = ({ target, onBack, onSave, 
                                     {OPERATIONS.map((op) => {
                                       const checked = set.has(op);
                                       return (
-                                        <td key={op} className="px-1 py-1 text-center">
+                                        <td key={op} className="px-1 py-1.5 text-center">
                                           <input
                                             type="checkbox"
                                             checked={checked}
                                             onChange={() => toggleMatrixCell(s.id, res.id, op)}
-                                            className="w-3 h-3 rounded border-border-subtle text-success focus:ring-success cursor-pointer"
+                                            className="w-3.5 h-3.5 rounded border-border-subtle text-secondary focus:ring-secondary cursor-pointer"
                                           />
                                         </td>
                                       );
@@ -492,20 +479,20 @@ export const PermissionWizardView: React.FC<Props> = ({ target, onBack, onSave, 
           )}
         </div>
 
-        {/* Modal Footer Actions (Fixed Height) */}
-        <div className="px-4 py-2.5 border-t border-border-subtle bg-surface-white flex justify-between items-center shrink-0">
+        {/* Modal Footer */}
+        <div className="px-5 py-3 border-t border-border-subtle bg-surface-white flex justify-between items-center shrink-0">
           <button
             onClick={onBack}
-            className="border border-border-subtle px-3.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer hover:bg-surface-container transition-all"
+            className="text-outline hover:text-primary font-semibold text-xs px-4 py-2 rounded-lg hover:bg-surface-container transition-all cursor-pointer"
           >
             Cancelar
           </button>
 
           <button
             onClick={handleSave}
-            className="bg-secondary text-surface-white px-5 py-1.5 rounded-lg text-xs font-bold hover:bg-secondary/90 shadow-md transition-all cursor-pointer flex items-center gap-1.5"
+            className="bg-primary hover:bg-primary-container text-surface-white px-5 py-2 rounded-lg text-xs font-bold shadow-md transition-all cursor-pointer flex items-center gap-2"
           >
-            <Save className="w-3.5 h-3.5" /> Guardar Permissões
+            <Save className="w-4 h-4 text-surface-white" /> Guardar Permissões
           </button>
         </div>
       </div>

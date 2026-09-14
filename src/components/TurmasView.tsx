@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActiveView } from '../types';
-import { School, Plus, Sparkles, UserCheck, Clock, DoorClosed, Trash2, Edit3, Users, AlertCircle, X, CheckCircle2 } from 'lucide-react';
+import { School, Plus, Sparkles, UserCheck, Clock, DoorClosed, Trash2, Pencil as Edit3, Users, AlertCircle, X, CheckCircle2, TrendingUp } from 'lucide-react';
 
 interface TurmasViewProps {
   onSelectView: (view: ActiveView) => void;
@@ -50,6 +50,12 @@ export const TurmasView: React.FC<TurmasViewProps> = ({ onSelectView, onShowToas
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPeriodo, setFilterPeriodo] = useState('todos');
   const [filterCurso, setFilterCurso] = useState('todos');
+  const [filterAnoLetivo, setFilterAnoLetivo] = useState('2026/2027');
+  const [filterClasse, setFilterClasse] = useState('todas');
+  const [filterEstado, setFilterEstado] = useState('todos');
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedTurmaIds, setSelectedTurmaIds] = useState<string[]>([]);
 
   // Modal & Form State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -441,73 +447,110 @@ export const TurmasView: React.FC<TurmasViewProps> = ({ onSelectView, onShowToas
 
     const matchesPeriodo = filterPeriodo === 'todos' || t.periodo.toLowerCase() === filterPeriodo.toLowerCase();
     const matchesCurso = filterCurso === 'todos' || t.curso === filterCurso;
+    const matchesClasse = filterClasse === 'todas' || t.classe.toLowerCase() === filterClasse.toLowerCase();
+    const matchesEstado = filterEstado === 'todos' || t.estado.toLowerCase() === filterEstado.toLowerCase();
+    const matchesAno = filterAnoLetivo === 'todos' || t.anoLetivo === filterAnoLetivo;
 
-    return matchesSearch && matchesPeriodo && matchesCurso;
+    return matchesSearch && matchesPeriodo && matchesCurso && matchesClasse && matchesEstado && matchesAno;
   });
+
+  const totalPages = Math.ceil(filteredTurmas.length / rowsPerPage) || 1;
+  const currentTurmas = filteredTurmas.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
+  const isAllSelected = currentTurmas.length > 0 && currentTurmas.every((t) => selectedTurmaIds.includes(t.id));
+
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedTurmaIds(selectedTurmaIds.filter((id) => !currentTurmas.some((t) => t.id === id)));
+    } else {
+      const newIds = [...selectedTurmaIds];
+      currentTurmas.forEach((t) => {
+        if (!newIds.includes(t.id)) newIds.push(t.id);
+      });
+      setSelectedTurmaIds(newIds);
+    }
+  };
+
+  const toggleSelectRow = (id: string) => {
+    if (selectedTurmaIds.includes(id)) {
+      setSelectedTurmaIds(selectedTurmaIds.filter((i) => i !== id));
+    } else {
+      setSelectedTurmaIds([...selectedTurmaIds, id]);
+    }
+  };
 
   const handleRunAutoDistribution = () => {
     onShowToast('Distribuição automática de estudantes executada! 42 novos inscritos foram alocados conforme as regras.');
   };
 
   return (
-    <div className="mt-header-height p-4 w-full flex flex-col gap-3 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-1">
-        <h1 className="text-xl font-bold text-primary flex items-center gap-2">
-          <span className="material-symbols-outlined text-[24px]">groups</span>
-          Gestão de Turmas
-        </h1>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleRunAutoDistribution}
-            className="bg-primary/10 text-primary hover:bg-primary/20 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[16px]">auto_mode</span>
-            Distribuição Automática
-          </button>
-
-          <button
-            onClick={openCreateModal}
-            className="bg-secondary text-surface-white hover:bg-secondary/90 px-4 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[16px]">add</span>
-            Criar Turma
-          </button>
-        </div>
-      </div>
-
-      {/* Quick Metrics Bar */}
+    <div className="mt-header-height p-4 w-full flex flex-col gap-3">
+      {/* Quick Metrics Bar - Matching Students Reference Standard */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-3 shadow-sm flex items-center gap-3">
-          <DoorClosed className="w-5 h-5 stroke-[1.75] text-info" />
+        {/* Card 1: Total de Turmas */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
           <div>
-            <p className="text-[10px] uppercase font-bold text-outline tracking-wider">Total de Turmas</p>
-            <p className="font-headline-sm text-lg font-bold text-primary">{turmas.length} Ativas</p>
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider block mb-0.5">Total de Turmas</span>
+            <span className="text-xl font-bold text-primary leading-none">{turmas.length} <span className="text-xs font-normal text-outline">Ativas</span></span>
+          </div>
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-success bg-success/10 text-[10px] font-bold">
+            <TrendingUp className="w-3.5 h-3.5" /> +2 este ano
+          </span>
+        </div>
+
+        {/* Card 2: Ocupação Média */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center transition-all hover:shadow-md h-[68px]">
+          <div className="w-full flex flex-col justify-center gap-1.5">
+            <div className="flex justify-between items-end">
+              <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider">Ocupação Média</span>
+              <span className="text-success font-bold text-[12px]">
+                92.8% <span className="text-[10px] font-medium text-outline ml-0.5">Vagas</span>
+              </span>
+            </div>
+            <div className="w-full bg-surface-container-low h-1.5 rounded-full overflow-hidden">
+              <div className="bg-success h-full rounded-full" style={{ width: '92.8%' }}></div>
+            </div>
+            <div className="flex justify-between text-[9px] font-medium uppercase text-outline">
+              <span>123 Inscritos</span>
+              <span className="text-outline">12 Vagas Liberais</span>
+            </div>
           </div>
         </div>
 
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-3 shadow-sm flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-transparent text-success flex items-center justify-center">
-            <CheckCircle2 className="w-5 h-5 stroke-[1.75]" />
-          </div>
-          <div>
-            <p className="text-[10px] uppercase font-bold text-outline tracking-wider">Ocupação Média</p>
-            <p className="font-headline-sm text-lg font-bold text-primary">92.8%</p>
+        {/* Card 3: Diretores de Turma */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center transition-all hover:shadow-md h-[68px]">
+          <div className="w-full flex flex-col justify-center gap-1.5">
+            <div className="flex justify-between items-end">
+              <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider">Diretores de Turma</span>
+              <span className="text-info font-bold text-[12px]">
+                100% <span className="text-[10px] font-medium text-outline ml-0.5">Atribuídos</span>
+              </span>
+            </div>
+            <div className="w-full bg-surface-container-low h-1.5 rounded-full overflow-hidden">
+              <div className="bg-info h-full rounded-full" style={{ width: '100%' }}></div>
+            </div>
+            <div className="flex justify-between text-[9px] font-medium uppercase text-outline">
+              <span>12 Atribuídos</span>
+              <span className="text-info/70">0 Pendentes</span>
+            </div>
           </div>
         </div>
 
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-3 shadow-sm flex items-center gap-3">
-          <UserCheck className="w-5 h-5 stroke-[1.75] text-warning" />
-          <div>
-            <p className="text-[10px] uppercase font-bold text-outline tracking-wider">Diretores de Turma</p>
-            <p className="font-headline-sm text-lg font-bold text-primary">12 Atribuídos</p>
+        {/* Card 4: Horários Gerados */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-2.5 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider mb-0.5">
+              Horários Gerados
+            </span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl font-bold text-primary leading-none">100%</span>
+              <span className="text-[10px] text-outline font-medium">válidos</span>
+            </div>
           </div>
-        </div>
-
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-3 shadow-sm flex items-center gap-3">
-          <Clock className="w-5 h-5 stroke-[1.75] text-secondary" />
-          <div>
-            <p className="text-[10px] uppercase font-bold text-outline tracking-wider">Horários Gerados</p>
-            <p className="font-headline-sm text-lg font-bold text-primary">100% Válidos</p>
+          <div className="flex flex-col items-end gap-1.5">
+            <span className="px-2 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">
+              {turmas.length} Turmas OK
+            </span>
           </div>
         </div>
       </div>
@@ -577,150 +620,367 @@ export const TurmasView: React.FC<TurmasViewProps> = ({ onSelectView, onShowToas
 
       {/* Tab 1: Lista de Turmas */}
       {activeTab === 'lista' && (
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-4 shadow-sm flex flex-col gap-3">
-          {/* Filters Bar */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pb-2 border-b border-border-subtle">
-            <div className="relative w-full sm:w-72">
-              <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-outline text-[16px]">
-                search
-              </span>
-              <input
-                type="text"
-                placeholder="Pesquisar por código, turma ou diretor..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-surface-container-low border border-border-subtle rounded-lg focus:outline-none focus:border-secondary"
-              />
-            </div>
+        <div className="flex flex-col gap-3">
+          {/* Search & Filters Bar (Reference 2-Row Design Standard) */}
+          <div className="bg-surface-white border border-outline-variant/30 rounded-lg flex flex-wrap items-center justify-between gap-4 shadow-sm p-3">
+            <div className="flex flex-col w-full gap-1.5">
+              {/* Row 1: Dropdown Filters */}
+              <div className="flex items-center gap-1 w-full">
+                <select
+                  value={filterAnoLetivo}
+                  onChange={(e) => {
+                    setFilterAnoLetivo(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="flex-1 min-w-0 appearance-none bg-surface border border-border-subtle rounded-md px-1.5 text-[11px] focus:outline-none focus:border-secondary h-7 py-0.5 text-ellipsis overflow-hidden cursor-pointer font-medium"
+                >
+                  <option value="2026/2027">Ano: 2026/2027</option>
+                  <option value="2025/2026">Ano: 2025/2026</option>
+                  <option value="2024/2025">Ano: 2024/2025</option>
+                </select>
 
-            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
-              <span className="text-xs text-outline font-semibold">Período:</span>
-              <select
-                value={filterPeriodo}
-                onChange={(e) => setFilterPeriodo(e.target.value)}
-                className="text-xs bg-surface-container-low border border-border-subtle rounded-lg px-2 py-1.5 focus:outline-none focus:border-secondary"
-              >
-                <option value="todos">Todos</option>
-                <option value="Manhã">Manhã</option>
-                <option value="Tarde">Tarde</option>
-                <option value="Noite">Noite</option>
-              </select>
+                <select
+                  value={filterPeriodo}
+                  onChange={(e) => {
+                    setFilterPeriodo(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="flex-1 min-w-0 appearance-none bg-surface border border-border-subtle rounded-md px-1.5 text-[11px] focus:outline-none focus:border-secondary h-7 py-0.5 text-ellipsis overflow-hidden cursor-pointer"
+                >
+                  <option value="todos">Período: Todos</option>
+                  <option value="Manhã">Manhã</option>
+                  <option value="Tarde">Tarde</option>
+                  <option value="Noite">Noite</option>
+                </select>
 
-              <span className="text-xs text-outline font-semibold ml-2">Curso:</span>
-              <select
-                value={filterCurso}
-                onChange={(e) => setFilterCurso(e.target.value)}
-                className="text-xs bg-surface-container-low border border-border-subtle rounded-lg px-2 py-1.5 focus:outline-none focus:border-secondary"
-              >
-                <option value="todos">Todos os Cursos</option>
-                <option value="Ciências Físicas e Biológicas">Ciências Físicas</option>
-                <option value="Ciências Humanas e Sociais">Ciências Humanas</option>
-                <option value="Técnico de Informática">Informática</option>
-                <option value="Gestão e Economia">Gestão e Economia</option>
-              </select>
+                <select
+                  value={filterClasse}
+                  onChange={(e) => {
+                    setFilterClasse(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="flex-1 min-w-0 appearance-none bg-surface border border-border-subtle rounded-md px-1.5 text-[11px] focus:outline-none focus:border-secondary h-7 py-0.5 text-ellipsis overflow-hidden cursor-pointer"
+                >
+                  <option value="todas">Classe: Todas</option>
+                  <option value="10º Ano">10º Ano</option>
+                  <option value="11º Ano">11º Ano</option>
+                  <option value="12º Ano">12º Ano</option>
+                </select>
+
+                <select
+                  value={filterCurso}
+                  onChange={(e) => {
+                    setFilterCurso(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="flex-1 min-w-0 appearance-none bg-surface border border-border-subtle rounded-md px-1.5 text-[11px] focus:outline-none focus:border-secondary h-7 py-0.5 text-ellipsis overflow-hidden cursor-pointer"
+                >
+                  <option value="todos">Curso: Todos os Cursos</option>
+                  <option value="Ciências Físicas e Biológicas">Ciências Físicas</option>
+                  <option value="Ciências Humanas e Sociais">Ciências Humanas</option>
+                  <option value="Técnico de Informática">Informática</option>
+                  <option value="Gestão e Economia">Gestão e Economia</option>
+                </select>
+
+                <select
+                  value={filterEstado}
+                  onChange={(e) => {
+                    setFilterEstado(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="flex-1 min-w-0 appearance-none bg-surface border border-border-subtle rounded-md px-1.5 text-[11px] focus:outline-none focus:border-secondary h-7 py-0.5 text-ellipsis overflow-hidden cursor-pointer"
+                >
+                  <option value="todos">Estado: Todos</option>
+                  <option value="Ativa">Ativa</option>
+                  <option value="Completa">Completa</option>
+                  <option value="Pendente">Pendente</option>
+                </select>
+              </div>
+
+              {/* Row 2: Search Input & Action Buttons */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex-1 flex items-center bg-surface border border-border-subtle rounded-md px-2 h-7 focus-within:border-secondary transition-colors">
+                  <span className="material-symbols-outlined text-[16px] text-outline mr-1.5">search</span>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    placeholder="Pesquisar por Código, Turma ou Diretor..."
+                    className="w-full bg-transparent border-none p-0 text-xs focus:ring-0 outline-none placeholder-outline"
+                  />
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    onClick={openCreateModal}
+                    className="bg-primary text-surface-white px-2.5 h-7 rounded hover:bg-primary/90 transition-colors shadow-sm flex items-center justify-center gap-1 font-semibold text-xs cursor-pointer"
+                    title="Criar Turma"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">add</span>
+                    <span className="whitespace-nowrap">Criar Turma</span>
+                  </button>
+
+                  <div className="flex items-center border border-border-subtle rounded overflow-hidden">
+                    <button
+                      onClick={() => onShowToast('Função de Importação de Turmas iniciada.')}
+                      className="bg-surface text-on-surface-variant px-2.5 h-7 hover:bg-surface-container transition-colors flex items-center justify-center gap-1 font-medium text-xs border-r border-border-subtle"
+                      title="Importar Turmas"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">upload</span>
+                      <span className="whitespace-nowrap">Importar</span>
+                    </button>
+                    <button
+                      onClick={() => onShowToast('Exportando Lista de Turmas em formato CSV...')}
+                      className="bg-surface text-on-surface-variant w-7 h-7 hover:bg-surface-container transition-colors flex items-center justify-center border-r border-border-subtle"
+                      title="Exportar"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">download</span>
+                    </button>
+                    <button
+                      onClick={() => window.print()}
+                      className="bg-surface text-on-surface-variant w-7 h-7 hover:bg-surface-container transition-colors flex items-center justify-center border-r border-border-subtle"
+                      title="Imprimir"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">print</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setFilterAnoLetivo('2026/2027');
+                        setFilterPeriodo('todos');
+                        setFilterClasse('todas');
+                        setFilterCurso('todos');
+                        setFilterEstado('todos');
+                        setSearchQuery('');
+                        setRowsPerPage(10);
+                        setCurrentPage(1);
+                        onShowToast('Filtros de turmas repostos com sucesso.');
+                      }}
+                      className="bg-surface text-on-surface-variant w-7 h-7 hover:bg-surface-container transition-colors flex items-center justify-center"
+                      title="Atualizar"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">refresh</span>
+                    </button>
+                  </div>
+
+                  <div className="w-px h-5 bg-border-subtle mx-0.5"></div>
+
+                  <div className="flex items-center gap-1.5">
+                    <select
+                      value={rowsPerPage}
+                      onChange={(e) => {
+                        setRowsPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      className="appearance-none bg-surface border border-border-subtle rounded-md pl-1.5 pr-6 text-xs focus:outline-none focus:border-secondary h-7 py-0.5 cursor-pointer font-medium"
+                    >
+                      <option value={10}>10</option>
+                      <option value={25}>25</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse whitespace-nowrap">
-              <thead>
-                <tr className="bg-surface-container-low">
-                  <th className="px-3 py-1.5 text-xs font-semibold text-outline uppercase">Código</th>
-                  <th className="px-3 py-1.5 text-xs font-semibold text-outline uppercase">Designação da Turma</th>
-                  <th className="px-3 py-1.5 text-xs font-semibold text-outline uppercase">Curso / Classe</th>
-                  <th className="px-3 py-1.5 text-xs font-semibold text-outline uppercase">Período</th>
-                  <th className="px-3 py-1.5 text-xs font-semibold text-outline uppercase">Sala</th>
-                  <th className="px-3 py-1.5 text-xs font-semibold text-outline uppercase text-center">Inscritos / Vagas</th>
-                  <th className="px-3 py-1.5 text-xs font-semibold text-outline uppercase">Diretor de Turma</th>
-                  <th className="px-3 py-1.5 text-xs font-semibold text-outline uppercase text-center">Estado</th>
-                  <th className="px-3 py-1.5 text-xs font-semibold text-outline uppercase text-center">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border-subtle">
-                {filteredTurmas.length === 0 ? (
-                  <tr>
-                    <td colSpan={9} className="text-center py-6 text-on-surface-variant font-medium">
-                      Nenhuma turma encontrada.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredTurmas.map((turma) => (
-                    <tr key={turma.id} className="hover:bg-surface-container/50 transition-colors">
-                      <td className="px-3 py-1.5 font-bold text-primary">{turma.codigo}</td>
-                      <td className="px-3 py-1.5 font-semibold text-on-surface">{turma.nome}</td>
-                      <td className="px-3 py-1.5 text-on-surface-variant">{turma.curso} ({turma.classe})</td>
-                      <td className="px-3 py-1.5 text-on-surface-variant">{turma.periodo}</td>
-                      <td className="px-3 py-1.5 text-outline">{turma.sala}</td>
-                      <td className="px-3 py-1.5 text-center font-bold">
-                        <span className={turma.estudantesInscritos >= turma.capacidadeMax ? 'text-error' : 'text-success'}>
-                          {turma.estudantesInscritos}
-                        </span>{' '}
-                        / {turma.capacidadeMax}
-                      </td>
-                      <td className="px-3 py-1.5 text-on-surface-variant">{turma.diretorTurma}</td>
-                      <td className="px-3 py-1.5 text-center">
-                        <span
-                          className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            turma.estado === 'Ativa'
-                              ? 'bg-green-100 text-green-800'
-                              : turma.estado === 'Completa'
-                              ? 'bg-amber-100 text-amber-800'
-                              : 'bg-blue-100 text-blue-800'
-                          }`}
-                        >
-                          {turma.estado}
-                        </span>
-                      </td>
-                      <td className="px-3 py-1.5 text-center relative">
-                        <button
-                          onClick={() => setActiveMenuId(activeMenuId === turma.id ? null : turma.id)}
-                          className="text-outline hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-surface-variant/50 cursor-pointer"
-                          title="Opções"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">more_vert</span>
-                        </button>
+          {/* Batch Actions Banner */}
+          {selectedTurmaIds.length > 0 && (
+            <div className="bg-[#FAF0E8] border border-[#E8D7C8] rounded-t-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 border-b-0 animate-in fade-in duration-200">
+              <span className="text-xs font-bold text-[#4A382C] flex items-center gap-1.5">
+                Acções em Lote Disponíveis:
+              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => onShowToast(`Notificações enviadas aos diretores de ${selectedTurmaIds.length} turmas.`)}
+                  className="bg-surface-white border border-outline-variant/30 text-on-surface hover:bg-surface-container rounded-md px-3 py-1.5 text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[16px]">mail</span> Notificar Diretores ({selectedTurmaIds.length})
+                </button>
+                <button
+                  onClick={() => onShowToast(`Pautas em lote exportadas para ${selectedTurmaIds.length} turmas.`)}
+                  className="bg-surface-white border border-outline-variant/30 text-on-surface hover:bg-surface-container rounded-md px-3 py-1.5 text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span> Pautas em Lote ({selectedTurmaIds.length})
+                </button>
+                <button
+                  onClick={() => setSelectedTurmaIds([])}
+                  className="bg-surface-white border border-outline-variant/30 text-outline hover:bg-surface-container rounded-md px-3 py-1.5 text-xs font-medium shadow-2xs cursor-pointer transition-colors"
+                >
+                  Desmarcar
+                </button>
+              </div>
+            </div>
+          )}
 
-                        {activeMenuId === turma.id && (
-                          <>
-                            <div className="fixed inset-0 z-20" onClick={() => setActiveMenuId(null)} />
-                            <div className="absolute right-2 top-8 w-44 bg-surface-white border border-border-subtle rounded-md shadow-lg z-30 p-1 text-xs text-left">
-                              <button
-                                onClick={() => {
-                                  setActiveMenuId(null);
-                                  setViewingTurmaStudents(turma);
-                                }}
-                                className="w-full text-left px-3 py-1.5 hover:bg-surface-container rounded flex items-center gap-2 cursor-pointer font-medium text-primary"
-                              >
-                                <Users className="w-3.5 h-3.5 stroke-[1.75]" /> Gerir Alunos
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setActiveMenuId(null);
-                                  openEditModal(turma);
-                                }}
-                                className="w-full text-left px-3 py-1.5 hover:bg-surface-container rounded flex items-center gap-2 cursor-pointer font-medium text-on-surface"
-                              >
-                                <Edit3 className="w-3.5 h-3.5 stroke-[1.75]" /> Editar Turma
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setActiveMenuId(null);
-                                  setDeletingTurma(turma);
-                                }}
-                                className="w-full text-left px-3 py-1.5 hover:bg-surface-container rounded flex items-center gap-2 cursor-pointer font-medium text-error"
-                              >
-                                <Trash2 className="w-3.5 h-3.5 stroke-[1.75]" /> Eliminar Turma
-                              </button>
-                            </div>
-                          </>
-                        )}
+          {/* Data Table Container */}
+          <div className={`bg-surface-white border border-border-subtle ${selectedTurmaIds.length > 0 ? 'rounded-b-xl border-t-0' : 'rounded-xl'} overflow-hidden shadow-sm`}>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse whitespace-nowrap">
+                <thead>
+                  <tr className="bg-surface border-b border-border-subtle">
+                    <th className="px-4 py-1.5 bg-surface-container-low w-10">
+                      <input
+                        type="checkbox"
+                        checked={isAllSelected}
+                        onChange={toggleSelectAll}
+                        className="rounded border-outline-variant text-primary focus:ring-primary cursor-pointer"
+                      />
+                    </th>
+                    <th className="px-4 font-semibold text-xs text-outline uppercase py-1.5 bg-surface-container-low">Código</th>
+                    <th className="px-4 font-semibold text-xs text-outline uppercase py-1.5 bg-surface-container-low">Designação da Turma</th>
+                    <th className="px-4 font-semibold text-xs text-outline uppercase py-1.5 bg-surface-container-low">Curso / Classe</th>
+                    <th className="px-4 font-semibold text-xs text-outline uppercase py-1.5 bg-surface-container-low">Período</th>
+                    <th className="px-4 font-semibold text-xs text-outline uppercase py-1.5 bg-surface-container-low">Sala</th>
+                    <th className="px-4 font-semibold text-xs text-outline uppercase text-center py-1.5 bg-surface-container-low">Inscritos / Vagas</th>
+                    <th className="px-4 font-semibold text-xs text-outline uppercase py-1.5 bg-surface-container-low">Diretor de Turma</th>
+                    <th className="px-4 font-semibold text-xs text-outline uppercase text-center py-1.5 bg-surface-container-low">Estado</th>
+                    <th className="px-4 font-semibold text-xs text-outline uppercase text-center w-16 py-1.5 bg-surface-container-low">Ações</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-outline-variant/10">
+                  {currentTurmas.length === 0 ? (
+                    <tr>
+                      <td colSpan={10} className="text-center py-6 text-on-surface-variant font-medium">
+                        Nenhuma turma encontrada para os filtros selecionados.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    currentTurmas.map((turma) => {
+                      const isSelected = selectedTurmaIds.includes(turma.id);
+                      return (
+                        <tr
+                          key={turma.id}
+                          className={`hover:bg-surface-container transition-colors group ${
+                            isSelected ? 'bg-primary/5' : 'even:bg-surface-container-low/50'
+                          }`}
+                        >
+                          <td className="px-4 py-1.5">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleSelectRow(turma.id)}
+                              className="rounded border-outline-variant text-primary focus:ring-primary cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-4 font-bold text-primary py-1.5 font-label-md">{turma.codigo}</td>
+                          <td className="px-4 font-semibold text-on-surface py-1.5 font-label-md">{turma.nome}</td>
+                          <td className="px-4 text-on-surface-variant py-1.5 font-label-md">{turma.curso} ({turma.classe})</td>
+                          <td className="px-4 text-on-surface-variant py-1.5 font-label-md">{turma.periodo}</td>
+                          <td className="px-4 text-outline py-1.5 font-label-md">{turma.sala}</td>
+                          <td className="px-4 py-1.5 text-center font-bold font-label-md">
+                            <span className={turma.estudantesInscritos >= turma.capacidadeMax ? 'text-error' : 'text-success'}>
+                              {turma.estudantesInscritos}
+                            </span>{' '}
+                            / {turma.capacidadeMax}
+                          </td>
+                          <td className="px-4 text-on-surface-variant py-1.5 font-label-md">{turma.diretorTurma}</td>
+                          <td className="px-4 py-1.5 text-center font-label-md">
+                            {turma.estado === 'Ativa' ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-green-800 bg-green-100 text-[11px] font-semibold tracking-tight">
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-600"></span> Ativa
+                              </span>
+                            ) : turma.estado === 'Completa' ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-amber-800 bg-amber-100 text-[11px] font-semibold tracking-tight">
+                                Completa
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-blue-800 bg-blue-100 text-[11px] font-semibold tracking-tight">
+                                Pendente
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-4 text-center py-1.5 font-label-md relative">
+                            <button
+                              onClick={() => setActiveMenuId(activeMenuId === turma.id ? null : turma.id)}
+                              className="text-outline hover:text-primary transition-colors p-1 rounded hover:bg-surface-variant/50 cursor-pointer"
+                              title="Opções"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">more_vert</span>
+                            </button>
+
+                            {activeMenuId === turma.id && (
+                              <>
+                                <div className="fixed inset-0 z-20" onClick={() => setActiveMenuId(null)} />
+                                <div className="absolute right-2 top-8 w-44 bg-surface-white border border-border-subtle rounded-md shadow-lg z-30 p-1 text-xs text-left">
+                                  <button
+                                    onClick={() => {
+                                      setActiveMenuId(null);
+                                      setViewingTurmaStudents(turma);
+                                    }}
+                                    className="w-full text-left px-3 py-1.5 hover:bg-surface-container rounded flex items-center gap-2 cursor-pointer font-medium text-primary"
+                                  >
+                                    <Users className="w-3.5 h-3.5 stroke-[1.75]" /> Gerir Alunos
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setActiveMenuId(null);
+                                      openEditModal(turma);
+                                    }}
+                                    className="w-full text-left px-3 py-1.5 hover:bg-surface-container rounded flex items-center gap-2 cursor-pointer font-medium text-on-surface"
+                                  >
+                                    <Edit3 className="w-3.5 h-3.5 stroke-[1.75]" /> Editar Turma
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setActiveMenuId(null);
+                                      setDeletingTurma(turma);
+                                    }}
+                                    className="w-full text-left px-3 py-1.5 hover:bg-surface-container rounded flex items-center gap-2 cursor-pointer font-medium text-error"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5 stroke-[1.75]" /> Eliminar Turma
+                                  </button>
+                                </div>
+                              </>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination Bar (Matching Students Reference Standard) */}
+            <div className="px-4 py-2 border-t border-border-subtle flex items-center justify-between bg-surface-white text-xs">
+              <p className="text-on-surface-variant">
+                Mostrando {filteredTurmas.length === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1}–
+                {Math.min(currentPage * rowsPerPage, filteredTurmas.length)} de {filteredTurmas.length} turmas
+              </p>
+              <div className="flex gap-1 items-center">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  className="px-2 py-1 border border-border-subtle rounded text-outline hover:bg-surface-container-low disabled:opacity-50 cursor-pointer"
+                >
+                  Anterior
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-2.5 py-1 border rounded font-medium cursor-pointer ${
+                      currentPage === page
+                        ? 'border-primary text-surface-white bg-primary'
+                        : 'border-border-subtle text-on-surface-variant hover:bg-surface-container-low'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  className="px-2 py-1 border border-border-subtle rounded text-on-surface-variant hover:bg-surface-container-low disabled:opacity-50 cursor-pointer"
+                >
+                  Próximo
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -789,7 +1049,7 @@ export const TurmasView: React.FC<TurmasViewProps> = ({ onSelectView, onShowToas
 
               <button
                 onClick={() => onShowToast('Parâmetros de distribuição guardados com sucesso!')}
-                className="w-full bg-secondary text-surface-white py-2 rounded-lg text-xs font-bold hover:bg-secondary/90 transition-colors mt-2 cursor-pointer"
+                className="w-full bg-primary text-surface-white py-2 rounded-lg text-xs font-bold hover:bg-primary/90 transition-colors mt-2 cursor-pointer"
               >
                 Guardar Regras de Alocação
               </button>
@@ -828,7 +1088,7 @@ export const TurmasView: React.FC<TurmasViewProps> = ({ onSelectView, onShowToas
                   setNewSlotIsIntervalo(false);
                   setIsAddSlotModalOpen(true);
                 }}
-                className="bg-secondary text-surface-white hover:bg-secondary/90 text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 shadow-sm transition-all cursor-pointer"
+                className="bg-primary text-surface-white hover:bg-primary/90 text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 shadow-sm transition-all cursor-pointer"
               >
                 <Plus className="w-4 h-4 stroke-[2]" />
                 Adicionar Bloco de Horário
@@ -1001,7 +1261,7 @@ export const TurmasView: React.FC<TurmasViewProps> = ({ onSelectView, onShowToas
             </div>
             <button
               onClick={() => onShowToast('Exportando Pauta Trimestral em PDF assinado digitalmente...')}
-              className="bg-secondary text-surface-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow cursor-pointer"
+              className="bg-primary hover:bg-primary/90 text-surface-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow cursor-pointer transition-all"
             >
               <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>
               Emitir Pauta Oficial (PDF)
@@ -1202,7 +1462,7 @@ export const TurmasView: React.FC<TurmasViewProps> = ({ onSelectView, onShowToas
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-secondary text-surface-white rounded-lg font-bold hover:bg-secondary/90 cursor-pointer transition-all"
+                  className="px-4 py-1.5 bg-primary text-surface-white rounded-lg font-bold hover:bg-primary/90 cursor-pointer transition-all"
                 >
                   {editingTurma ? 'Guardar Alterações' : 'Criar Turma'}
                 </button>
@@ -1266,7 +1526,7 @@ export const TurmasView: React.FC<TurmasViewProps> = ({ onSelectView, onShowToas
               />
               <button
                 onClick={() => handleAddStudentToTurma(viewingTurmaStudents.id)}
-                className="bg-secondary text-surface-white px-3 py-2 rounded-lg font-bold hover:bg-secondary/90 transition-all cursor-pointer whitespace-nowrap"
+                className="bg-primary text-surface-white px-3 py-2 rounded-lg font-bold hover:bg-primary/90 transition-all cursor-pointer whitespace-nowrap"
               >
                 + Adicionar
               </button>
@@ -1392,7 +1652,7 @@ export const TurmasView: React.FC<TurmasViewProps> = ({ onSelectView, onShowToas
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-1.5 bg-secondary text-surface-white rounded-lg font-bold hover:bg-secondary/90 cursor-pointer transition-all"
+                    className="px-4 py-1.5 bg-primary text-surface-white rounded-lg font-bold hover:bg-primary/90 cursor-pointer transition-all"
                   >
                     Guardar Aula
                   </button>
@@ -1466,7 +1726,7 @@ export const TurmasView: React.FC<TurmasViewProps> = ({ onSelectView, onShowToas
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-secondary text-surface-white rounded-lg font-bold hover:bg-secondary/90 cursor-pointer transition-all"
+                  className="px-4 py-1.5 bg-primary text-surface-white rounded-lg font-bold hover:bg-primary/90 cursor-pointer transition-all"
                 >
                   Criar Bloco
                 </button>

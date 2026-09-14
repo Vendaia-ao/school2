@@ -21,10 +21,10 @@
   --color-on-primary-container: #7284a9;
   --color-inverse-primary: #b5c7ef;
   
-  --color-secondary: #a04100;
-  --color-secondary-container: #fe6b00;
+  --color-secondary: #041939;
+  --color-secondary-container: #061b3b;
   --color-on-secondary: #ffffff;
-  --color-on-secondary-container: #572000;
+  --color-on-secondary-container: #7284a9;
   
   --color-tertiary: #000000;
   --color-on-tertiary: #ffffff;
@@ -295,6 +295,327 @@ div.icon-box {
 .shadow-2xl {
   box-shadow: 0 8px 20px 0 rgba(0, 0, 0, 0.06) !important;
 }
+
+/* Optimized Global Font Legibility Scaling (Preserving Component Box Heights & Dimensions) */
+.text-\[9px\] {
+  font-size: 11px !important;
+  line-height: 14px !important;
+}
+
+.text-\[10px\] {
+  font-size: 12px !important;
+  line-height: 15px !important;
+}
+
+.text-\[11px\] {
+  font-size: 12.5px !important;
+  line-height: 16px !important;
+}
+
+.text-xs {
+  font-size: 13.5px !important;
+  line-height: 17px !important;
+}
+
+.text-sm {
+  font-size: 15px !important;
+  line-height: 20px !important;
+}
+
+table th,
+th {
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+}
+
+table td,
+td {
+  font-size: 13px !important;
+}
+
+input, select, textarea {
+  font-size: 13px;
+}
+
+input::placeholder, textarea::placeholder {
+  font-size: 12.5px;
+}
+
+/* ==========================================================================
+   Comprehensive Dark Mode System (WCAG AA High-Contrast Overrides)
+   ========================================================================== */
+html.dark, body.dark, .dark {
+  color-scheme: dark;
+  --color-primary: #ffffff;
+  --color-background: #060e1a;
+  --color-surface: #0b1a30;
+  --color-surface-white: #0d203f;
+  --color-surface-bright: #142c52;
+  --color-surface-dim: #071427;
+  --color-surface-container-lowest: #0c1c38;
+  --color-surface-container-low: #11274a;
+  --color-surface-container: #16305a;
+  --color-surface-container-high: #1c3b6d;
+  --color-surface-container-highest: #22457f;
+  --color-surface-variant: #1a345e;
+
+  --color-on-background: #f8fafc;
+  --color-on-surface: #f8fafc;
+  --color-on-surface-variant: #cbd5e1;
+  --color-outline: #94a3b8;
+  --color-outline-variant: #475569;
+  --color-border-subtle: #1e3a5f;
+}
+
+html.dark body, body.dark {
+  background-color: #060e1a !important;
+  color: #f8fafc !important;
+}
+
+/* Headers & Navigation High Contrast */
+html.dark header,
+html.dark .header-nav,
+html.dark .topbar {
+  background-color: #0b1a30 !important;
+  border-color: #1e3a5f !important;
+  color: #f8fafc !important;
+}
+
+html.dark header *,
+html.dark .header-nav *,
+html.dark .topbar * {
+  color: #e2e8f0;
+}
+
+html.dark header .text-primary,
+html.dark .header-nav .text-primary,
+html.dark .topbar .text-primary,
+html.dark header h1,
+html.dark header h2,
+html.dark header .font-bold,
+html.dark .header-nav .font-bold {
+  color: #ffffff !important;
+}
+
+/* Sidebar Text & Submenus High Contrast */
+html.dark aside,
+html.dark .sidebar {
+  background-color: #051020 !important;
+  border-color: #1e3a5f !important;
+}
+
+html.dark .sidebar-text,
+html.dark aside span,
+html.dark aside a,
+html.dark aside button {
+  color: #e2e8f0;
+}
+
+html.dark aside button:hover {
+  color: #ffffff !important;
+}
+
+/* Main Content Area */
+html.dark main,
+html.dark .main-content {
+  background-color: #060e1a !important;
+}
+
+/* Card Surfaces & Container Backgrounds */
+html.dark .bg-surface-white,
+html.dark .bg-surface,
+html.dark .bg-white {
+  background-color: #0d203f !important;
+  color: #f8fafc !important;
+  border-color: #1e3a5f !important;
+}
+
+html.dark .bg-surface-container-low,
+html.dark .bg-surface-container,
+html.dark .bg-slate-50,
+html.dark .bg-gray-50,
+html.dark .bg-slate-100\/50,
+html.dark .bg-gray-100 {
+  background-color: #11274a !important;
+  border-color: #1e3a5f !important;
+}
+
+/* High Contrast Typography Overrides */
+html.dark .text-primary,
+html.dark .text-gray-900,
+html.dark .text-slate-900,
+html.dark .text-gray-800,
+html.dark .text-slate-800,
+html.dark .text-gray-700,
+html.dark .text-slate-700 {
+  color: #ffffff !important;
+}
+
+html.dark .text-on-surface-variant,
+html.dark .text-slate-600,
+html.dark .text-gray-600,
+html.dark .text-gray-500,
+html.dark .text-slate-500,
+html.dark .text-outline {
+  color: #cbd5e1 !important;
+}
+
+html.dark .text-slate-400,
+html.dark .text-gray-400 {
+  color: #a0aec0 !important;
+}
+
+/* Form Labels & Headers */
+html.dark label,
+html.dark .label,
+html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6 {
+  color: #f8fafc !important;
+}
+
+/* Navigation Tabs & Filter Pills */
+html.dark div[role="tablist"] button,
+html.dark .tab-button,
+html.dark nav button:not(.bg-primary):not(.bg-info) {
+  color: #cbd5e1 !important;
+}
+
+html.dark button:hover {
+  color: #ffffff !important;
+}
+
+/* Form Inputs, Selects, Dropdowns */
+html.dark input,
+html.dark select,
+html.dark textarea {
+  background-color: #061224 !important;
+  color: #ffffff !important;
+  border-color: #244b7a !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #8da4c4 !important;
+}
+
+html.dark select option,
+html.dark select optgroup {
+  background-color: #0b1a30 !important;
+  color: #ffffff !important;
+}
+
+/* Tables High Contrast */
+html.dark table {
+  color: #f8fafc !important;
+}
+
+html.dark table th,
+html.dark th {
+  background-color: #07162b !important;
+  color: #a0aec0 !important;
+  border-bottom-color: #1e3a5f !important;
+}
+
+html.dark table td,
+html.dark td {
+  border-bottom-color: #1e3a5f !important;
+  color: #e2e8f0 !important;
+}
+
+html.dark table td span.text-outline,
+html.dark table td .text-slate-500,
+html.dark table td .text-gray-500 {
+  color: #cbd5e1 !important;
+}
+
+html.dark tr:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Status Badges & Pills High Contrast */
+html.dark .bg-emerald-50,
+html.dark .bg-emerald-100,
+html.dark .bg-green-50,
+html.dark .bg-green-100 {
+  background-color: rgba(16, 185, 129, 0.22) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+}
+
+html.dark .bg-amber-50,
+html.dark .bg-amber-100,
+html.dark .bg-yellow-50,
+html.dark .bg-yellow-100 {
+  background-color: rgba(245, 158, 11, 0.22) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+}
+
+html.dark .bg-rose-50,
+html.dark .bg-rose-100,
+html.dark .bg-red-50,
+html.dark .bg-red-100 {
+  background-color: rgba(239, 68, 68, 0.22) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.4) !important;
+}
+
+html.dark .bg-blue-50,
+html.dark .bg-blue-100,
+html.dark .bg-sky-50,
+html.dark .bg-sky-100 {
+  background-color: rgba(59, 130, 246, 0.22) !important;
+  color: #60a5fa !important;
+  border: 1px solid rgba(59, 130, 246, 0.4) !important;
+}
+
+html.dark .bg-purple-50,
+html.dark .bg-purple-100 {
+  background-color: rgba(168, 85, 247, 0.22) !important;
+  color: #c084fc !important;
+  border: 1px solid rgba(168, 85, 247, 0.4) !important;
+}
+
+/* Batch Action Banner Dark Mode Override */
+html.dark [class*="bg-\[\#FAF0E8\]"],
+html.dark .bg-\[\#FAF0E8\] {
+  background-color: #2e1c0c !important;
+  color: #ffedd5 !important;
+  border-color: #7c2d12 !important;
+}
+
+html.dark [class*="text-\[\#4A382C\]"] {
+  color: #ffedd5 !important;
+}
+
+/* Sub-text Metrics Contrast */
+html.dark .text-emerald-600,
+html.dark .text-emerald-700 {
+  color: #34d399 !important;
+}
+
+html.dark .text-amber-600,
+html.dark .text-amber-700 {
+  color: #fbbf24 !important;
+}
+
+html.dark .text-rose-600,
+html.dark .text-rose-700,
+html.dark .text-red-600 {
+  color: #f87171 !important;
+}
+
+html.dark .text-blue-600,
+html.dark .text-blue-700 {
+  color: #60a5fa !important;
+}
+
+/* Modals & Popovers High Contrast */
+html.dark .shadow-2xl,
+html.dark .shadow-xl {
+  box-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.7) !important;
+}
+
+
 
 
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActiveView } from '../types';
-import { UserCheck, UserPlus, Clock, CheckCircle2, Star, Award, BookOpen } from 'lucide-react';
+import { UserCheck, UserPlus, Clock, CheckCircle2, Star, Award, BookOpen, TrendingUp } from 'lucide-react';
 
 interface ProfessoresViewProps {
   onSelectView: (view: ActiveView) => void;
@@ -23,6 +23,13 @@ interface Professor {
 export const ProfessoresView: React.FC<ProfessoresViewProps> = ({ onSelectView, onShowToast }) => {
   const [activeTab, setActiveTab] = useState<'lista' | 'atribuicao' | 'horarios' | 'assiduidade' | 'desempenho'>('lista');
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterAnoLetivo, setFilterAnoLetivo] = useState('2026/2027');
+  const [filterDisciplina, setFilterDisciplina] = useState('todas');
+  const [filterRegime, setFilterRegime] = useState('todos');
+  const [filterEstado, setFilterEstado] = useState('todos');
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedProfIds, setSelectedProfIds] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProf, setEditingProf] = useState<Professor | null>(null);
   const [deletingProf, setDeletingProf] = useState<Professor | null>(null);
@@ -157,62 +164,117 @@ export const ProfessoresView: React.FC<ProfessoresViewProps> = ({ onSelectView, 
     },
   ]);
 
-  const filteredProfessores = professores.filter(
-    (p) =>
+  const filteredProfessores = professores.filter((p) => {
+    const matchesSearch =
       p.nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.disciplinas.some((d) => d.toLowerCase().includes(searchQuery.toLowerCase()))
+      p.disciplinas.some((d) => d.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const matchesDisciplina =
+      filterDisciplina === 'todas' ||
+      p.disciplinas.some((d) => d.toLowerCase().includes(filterDisciplina.toLowerCase()));
+    const matchesEstado = filterEstado === 'todos' || p.estado.toLowerCase() === filterEstado.toLowerCase();
+
+    return matchesSearch && matchesDisciplina && matchesEstado;
+  });
+
+  const totalPages = Math.ceil(filteredProfessores.length / rowsPerPage) || 1;
+  const currentProfessores = filteredProfessores.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
   );
 
+  const isAllSelected =
+    currentProfessores.length > 0 && currentProfessores.every((p) => selectedProfIds.includes(p.id));
+
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedProfIds(selectedProfIds.filter((id) => !currentProfessores.some((p) => p.id === id)));
+    } else {
+      const newIds = [...selectedProfIds];
+      currentProfessores.forEach((p) => {
+        if (!newIds.includes(p.id)) newIds.push(p.id);
+      });
+      setSelectedProfIds(newIds);
+    }
+  };
+
+  const toggleSelectRow = (id: string) => {
+    if (selectedProfIds.includes(id)) {
+      setSelectedProfIds(selectedProfIds.filter((i) => i !== id));
+    } else {
+      setSelectedProfIds([...selectedProfIds, id]);
+    }
+  };
+
   return (
-    <div className="mt-header-height p-4 w-full flex flex-col gap-4 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-1">
-        <h1 className="text-xl font-bold text-primary flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-secondary" />
-          Gestão de Professores
-        </h1>
-        <button
-          onClick={openCreateModal}
-          className="bg-secondary text-surface-white hover:bg-secondary/90 px-4 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
-        >
-          <UserPlus className="w-4 h-4 stroke-[1.75]" />
-          Cadastrar Professor
-        </button>
-      </div>
-
-      {/* Quick Metrics Bar */}
+    <div className="mt-header-height p-4 w-full flex flex-col gap-3">
+      {/* Quick Metrics Bar - Matching Students Reference Standard */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-3 shadow-sm flex items-center gap-3">
-          <UserCheck className="w-5 h-5 stroke-[1.75] text-info" />
+        {/* Card 1: Total Docentes */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
           <div>
-            <p className="text-[10px] uppercase font-bold text-outline tracking-wider">Total Docentes</p>
-            <p className="font-headline-sm text-lg font-bold text-primary">{professores.length} Ativos</p>
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider block mb-0.5">Total Docentes</span>
+            <span className="text-xl font-bold text-primary leading-none">{professores.length} <span className="text-xs font-normal text-outline">Ativos</span></span>
+          </div>
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-success bg-success/10 text-[10px] font-bold">
+            <TrendingUp className="w-3.5 h-3.5" /> +1 este ano
+          </span>
+        </div>
+
+        {/* Card 2: Carga Horária Média */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center transition-all hover:shadow-md h-[68px]">
+          <div className="w-full flex flex-col justify-center gap-1.5">
+            <div className="flex justify-between items-end">
+              <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider">Carga Horária Média</span>
+              <span className="text-success font-bold text-[12px]">
+                23h <span className="text-[10px] font-medium text-outline ml-0.5">/semana</span>
+              </span>
+            </div>
+            <div className="w-full bg-surface-container-low h-1.5 rounded-full overflow-hidden">
+              <div className="bg-success h-full rounded-full" style={{ width: '85%' }}></div>
+            </div>
+            <div className="flex justify-between text-[9px] font-medium uppercase text-outline">
+              <span>92 Tempos Letivos</span>
+              <span className="text-outline">100% Cobertura</span>
+            </div>
           </div>
         </div>
 
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-3 shadow-sm flex items-center gap-3">
-          <Clock className="w-5 h-5 stroke-[1.75] text-success" />
-          <div>
-            <p className="text-[10px] uppercase font-bold text-outline tracking-wider">Carga Horária Média</p>
-            <p className="font-headline-sm text-lg font-bold text-primary">23 hrs/semana</p>
+        {/* Card 3: Assiduidade Geral */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center transition-all hover:shadow-md h-[68px]">
+          <div className="w-full flex flex-col justify-center gap-1.5">
+            <div className="flex justify-between items-end">
+              <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider">Assiduidade Geral</span>
+              <span className="text-info font-bold text-[12px]">
+                97.6% <span className="text-[10px] font-medium text-outline ml-0.5">Regular</span>
+              </span>
+            </div>
+            <div className="w-full bg-surface-container-low h-1.5 rounded-full overflow-hidden">
+              <div className="bg-info h-full rounded-full" style={{ width: '97.6%' }}></div>
+            </div>
+            <div className="flex justify-between text-[9px] font-medium uppercase text-outline">
+              <span>0 Faltas Injust.</span>
+              <span className="text-info/70">2 Licenças</span>
+            </div>
           </div>
         </div>
 
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-3 shadow-sm flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-transparent text-warning flex items-center justify-center">
-            <CheckCircle2 className="w-5 h-5 stroke-[1.75]" />
+        {/* Card 4: Avaliação Média */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-2.5 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider mb-0.5">
+              Avaliação Média
+            </span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl font-bold text-primary leading-none">4.8</span>
+              <span className="text-[10px] text-outline font-medium">/ 5.0</span>
+            </div>
           </div>
-          <div>
-            <p className="text-[10px] uppercase font-bold text-outline tracking-wider">Assiduidade Geral</p>
-            <p className="font-headline-sm text-lg font-bold text-primary">97.6%</p>
-          </div>
-        </div>
-
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-3 shadow-sm flex items-center gap-3">
-          <Star className="w-5 h-5 stroke-[1.75] text-secondary" />
-          <div>
-            <p className="text-[10px] uppercase font-bold text-outline tracking-wider">Avaliação Média</p>
-            <p className="font-headline-sm text-lg font-bold text-primary">4.8 / 5.0</p>
+          <div className="flex flex-col items-end gap-1.5">
+            <span className="px-2 py-0.5 rounded bg-success/10 text-success text-[10px] font-bold">
+              Excelente
+            </span>
           </div>
         </div>
       </div>
@@ -282,112 +344,350 @@ export const ProfessoresView: React.FC<ProfessoresViewProps> = ({ onSelectView, 
 
       {/* Tab 1: Lista de Professores */}
       {activeTab === 'lista' && (
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-4 shadow-sm flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-3 pb-2 border-b border-border-subtle">
-            <div className="relative w-full sm:w-80">
-              <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-outline text-[16px]">
-                search
-              </span>
-              <input
-                type="text"
-                placeholder="Pesquisar docente por nome, e-mail ou disciplina..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-surface-container-low border border-border-subtle rounded-lg focus:outline-none focus:border-secondary"
-              />
+        <div className="flex flex-col gap-3">
+          {/* Search & Filters Bar (Reference 2-Row Design Standard) */}
+          <div className="bg-surface-white border border-outline-variant/30 rounded-lg flex flex-wrap items-center justify-between gap-4 shadow-sm p-3">
+            <div className="flex flex-col w-full gap-1.5">
+              {/* Row 1: Dropdown Filters */}
+              <div className="flex items-center gap-1 w-full">
+                <select
+                  value={filterAnoLetivo}
+                  onChange={(e) => {
+                    setFilterAnoLetivo(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="flex-1 min-w-0 appearance-none bg-surface border border-border-subtle rounded-md px-1.5 text-[11px] focus:outline-none focus:border-secondary h-7 py-0.5 text-ellipsis overflow-hidden cursor-pointer font-medium"
+                >
+                  <option value="2026/2027">Ano: 2026/2027</option>
+                  <option value="2025/2026">Ano: 2025/2026</option>
+                  <option value="2024/2025">Ano: 2024/2025</option>
+                </select>
+
+                <select
+                  value={filterDisciplina}
+                  onChange={(e) => {
+                    setFilterDisciplina(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="flex-1 min-w-0 appearance-none bg-surface border border-border-subtle rounded-md px-1.5 text-[11px] focus:outline-none focus:border-secondary h-7 py-0.5 text-ellipsis overflow-hidden cursor-pointer"
+                >
+                  <option value="todas">Disciplina: Todas</option>
+                  <option value="Matemática">Matemática</option>
+                  <option value="Física">Física</option>
+                  <option value="Química">Química</option>
+                  <option value="Biologia">Biologia</option>
+                  <option value="Língua Portuguesa">Língua Portuguesa</option>
+                  <option value="Informática">Informática</option>
+                </select>
+
+                <select
+                  value={filterRegime}
+                  onChange={(e) => {
+                    setFilterRegime(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="flex-1 min-w-0 appearance-none bg-surface border border-border-subtle rounded-md px-1.5 text-[11px] focus:outline-none focus:border-secondary h-7 py-0.5 text-ellipsis overflow-hidden cursor-pointer"
+                >
+                  <option value="todos">Regime: Todos</option>
+                  <option value="Integral">Tempo Inteiro</option>
+                  <option value="Parcial">Tempo Parcial</option>
+                </select>
+
+                <select
+                  value={filterEstado}
+                  onChange={(e) => {
+                    setFilterEstado(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="flex-1 min-w-0 appearance-none bg-surface border border-border-subtle rounded-md px-1.5 text-[11px] focus:outline-none focus:border-secondary h-7 py-0.5 text-ellipsis overflow-hidden cursor-pointer"
+                >
+                  <option value="todos">Estado: Todos</option>
+                  <option value="Ativo">Ativo</option>
+                  <option value="Licença">Licença</option>
+                  <option value="Inativo">Inativo</option>
+                </select>
+              </div>
+
+              {/* Row 2: Search Input & Action Buttons */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex-1 flex items-center bg-surface border border-border-subtle rounded-md px-2 h-7 focus-within:border-secondary transition-colors">
+                  <span className="material-symbols-outlined text-[16px] text-outline mr-1.5">search</span>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    placeholder="Pesquisar docente por nome, e-mail ou disciplina..."
+                    className="w-full bg-transparent border-none p-0 text-xs focus:ring-0 outline-none placeholder-outline"
+                  />
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    onClick={openCreateModal}
+                    className="bg-primary text-surface-white px-2.5 h-7 rounded hover:bg-primary/90 transition-colors shadow-sm flex items-center justify-center gap-1 font-semibold text-xs cursor-pointer"
+                    title="Cadastrar Professor"
+                  >
+                    <UserPlus className="w-3.5 h-3.5 stroke-[1.75]" />
+                    <span className="whitespace-nowrap">Cadastrar Professor</span>
+                  </button>
+
+                  <div className="flex items-center border border-border-subtle rounded overflow-hidden">
+                    <button
+                      onClick={() => onShowToast('Função de Importação de Docentes iniciada.')}
+                      className="bg-surface text-on-surface-variant px-2.5 h-7 hover:bg-surface-container transition-colors flex items-center justify-center gap-1 font-medium text-xs border-r border-border-subtle"
+                      title="Importar Docentes"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">upload</span>
+                      <span className="whitespace-nowrap">Importar</span>
+                    </button>
+                    <button
+                      onClick={() => onShowToast('Exportando Lista de Docentes em formato CSV...')}
+                      className="bg-surface text-on-surface-variant w-7 h-7 hover:bg-surface-container transition-colors flex items-center justify-center border-r border-border-subtle"
+                      title="Exportar"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">download</span>
+                    </button>
+                    <button
+                      onClick={() => window.print()}
+                      className="bg-surface text-on-surface-variant w-7 h-7 hover:bg-surface-container transition-colors flex items-center justify-center border-r border-border-subtle"
+                      title="Imprimir"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">print</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setFilterAnoLetivo('2026/2027');
+                        setFilterDisciplina('todas');
+                        setFilterRegime('todos');
+                        setFilterEstado('todos');
+                        setSearchQuery('');
+                        setRowsPerPage(10);
+                        setCurrentPage(1);
+                        onShowToast('Filtros de docentes repostos com sucesso.');
+                      }}
+                      className="bg-surface text-on-surface-variant w-7 h-7 hover:bg-surface-container transition-colors flex items-center justify-center"
+                      title="Atualizar"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">refresh</span>
+                    </button>
+                  </div>
+
+                  <div className="w-px h-5 bg-border-subtle mx-0.5"></div>
+
+                  <div className="flex items-center gap-1.5">
+                    <select
+                      value={rowsPerPage}
+                      onChange={(e) => {
+                        setRowsPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      className="appearance-none bg-surface border border-border-subtle rounded-md pl-1.5 pr-6 text-xs focus:outline-none focus:border-secondary h-7 py-0.5 cursor-pointer font-medium"
+                    >
+                      <option value={10}>10</option>
+                      <option value={25}>25</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse whitespace-nowrap">
-              <thead>
-                <tr className="bg-surface-container-low">
-                  <th className="px-3 py-1.5 text-xs font-semibold text-outline uppercase">Docente</th>
-                  <th className="px-3 py-1.5 text-xs font-semibold text-outline uppercase">Contacto / E-mail</th>
-                  <th className="px-3 py-1.5 text-xs font-semibold text-outline uppercase">Disciplinas Lecionadas</th>
-                  <th className="px-3 py-1.5 text-xs font-semibold text-outline uppercase">Turmas Atribuídas</th>
-                  <th className="px-3 py-1.5 text-xs font-semibold text-outline uppercase text-center">Carga Letiva</th>
-                  <th className="px-3 py-1.5 text-xs font-semibold text-outline uppercase text-center">Assiduidade</th>
-                  <th className="px-3 py-1.5 text-xs font-semibold text-outline uppercase text-center">Estado</th>
-                  <th className="px-3 py-1.5 text-xs font-semibold text-outline uppercase text-center">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border-subtle">
-                {filteredProfessores.map((prof) => (
-                  <tr key={prof.id} className="hover:bg-surface-container/50 transition-colors">
-                    <td className="px-3 py-1.5 font-bold text-primary">{prof.nome}</td>
-                    <td className="px-3 py-1.5 text-on-surface-variant text-xs">
-                      <div>{prof.email}</div>
-                      <div className="text-outline text-[11px]">{prof.telefone}</div>
-                    </td>
-                    <td className="px-3 py-1.5">
-                      <div className="flex flex-wrap gap-1">
-                        {prof.disciplinas.map((d, i) => (
-                          <span key={i} className="px-2 py-0.5 rounded text-[10px] font-semibold bg-primary/10 text-primary">
-                            {d}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-3 py-1.5 text-on-surface-variant font-bold">
-                      {prof.turmasAtribuidas.join(', ')}
-                    </td>
-                    <td className="px-3 py-1.5 text-center font-bold text-secondary">{prof.cargaHorariaSemanal}h/sem</td>
-                    <td className="px-3 py-1.5 text-center font-bold text-success">{prof.assiduidadePerc}%</td>
-                    <td className="px-3 py-1.5 text-center">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-800">
-                        {prof.estado}
-                      </span>
-                    </td>
-                    <td className="px-3 py-1.5 text-center relative">
-                      <button
-                        onClick={() => setActiveMenuId(activeMenuId === prof.id ? null : prof.id)}
-                        className="text-outline hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-surface-variant/50 cursor-pointer"
-                        title="Opções"
-                      >
-                        <span className="material-symbols-outlined text-[18px]">more_vert</span>
-                      </button>
+          {/* Batch Actions Banner */}
+          {selectedProfIds.length > 0 && (
+            <div className="bg-[#FAF0E8] border border-[#E8D7C8] rounded-t-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 border-b-0 animate-in fade-in duration-200">
+              <span className="text-xs font-bold text-[#4A382C] flex items-center gap-1.5">
+                Acções em Lote Disponíveis:
+              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => onShowToast(`Notificações enviadas a ${selectedProfIds.length} docentes.`)}
+                  className="bg-surface-white border border-outline-variant/30 text-on-surface hover:bg-surface-container rounded-md px-3 py-1.5 text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[16px]">mail</span> Enviar Notificação ({selectedProfIds.length})
+                </button>
+                <button
+                  onClick={() => onShowToast(`Fichas individuais exportadas para ${selectedProfIds.length} docentes.`)}
+                  className="bg-surface-white border border-outline-variant/30 text-on-surface hover:bg-surface-container rounded-md px-3 py-1.5 text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span> Exportar Fichas ({selectedProfIds.length})
+                </button>
+                <button
+                  onClick={() => setSelectedProfIds([])}
+                  className="bg-surface-white border border-outline-variant/30 text-outline hover:bg-surface-container rounded-md px-3 py-1.5 text-xs font-medium shadow-2xs cursor-pointer transition-colors"
+                >
+                  Desmarcar
+                </button>
+              </div>
+            </div>
+          )}
 
-                      {activeMenuId === prof.id && (
-                        <>
-                          <div className="fixed inset-0 z-20" onClick={() => setActiveMenuId(null)} />
-                          <div className="absolute right-2 top-8 w-44 bg-surface-white border border-border-subtle rounded-md shadow-lg z-30 p-1 text-xs text-left">
-                            <button
-                              onClick={() => {
-                                setActiveMenuId(null);
-                                openEditModal(prof);
-                              }}
-                              className="w-full text-left px-3 py-1.5 hover:bg-surface-container rounded flex items-center gap-2 cursor-pointer font-medium text-primary"
-                            >
-                              <span className="material-symbols-outlined text-[16px]">edit</span> Editar Docente
-                            </button>
-                            <button
-                              onClick={() => {
-                                setActiveMenuId(null);
-                                setActiveTab('atribuicao');
-                                onShowToast(`Gerindo atribuição de turmas para ${prof.nome}`);
-                              }}
-                              className="w-full text-left px-3 py-1.5 hover:bg-surface-container rounded flex items-center gap-2 cursor-pointer font-medium text-on-surface"
-                            >
-                              <span className="material-symbols-outlined text-[16px]">assignment</span> Atribuir Turmas
-                            </button>
-                            <button
-                              onClick={() => {
-                                setActiveMenuId(null);
-                                setDeletingProf(prof);
-                              }}
-                              className="w-full text-left px-3 py-1.5 hover:bg-surface-container rounded flex items-center gap-2 cursor-pointer font-medium text-error"
-                            >
-                              <span className="material-symbols-outlined text-[16px]">delete</span> Remover Docente
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </td>
+          {/* Data Table Container */}
+          <div className={`bg-surface-white border border-border-subtle ${selectedProfIds.length > 0 ? 'rounded-b-xl border-t-0' : 'rounded-xl'} overflow-hidden shadow-sm`}>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse whitespace-nowrap">
+                <thead>
+                  <tr className="bg-surface border-b border-border-subtle">
+                    <th className="px-4 py-1.5 bg-surface-container-low w-10">
+                      <input
+                        type="checkbox"
+                        checked={isAllSelected}
+                        onChange={toggleSelectAll}
+                        className="rounded border-outline-variant text-primary focus:ring-primary cursor-pointer"
+                      />
+                    </th>
+                    <th className="px-4 font-semibold text-xs text-outline uppercase py-1.5 bg-surface-container-low">Docente</th>
+                    <th className="px-4 font-semibold text-xs text-outline uppercase py-1.5 bg-surface-container-low">Contacto / E-mail</th>
+                    <th className="px-4 font-semibold text-xs text-outline uppercase py-1.5 bg-surface-container-low">Disciplinas Lecionadas</th>
+                    <th className="px-4 font-semibold text-xs text-outline uppercase py-1.5 bg-surface-container-low">Turmas Atribuídas</th>
+                    <th className="px-4 font-semibold text-xs text-outline uppercase text-center py-1.5 bg-surface-container-low">Carga Letiva</th>
+                    <th className="px-4 font-semibold text-xs text-outline uppercase text-center py-1.5 bg-surface-container-low">Assiduidade</th>
+                    <th className="px-4 font-semibold text-xs text-outline uppercase text-center py-1.5 bg-surface-container-low">Estado</th>
+                    <th className="px-4 font-semibold text-xs text-outline uppercase text-center w-16 py-1.5 bg-surface-container-low">Ações</th>
                   </tr>
+                </thead>
+                <tbody className="divide-y divide-outline-variant/10">
+                  {currentProfessores.length === 0 ? (
+                    <tr>
+                      <td colSpan={9} className="text-center py-6 text-on-surface-variant font-medium">
+                        Nenhum docente encontrado para os filtros selecionados.
+                      </td>
+                    </tr>
+                  ) : (
+                    currentProfessores.map((prof) => {
+                      const isSelected = selectedProfIds.includes(prof.id);
+                      return (
+                        <tr
+                          key={prof.id}
+                          className={`hover:bg-surface-container transition-colors group ${
+                            isSelected ? 'bg-primary/5' : 'even:bg-surface-container-low/50'
+                          }`}
+                        >
+                          <td className="px-4 py-1.5">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleSelectRow(prof.id)}
+                              className="rounded border-outline-variant text-primary focus:ring-primary cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-4 font-bold text-primary py-1.5 font-label-md">{prof.nome}</td>
+                          <td className="px-4 text-on-surface-variant text-xs py-1.5 font-label-md">
+                            <div>{prof.email}</div>
+                            <div className="text-outline text-[11px]">{prof.telefone}</div>
+                          </td>
+                          <td className="px-4 py-1.5 font-label-md">
+                            <div className="flex flex-wrap gap-1">
+                              {prof.disciplinas.map((d, i) => (
+                                <span key={i} className="px-2 py-0.5 rounded text-[10px] font-semibold bg-primary/10 text-primary">
+                                  {d}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="px-4 text-on-surface-variant font-semibold py-1.5 font-label-md">
+                            {prof.turmasAtribuidas.join(', ')}
+                          </td>
+                          <td className="px-4 py-1.5 text-center font-bold text-primary font-label-md">{prof.cargaHorariaSemanal}h/sem</td>
+                          <td className="px-4 py-1.5 text-center font-bold text-success font-label-md">{prof.assiduidadePerc}%</td>
+                          <td className="px-4 py-1.5 text-center font-label-md">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-green-800 bg-green-100 text-[11px] font-semibold tracking-tight">
+                              <span className="w-1.5 h-1.5 rounded-full bg-green-600"></span> {prof.estado}
+                            </span>
+                          </td>
+                          <td className="px-4 text-center py-1.5 font-label-md relative">
+                            <button
+                              onClick={() => setActiveMenuId(activeMenuId === prof.id ? null : prof.id)}
+                              className="text-outline hover:text-primary transition-colors p-1 rounded hover:bg-surface-variant/50 cursor-pointer"
+                              title="Opções"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">more_vert</span>
+                            </button>
+
+                            {activeMenuId === prof.id && (
+                              <>
+                                <div className="fixed inset-0 z-20" onClick={() => setActiveMenuId(null)} />
+                                <div className="absolute right-2 top-8 w-44 bg-surface-white border border-border-subtle rounded-md shadow-lg z-30 p-1 text-xs text-left">
+                                  <button
+                                    onClick={() => {
+                                      setActiveMenuId(null);
+                                      openEditModal(prof);
+                                    }}
+                                    className="w-full text-left px-3 py-1.5 hover:bg-surface-container rounded flex items-center gap-2 cursor-pointer font-medium text-primary"
+                                  >
+                                    <span className="material-symbols-outlined text-[16px]">edit</span> Editar Docente
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setActiveMenuId(null);
+                                      setActiveTab('atribuicao');
+                                      onShowToast(`Gerindo atribuição de turmas para ${prof.nome}`);
+                                    }}
+                                    className="w-full text-left px-3 py-1.5 hover:bg-surface-container rounded flex items-center gap-2 cursor-pointer font-medium text-on-surface"
+                                  >
+                                    <span className="material-symbols-outlined text-[16px]">assignment</span> Atribuir Turmas
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setActiveMenuId(null);
+                                      setDeletingProf(prof);
+                                    }}
+                                    className="w-full text-left px-3 py-1.5 hover:bg-surface-container rounded flex items-center gap-2 cursor-pointer font-medium text-error"
+                                  >
+                                    <span className="material-symbols-outlined text-[16px]">delete</span> Remover Docente
+                                  </button>
+                                </div>
+                              </>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination Bar (Matching Students Reference Standard) */}
+            <div className="px-4 py-2 border-t border-border-subtle flex items-center justify-between bg-surface-white text-xs">
+              <p className="text-on-surface-variant">
+                Mostrando {filteredProfessores.length === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1}–
+                {Math.min(currentPage * rowsPerPage, filteredProfessores.length)} de {filteredProfessores.length} professores
+              </p>
+              <div className="flex gap-1 items-center">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  className="px-2 py-1 border border-border-subtle rounded text-outline hover:bg-surface-container-low disabled:opacity-50 cursor-pointer"
+                >
+                  Anterior
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-2.5 py-1 border rounded font-medium cursor-pointer ${
+                      currentPage === page
+                        ? 'border-primary text-surface-white bg-primary'
+                        : 'border-border-subtle text-on-surface-variant hover:bg-surface-container-low'
+                    }`}
+                  >
+                    {page}
+                  </button>
                 ))}
-              </tbody>
-            </table>
+                <button
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  className="px-2 py-1 border border-border-subtle rounded text-on-surface-variant hover:bg-surface-container-low disabled:opacity-50 cursor-pointer"
+                >
+                  Próximo
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -445,7 +745,7 @@ export const ProfessoresView: React.FC<ProfessoresViewProps> = ({ onSelectView, 
             <h2 className="font-title-lg text-lg font-bold text-primary">Registo de Presenças e Ausências Docentes</h2>
             <button
               onClick={() => onShowToast('Lançando falta comunicada de docente...')}
-              className="bg-secondary text-surface-white px-3 py-1.5 rounded-lg text-xs font-bold"
+              className="bg-primary text-surface-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-primary/90 cursor-pointer"
             >
               Registar Falta / Subscrição
             </button>
@@ -578,7 +878,7 @@ export const ProfessoresView: React.FC<ProfessoresViewProps> = ({ onSelectView, 
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-secondary text-surface-white rounded-lg font-bold hover:bg-secondary/90 cursor-pointer transition-all"
+                  className="px-4 py-1.5 bg-primary text-surface-white rounded-lg font-bold hover:bg-primary/90 cursor-pointer transition-all"
                 >
                   {editingProf ? 'Guardar Alterações' : 'Salvar Cadastro'}
                 </button>

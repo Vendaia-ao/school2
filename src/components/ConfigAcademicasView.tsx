@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActiveView } from '../types';
-import { SlidersHorizontal, Save, Calendar, Layers, BookOpen, CheckSquare, Plus, Trash2, Edit3, X } from 'lucide-react';
+import { SlidersHorizontal, Save, Calendar, Layers, BookOpen, CheckSquare, Plus, Trash2, Pencil as Edit3, X, TrendingUp, CheckCircle2, Award } from 'lucide-react';
 
 interface ConfigAcademicasViewProps {
   onSelectView: (view: ActiveView) => void;
@@ -252,16 +252,86 @@ export const ConfigAcademicasView: React.FC<ConfigAcademicasViewProps> = ({ onSh
   };
 
   return (
-    <div className="mt-header-height p-4 w-full flex flex-col gap-4 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-1">
-        <h1 className="text-xl font-bold text-primary flex items-center gap-2">
-          <SlidersHorizontal className="w-5 h-5 text-secondary stroke-[1.75]" />
+    <div className="mt-header-height p-4 w-full flex flex-col gap-3">
+      {/* Quick Metrics Bar - Matching Reference Standard */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Card 1: Ano Letivo Corrente */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div>
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider block mb-0.5">Ano Letivo Corrente</span>
+            <span className="text-xl font-bold text-primary leading-none">2026/2027</span>
+          </div>
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-success bg-success/10 text-[10px] font-bold">
+            <TrendingUp className="w-3.5 h-3.5" /> Em Curso
+          </span>
+        </div>
+
+        {/* Card 2: Níveis & Classes */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center transition-all hover:shadow-md h-[68px]">
+          <div className="w-full flex flex-col justify-center gap-1.5">
+            <div className="flex justify-between items-end">
+              <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider">Níveis & Classes</span>
+              <span className="text-success font-bold text-[12px]">
+                3 Níveis <span className="text-[10px] font-medium text-outline ml-0.5">/ 13 Classes</span>
+              </span>
+            </div>
+            <div className="w-full bg-surface-container-low h-1.5 rounded-full overflow-hidden">
+              <div className="bg-success h-full rounded-full" style={{ width: '100%' }}></div>
+            </div>
+            <div className="flex justify-between text-[9px] font-medium uppercase text-outline">
+              <span>Primário • Geral • Técnico</span>
+              <span className="text-success">100% Configurado</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 3: Cursos & Matriz */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center transition-all hover:shadow-md h-[68px]">
+          <div className="w-full flex flex-col justify-center gap-1.5">
+            <div className="flex justify-between items-end">
+              <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider">Cursos & Disciplinas</span>
+              <span className="text-info font-bold text-[12px]">
+                4 Cursos <span className="text-[10px] font-medium text-outline ml-0.5">/ 20 Disciplinas</span>
+              </span>
+            </div>
+            <div className="w-full bg-surface-container-low h-1.5 rounded-full overflow-hidden">
+              <div className="bg-info h-full rounded-full" style={{ width: '100%' }}></div>
+            </div>
+            <div className="flex justify-between text-[9px] font-medium uppercase text-outline">
+              <span>Matrizes Ativas</span>
+              <span className="text-info">Atualizado</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 4: Critérios de Aprovação */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-2.5 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider mb-0.5">
+              Critérios de Transição
+            </span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl font-bold text-primary leading-none">≥ 10.0</span>
+              <span className="text-[10px] text-outline font-medium">Valores</span>
+            </div>
+          </div>
+          <div className="flex flex-col items-end gap-1.5">
+            <span className="px-2 py-0.5 rounded bg-success/10 text-success text-[10px] font-bold">
+              3 Trimestres
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-between items-center bg-surface-white border border-border-subtle rounded-xl p-3 shadow-sm">
+        <h1 className="text-lg font-bold text-primary flex items-center gap-2">
+          <SlidersHorizontal className="w-5 h-5 text-primary stroke-[1.75]" />
           Configurações Académicas
         </h1>
 
         <button
           onClick={() => onShowToast('Todas as configurações académicas foram salvas e sincronizadas!')}
-          className="bg-secondary text-surface-white hover:bg-secondary/90 px-4 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+          className="bg-primary text-surface-white hover:bg-primary/90 px-4 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
         >
           <Save className="w-4 h-4 stroke-[1.75]" />
           Guardar Parâmetros
@@ -384,7 +454,7 @@ export const ConfigAcademicasView: React.FC<ConfigAcademicasViewProps> = ({ onSh
             </div>
             <button
               onClick={openCreateNivelModal}
-              className="bg-secondary text-surface-white hover:bg-secondary/90 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 cursor-pointer transition-all shadow-sm"
+              className="bg-primary text-surface-white hover:bg-primary/90 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 cursor-pointer transition-all shadow-sm"
             >
               <Plus className="w-4 h-4 stroke-[1.75]" />
               Novo Nível de Ensino
@@ -515,7 +585,7 @@ export const ConfigAcademicasView: React.FC<ConfigAcademicasViewProps> = ({ onSh
                         />
                         <button
                           onClick={() => handleAddClassToNivel(nivel.id)}
-                          className="bg-secondary text-surface-white px-2 py-0.5 rounded text-xs font-bold hover:bg-secondary/90 cursor-pointer"
+                          className="bg-primary text-surface-white px-2 py-0.5 rounded text-xs font-bold hover:bg-primary/90 cursor-pointer"
                         >
                           OK
                         </button>
@@ -532,7 +602,7 @@ export const ConfigAcademicasView: React.FC<ConfigAcademicasViewProps> = ({ onSh
                           setAddingClassNivelId(nivel.id);
                           setNewClassNameInput('');
                         }}
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold border border-dashed border-secondary text-secondary hover:bg-secondary/10 cursor-pointer transition-colors"
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold border border-dashed border-primary text-primary hover:bg-primary/10 cursor-pointer transition-colors"
                       >
                         <Plus className="w-3 h-3 stroke-[2]" />
                         Adicionar Classe
@@ -556,7 +626,7 @@ export const ConfigAcademicasView: React.FC<ConfigAcademicasViewProps> = ({ onSh
             </div>
             <button
               onClick={openCreateCursoModal}
-              className="bg-secondary text-surface-white hover:bg-secondary/90 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 cursor-pointer transition-all"
+              className="bg-primary text-surface-white hover:bg-primary/90 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 cursor-pointer transition-all"
             >
               <Plus className="w-4 h-4 stroke-[1.75]" />
               Novo Curso
@@ -706,7 +776,7 @@ export const ConfigAcademicasView: React.FC<ConfigAcademicasViewProps> = ({ onSh
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-secondary text-surface-white rounded-lg font-bold hover:bg-secondary/90 cursor-pointer transition-all"
+                  className="px-4 py-1.5 bg-primary text-surface-white rounded-lg font-bold hover:bg-primary/90 cursor-pointer transition-all"
                 >
                   {editingCurso ? 'Guardar Alterações' : 'Criar Curso'}
                 </button>
@@ -819,7 +889,7 @@ export const ConfigAcademicasView: React.FC<ConfigAcademicasViewProps> = ({ onSh
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-secondary text-surface-white rounded-lg font-bold hover:bg-secondary/90 cursor-pointer transition-all"
+                  className="px-4 py-1.5 bg-primary text-surface-white rounded-lg font-bold hover:bg-primary/90 cursor-pointer transition-all"
                 >
                   {editingNivel ? 'Guardar Alterações' : 'Criar Nível'}
                 </button>

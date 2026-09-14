@@ -9,7 +9,7 @@ import {
   Plus,
   Search,
   Filter,
-  Edit3,
+  Pencil as Edit3,
   Trash2,
   CheckCircle2,
   AlertTriangle,
@@ -478,76 +478,79 @@ export const CantinaView: React.FC<CantinaViewProps> = ({ onShowToast }) => {
   const stockBaixoItems = produtos.filter((p) => p.stockAtual <= p.stockMinimo);
 
   return (
-    <div className="mt-header-height p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex justify-between items-center mb-1">
-        <h1 className="text-xl font-bold text-primary flex items-center gap-2">
-          <Utensils className="w-5 h-5 text-secondary stroke-[2]" />
-          Cantina Escolar & Carteira Digital
-        </h1>
-
-        <div className="flex items-center gap-2">
-          <div className="bg-surface-white border border-border-subtle px-3 py-1.5 rounded-lg flex items-center gap-2">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-success"></span>
+    <div className="mt-header-height p-4 w-full flex flex-col gap-3">
+      {/* KPI Stats Cards (Padrão Dashboard — h-[68px], sem redundâncias) */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+        {/* Card 1: FATURAÇÃO HOJE (TOTAL) */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider mb-0.5">
+              FATURAÇÃO HOJE (TOTAL)
             </span>
-            <span className="text-xs font-bold text-primary">Caixa: {caixaStatus.toUpperCase()}</span>
-          </div>
-
-          <button
-            onClick={openCreateProductModal}
-            className="bg-secondary text-surface-white hover:bg-secondary/90 text-xs px-4 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
-          >
-            <Plus className="w-4 h-4 stroke-[2]" />
-            Novo Produto
-          </button>
-        </div>
-      </div>
-
-      {/* KPI Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-4 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold text-outline uppercase tracking-wider">Faturação Hoje (Total)</p>
-            <p className="text-xl font-extrabold text-primary mt-1">{formatKz(faturadoHojeCarteira + faturadoHojeDinheiro)}</p>
-            <span className="text-[11px] font-semibold text-secondary mt-0.5 flex items-center gap-1">
-              <ShoppingBasket className="w-3 h-3" /> {vendasHojeCount} Refeições / Vendas
+            <span className="text-xl sm:text-2xl font-bold text-primary leading-none">
+              {formatKz(faturadoHojeCarteira + faturadoHojeDinheiro)}
             </span>
           </div>
-          <TrendingUp className="w-6 h-6 stroke-[2] text-primary" />
+          <div className="flex flex-col items-end gap-1">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-success bg-success/10 text-[10px] font-bold">
+              <ShoppingBasket className="w-3 h-3 mr-0.5" /> {vendasHojeCount}
+            </span>
+            <span className="text-[9px] text-outline font-medium uppercase">vendas hoje</span>
+          </div>
         </div>
 
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-4 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold text-outline uppercase tracking-wider">Carteira Digital (Cartão)</p>
-            <p className="text-xl font-extrabold text-secondary mt-1">{formatKz(faturadoHojeCarteira)}</p>
-            <span className="text-[11px] font-semibold text-outline mt-0.5">
-              {Math.round((faturadoHojeCarteira / (faturadoHojeCarteira + faturadoHojeDinheiro || 1)) * 100)}% das vendas hoje
+        {/* Card 2: CARTEIRA DIGITAL (CARTÃO) */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider mb-0.5">
+              CARTEIRA DIGITAL (CARTÃO)
+            </span>
+            <span className="text-xl sm:text-2xl font-bold text-primary leading-none">
+              {formatKz(faturadoHojeCarteira)}
             </span>
           </div>
-          <Wallet className="w-6 h-6 stroke-[2] text-secondary" />
+          <div className="flex flex-col items-end gap-1">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-primary bg-primary/10 text-[10px] font-bold">
+              {Math.round((faturadoHojeCarteira / (faturadoHojeCarteira + faturadoHojeDinheiro || 1)) * 100)}%
+            </span>
+            <span className="text-[9px] text-outline font-medium uppercase">do total</span>
+          </div>
         </div>
 
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-4 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold text-outline uppercase tracking-wider">Vendas em Numerário</p>
-            <p className="text-xl font-extrabold text-primary mt-1">{formatKz(faturadoHojeDinheiro)}</p>
-            <span className="text-[11px] font-semibold text-outline mt-0.5">
-              Pagamentos presenciais
+        {/* Card 3: VENDAS EM NUMERÁRIO */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider mb-0.5">
+              VENDAS EM NUMERÁRIO
+            </span>
+            <span className="text-xl sm:text-2xl font-bold text-primary leading-none">
+              {formatKz(faturadoHojeDinheiro)}
             </span>
           </div>
-          <Receipt className="w-6 h-6 stroke-[2] text-info" />
+          <div className="flex flex-col items-end gap-1">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-info bg-info/10 text-[10px] font-bold">
+              <Receipt className="w-3 h-3 mr-0.5" /> Presencial
+            </span>
+            <span className="text-[9px] text-outline font-medium uppercase">pagamentos</span>
+          </div>
         </div>
 
-        <div className="bg-surface-white border border-border-subtle rounded-xl p-4 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold text-outline uppercase tracking-wider">Avisos de Stock Baixo</p>
-            <p className="text-xl font-extrabold text-error mt-1">{stockBaixoItems.length} Produtos</p>
-            <span className="text-[11px] font-semibold text-error mt-0.5 flex items-center gap-1">
-              <AlertTriangle className="w-3 h-3" /> Reposição Recomendada
+        {/* Card 4: AVISOS DE STOCK BAIXO */}
+        <div className="bg-surface-white border border-outline-variant/30 rounded-lg px-4 py-3 shadow-sm flex items-center justify-between transition-all hover:shadow-md h-[68px]">
+          <div className="flex flex-col justify-center">
+            <span className="text-on-surface-variant text-[10px] uppercase font-bold tracking-wider mb-0.5">
+              AVISOS DE STOCK BAIXO
+            </span>
+            <span className="text-xl sm:text-2xl font-bold text-error leading-none">
+              {stockBaixoItems.length}
             </span>
           </div>
-          <Package className="w-6 h-6 stroke-[2] text-error" />
+          <div className="flex flex-col items-end gap-1">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-error bg-error/10 text-[10px] font-bold">
+              <AlertTriangle className="w-3 h-3 mr-0.5" /> Reposição
+            </span>
+            <span className="text-[9px] text-outline font-medium uppercase">necessária</span>
+          </div>
         </div>
       </div>
 
@@ -616,72 +619,96 @@ export const CantinaView: React.FC<CantinaViewProps> = ({ onShowToast }) => {
 
         {/* Tab 1: POS - Registo Rápido de Consumos */}
         {activeTab === 'pos' && (
-          <div className="p-5 grid grid-cols-1 lg:grid-cols-12 gap-5">
-            {/* Left Col: Student Selection & Product Grid (Cols 7) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            {/* Left Col: Student Identification & Product Catalog (Cols 7) */}
             <div className="lg:col-span-7 space-y-4">
-              {/* Student Selector Card */}
-              <div className="bg-surface-container-low border border-border-subtle rounded-xl p-4 space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
-                    <UserCheck className="w-4 h-4 text-secondary" />
+              {/* Student Identification & Digital Wallet Card */}
+              <div className="bg-surface-white border border-border-subtle rounded-xl p-4 shadow-sm space-y-3">
+                <div className="flex justify-between items-center border-b border-border-subtle/60 pb-2.5">
+                  <span className="text-xs font-extrabold text-primary uppercase tracking-wider flex items-center gap-2">
+                    <QrCode className="w-4 h-4 text-primary" />
                     Estudante / Cartão Digital Lido
                   </span>
-                  <span className="text-[11px] font-bold text-outline">Scan NIF / Matrícula</span>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-success/10 text-success">
+                    <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                    Leitor de Cartão Ativo
+                  </span>
                 </div>
 
                 <div className="flex gap-2">
-                  <select
-                    value={selectedStudentPos?.studentId || ''}
-                    onChange={(e) => {
-                      const found = carteiras.find((c) => c.studentId === e.target.value);
-                      if (found) setSelectedStudentPos(found);
-                    }}
-                    className="flex-1 bg-surface-white border border-border-subtle rounded-lg p-2 text-xs font-bold text-primary focus:border-secondary focus:outline-none"
-                  >
-                    {carteiras.map((c) => (
-                      <option key={c.studentId} value={c.studentId}>
-                        {c.nomeEstudante} (Matrícula: {c.matricula}) - {c.classe}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative flex-1">
+                    <Search className="w-4 h-4 text-outline absolute left-3 top-2.5" />
+                    <select
+                      value={selectedStudentPos?.studentId || ''}
+                      onChange={(e) => {
+                        const found = carteiras.find((c) => c.studentId === e.target.value);
+                        if (found) setSelectedStudentPos(found);
+                      }}
+                      className="w-full bg-surface-white border border-border-subtle rounded-lg pl-9 pr-3 py-2 text-xs font-bold text-primary focus:border-primary focus:outline-none cursor-pointer"
+                    >
+                      {carteiras.map((c) => (
+                        <option key={c.studentId} value={c.studentId}>
+                          {c.nomeEstudante} (Matrícula: {c.matricula}) - {c.classe}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 {selectedStudentPos && (
-                  <div className="bg-surface-white p-3 rounded-lg border border-border-subtle flex items-center justify-between text-xs">
-                    <div>
-                      <p className="font-bold text-primary">{selectedStudentPos.nomeEstudante}</p>
-                      <p className="text-[11px] text-on-surface-variant">
-                        {selectedStudentPos.classe} • {selectedStudentPos.turma}
-                      </p>
+                  <div className="bg-surface-container-low/60 p-3.5 rounded-xl border border-border-subtle flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center border border-primary/20 shrink-0">
+                        {selectedStudentPos.nomeEstudante
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .slice(0, 2)}
+                      </div>
+                      <div>
+                        <p className="font-extrabold text-primary text-sm leading-tight">
+                          {selectedStudentPos.nomeEstudante}
+                        </p>
+                        <p className="text-[11px] text-on-surface-variant font-medium mt-0.5">
+                          Matrícula: <span className="font-bold text-primary">{selectedStudentPos.matricula}</span> • {selectedStudentPos.classe} • {selectedStudentPos.turma}
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="text-right">
-                      <p className="text-[10px] text-outline uppercase font-bold">Saldo Carteira Digital</p>
-                      <p className={`text-base font-extrabold ${selectedStudentPos.saldoAtual < 1000 ? 'text-error' : 'text-success'}`}>
+                    <div className="bg-surface-white p-2.5 rounded-lg border border-border-subtle/80 text-right shrink-0">
+                      <p className="text-[9px] text-outline uppercase font-bold tracking-wider">Saldo Carteira Digital</p>
+                      <p className={`text-base font-black ${selectedStudentPos.saldoAtual < 1000 ? 'text-error' : 'text-primary'}`}>
                         {formatKz(selectedStudentPos.saldoAtual)}
                       </p>
-                      <p className="text-[10px] text-outline">
-                        Gasto hoje: {formatKz(selectedStudentPos.gastoHoje)} / Máx {formatKz(selectedStudentPos.limiteDiario)}
-                      </p>
+                      <div className="mt-1 flex items-center justify-end gap-1 text-[10px] text-outline font-medium">
+                        <span>Gasto hoje: <strong className="text-on-surface">{formatKz(selectedStudentPos.gastoHoje)}</strong></span>
+                        <span>/</span>
+                        <span>Máx: <strong className="text-on-surface">{formatKz(selectedStudentPos.limiteDiario)}</strong></span>
+                      </div>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Product Quick Selection Grid */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <h3 className="font-bold text-primary text-xs uppercase tracking-wider">Produtos da Cantina</h3>
-                  <div className="flex gap-1 text-[11px]">
-                    {['todas', 'Refeições Quentes', 'Lanches & Salgados', 'Bebidas', 'Menus Completos'].map((cat) => (
+              {/* Product Catalog Grid & Filters */}
+              <div className="bg-surface-white border border-border-subtle rounded-xl p-4 shadow-sm space-y-3">
+                <div className="flex flex-wrap justify-between items-center gap-2">
+                  <h3 className="font-extrabold text-primary text-xs uppercase tracking-wider flex items-center gap-1.5">
+                    <Utensils className="w-4 h-4 text-primary" />
+                    Produtos da Cantina
+                  </h3>
+                  <div className="flex flex-wrap gap-1 text-[11px]">
+                    {['todas', 'Refeições Quentes', 'Lanches & Salgados', 'Bebidas', 'Menus Completos', 'Frutas & Sobremesas'].map((cat) => (
                       <button
                         key={cat}
                         onClick={() => setFilterCategoria(cat)}
-                        className={`px-2 py-0.5 rounded font-bold transition-all cursor-pointer ${
-                          filterCategoria === cat ? 'bg-secondary text-surface-white' : 'bg-surface-container-low text-outline'
+                        className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                          filterCategoria === cat
+                            ? 'bg-primary text-surface-white shadow-xs'
+                            : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-primary'
                         }`}
                       >
-                        {cat.split(' ')[0]}
+                        {cat === 'todas' ? 'Todas' : cat.split(' ')[0]}
                       </button>
                     ))}
                   </div>
@@ -695,20 +722,25 @@ export const CantinaView: React.FC<CantinaViewProps> = ({ onShowToast }) => {
                         key={prod.id}
                         onClick={() => handleAddToCart(prod)}
                         disabled={prod.stockAtual <= 0}
-                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between group h-[115px] relative overflow-hidden ${
                           prod.stockAtual <= 0
                             ? 'bg-surface-container-low border-border-subtle opacity-50 cursor-not-allowed'
-                            : 'bg-surface-white border-border-subtle hover:border-secondary hover:shadow-md'
+                            : 'bg-surface-white border-border-subtle hover:border-primary hover:shadow-md'
                         }`}
                       >
                         <div>
-                          <span className="text-[9px] font-bold text-outline uppercase">{prod.categoria}</span>
-                          <p className="font-bold text-primary text-xs line-clamp-2 mt-0.5">{prod.nome}</p>
+                          <div className="flex justify-between items-start mb-1">
+                            <span className="text-[9px] font-bold text-outline uppercase tracking-wider line-clamp-1">{prod.categoria}</span>
+                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${prod.stockAtual <= prod.stockMinimo ? 'bg-error/10 text-error' : 'bg-success/10 text-success'}`}>
+                              {prod.stockAtual} un.
+                            </span>
+                          </div>
+                          <p className="font-bold text-primary text-xs line-clamp-2 group-hover:text-primary transition-colors">{prod.nome}</p>
                         </div>
-                        <div className="mt-2 flex justify-between items-end">
-                          <span className="text-xs font-extrabold text-secondary">{formatKz(prod.preco)}</span>
-                          <span className={`text-[10px] font-bold ${prod.stockAtual <= prod.stockMinimo ? 'text-error' : 'text-outline'}`}>
-                            Stock: {prod.stockAtual}
+                        <div className="mt-2 flex justify-between items-center">
+                          <span className="text-xs font-black text-primary">{formatKz(prod.preco)}</span>
+                          <span className="w-6 h-6 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-surface-white flex items-center justify-center transition-colors">
+                            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
                           </span>
                         </div>
                       </button>
@@ -718,31 +750,42 @@ export const CantinaView: React.FC<CantinaViewProps> = ({ onShowToast }) => {
             </div>
 
             {/* Right Col: POS Checkout Cart (Cols 5) */}
-            <div className="lg:col-span-5 bg-surface-container-low border border-border-subtle rounded-xl p-4 flex flex-col justify-between space-y-4">
+            <div className="lg:col-span-5 bg-surface-white border border-border-subtle rounded-xl p-4 flex flex-col justify-between shadow-sm space-y-4">
               <div>
                 <div className="flex justify-between items-center border-b border-border-subtle pb-3">
-                  <h3 className="font-bold text-primary text-sm flex items-center gap-1.5">
-                    <ShoppingBasket className="w-4 h-4 text-secondary" />
-                    Talão de Consumo / Carrinho
-                  </h3>
-                  <button
-                    onClick={() => setCartItems([])}
-                    className="text-[11px] font-bold text-outline hover:text-error cursor-pointer"
-                  >
-                    Limpar
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                      <ShoppingBasket className="w-4 h-4 stroke-[2]" />
+                    </div>
+                    <div>
+                      <h3 className="font-extrabold text-primary text-sm">Talão de Consumo</h3>
+                      <span className="text-[10px] font-semibold text-outline">
+                        {cartItems.reduce((acc, curr) => acc + curr.quantidade, 0)} {cartItems.reduce((acc, curr) => acc + curr.quantidade, 0) === 1 ? 'item' : 'itens'} no carrinho
+                      </span>
+                    </div>
+                  </div>
+                  {cartItems.length > 0 && (
+                    <button
+                      onClick={() => setCartItems([])}
+                      className="text-[11px] font-bold text-outline hover:text-error cursor-pointer flex items-center gap-1 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Limpar
+                    </button>
+                  )}
                 </div>
 
-                <div className="divide-y divide-border-subtle max-h-60 overflow-y-auto my-2">
+                <div className="divide-y divide-border-subtle/60 max-h-[320px] overflow-y-auto my-2 pr-1">
                   {cartItems.length === 0 ? (
-                    <div className="text-center py-8 text-outline text-xs">
-                      Nenhum item selecionado. Clique nos produtos da cantina para adicionar.
+                    <div className="text-center py-12 text-outline text-xs space-y-2">
+                      <ShoppingBasket className="w-8 h-8 mx-auto text-outline-variant stroke-[1.5]" />
+                      <p className="font-semibold text-on-surface-variant">Carrinho vazio</p>
+                      <p className="text-[11px] text-outline">Clique nos produtos da cantina para adicionar ao consumo.</p>
                     </div>
                   ) : (
                     cartItems.map(({ produto, quantidade }) => (
-                      <div key={produto.id} className="py-2 flex justify-between items-center text-xs">
-                        <div className="pr-2">
-                          <p className="font-bold text-primary">{produto.nome}</p>
+                      <div key={produto.id} className="py-2.5 flex justify-between items-center text-xs">
+                        <div className="pr-2 flex-1 min-w-0">
+                          <p className="font-bold text-primary truncate">{produto.nome}</p>
                           <p className="text-[10px] text-outline">
                             {formatKz(produto.preco)} x {quantidade}
                           </p>
@@ -751,18 +794,18 @@ export const CantinaView: React.FC<CantinaViewProps> = ({ onShowToast }) => {
                         <div className="flex items-center gap-1.5 shrink-0">
                           <button
                             onClick={() => handleUpdateCartQty(produto.id, -1)}
-                            className="w-5 h-5 bg-surface-white border border-border-subtle rounded flex items-center justify-center font-bold text-primary hover:bg-surface-container-high cursor-pointer"
+                            className="w-6 h-6 bg-surface-container border border-border-subtle rounded-md flex items-center justify-center font-bold text-primary hover:bg-primary hover:text-surface-white transition-colors cursor-pointer"
                           >
                             -
                           </button>
-                          <span className="font-bold text-primary w-4 text-center">{quantidade}</span>
+                          <span className="font-bold text-primary w-5 text-center">{quantidade}</span>
                           <button
                             onClick={() => handleUpdateCartQty(produto.id, 1)}
-                            className="w-5 h-5 bg-surface-white border border-border-subtle rounded flex items-center justify-center font-bold text-primary hover:bg-surface-container-high cursor-pointer"
+                            className="w-6 h-6 bg-surface-container border border-border-subtle rounded-md flex items-center justify-center font-bold text-primary hover:bg-primary hover:text-surface-white transition-colors cursor-pointer"
                           >
                             +
                           </button>
-                          <span className="font-extrabold text-primary ml-2 w-16 text-right">
+                          <span className="font-extrabold text-primary ml-2 w-20 text-right">
                             {formatKz(produto.preco * quantidade)}
                           </span>
                         </div>
@@ -773,47 +816,47 @@ export const CantinaView: React.FC<CantinaViewProps> = ({ onShowToast }) => {
               </div>
 
               <div className="border-t border-border-subtle pt-3 space-y-3">
-                <div className="space-y-1 text-xs">
+                <div className="bg-surface-container-low/60 rounded-xl p-3 border border-border-subtle/80 space-y-1.5 text-xs">
                   <div className="flex justify-between text-outline font-medium">
                     <span>Subtotal:</span>
                     <span>{formatKz(cartTotal)}</span>
                   </div>
-                  <div className="flex justify-between font-extrabold text-primary text-base pt-1 border-t border-border-subtle">
+                  <div className="flex justify-between font-black text-primary text-base pt-1.5 border-t border-border-subtle/80">
                     <span>Total a Pagar:</span>
-                    <span className="text-secondary">{formatKz(cartTotal)}</span>
+                    <span className="text-primary">{formatKz(cartTotal)}</span>
                   </div>
                 </div>
 
                 {/* Payment Method Selector */}
                 <div className="space-y-1">
-                  <label className="block text-[11px] font-bold text-outline uppercase">Forma de Pagamento:</label>
+                  <label className="block text-[10px] font-extrabold text-outline uppercase tracking-wider">Forma de Pagamento:</label>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => setPosMetodoPagamento('carteira')}
-                      className={`p-2 rounded-lg border text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all ${
+                      className={`py-2 px-3 rounded-lg border text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
                         posMetodoPagamento === 'carteira'
-                          ? 'bg-secondary text-surface-white border-secondary'
-                          : 'bg-surface-white text-primary border-border-subtle'
+                          ? 'bg-primary text-surface-white border-primary shadow-xs'
+                          : 'bg-surface-white text-primary border-border-subtle hover:bg-surface-container'
                       }`}
                     >
-                      <Wallet className="w-3.5 h-3.5" /> Carteira Digital
+                      <Wallet className="w-4 h-4" /> Carteira Digital
                     </button>
                     <button
                       onClick={() => setPosMetodoPagamento('dinheiro')}
-                      className={`p-2 rounded-lg border text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all ${
+                      className={`py-2 px-3 rounded-lg border text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
                         posMetodoPagamento === 'dinheiro'
-                          ? 'bg-secondary text-surface-white border-secondary'
-                          : 'bg-surface-white text-primary border-border-subtle'
+                          ? 'bg-primary text-surface-white border-primary shadow-xs'
+                          : 'bg-surface-white text-primary border-border-subtle hover:bg-surface-container'
                       }`}
                     >
-                      <Receipt className="w-3.5 h-3.5" /> Numerário
+                      <Receipt className="w-4 h-4" /> Numerário
                     </button>
                   </div>
                 </div>
 
                 <button
                   onClick={handleFinalizePosSale}
-                  className="w-full bg-secondary text-surface-white hover:bg-secondary/90 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full bg-primary text-surface-white hover:bg-primary/90 py-3 rounded-xl font-bold text-xs shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
                   <CheckCircle2 className="w-4 h-4 stroke-[2]" />
                   Confirmar & Registrar Venda ({formatKz(cartTotal)})
@@ -838,7 +881,7 @@ export const CantinaView: React.FC<CantinaViewProps> = ({ onShowToast }) => {
               </div>
               <button
                 onClick={() => onShowToast('A ementa semanal foi atualizada e enviada aos encarregados via Portal/App.')}
-                className="bg-secondary text-surface-white hover:bg-secondary/90 text-xs px-3.5 py-2 rounded-lg font-bold cursor-pointer"
+                className="bg-primary text-surface-white hover:bg-primary/90 text-xs px-3.5 py-2 rounded-lg font-bold cursor-pointer transition-all shadow-sm"
               >
                 Publicar Ementa aos Encarregados
               </button>
@@ -876,7 +919,7 @@ export const CantinaView: React.FC<CantinaViewProps> = ({ onShowToast }) => {
                   </div>
 
                   <div className="pt-2 border-t border-border-subtle flex justify-between items-center text-xs">
-                    <span className="font-extrabold text-secondary">{formatKz(menu.precoMenu)}</span>
+                    <span className="font-extrabold text-primary">{formatKz(menu.precoMenu)}</span>
                     <button
                       onClick={() => onShowToast(`Editar menu para ${menu.diaSemana}`)}
                       className="text-outline hover:text-primary p-1 cursor-pointer"
@@ -901,22 +944,33 @@ export const CantinaView: React.FC<CantinaViewProps> = ({ onShowToast }) => {
                   placeholder="Pesquisar produto da cantina..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 text-xs bg-surface-white border border-border-subtle rounded-lg focus:outline-none focus:border-secondary font-medium"
+                  className="w-full pl-9 pr-3 py-1.5 text-xs bg-surface-white border border-border-subtle rounded-lg focus:outline-none focus:border-primary font-medium"
                 />
               </div>
 
-              <select
-                value={filterCategoria}
-                onChange={(e) => setFilterCategoria(e.target.value)}
-                className="text-xs bg-surface-white border border-border-subtle rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-secondary font-semibold"
-              >
-                <option value="todas">Todas as Categorias</option>
-                <option value="Refeições Quentes">Refeições Quentes</option>
-                <option value="Lanches & Salgados">Lanches & Salgados</option>
-                <option value="Bebidas">Bebidas</option>
-                <option value="Frutas & Sobremesas">Frutas & Sobremesas</option>
-                <option value="Menus Completos">Menus Completos</option>
-              </select>
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                <select
+                  value={filterCategoria}
+                  onChange={(e) => setFilterCategoria(e.target.value)}
+                  className="text-xs bg-surface-white border border-border-subtle rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-primary font-semibold text-primary"
+                >
+                  <option value="todas">Todas as Categorias</option>
+                  <option value="Refeições Quentes">Refeições Quentes</option>
+                  <option value="Lanches & Salgados">Lanches & Salgados</option>
+                  <option value="Bebidas">Bebidas</option>
+                  <option value="Frutas & Sobremesas">Frutas & Sobremesas</option>
+                  <option value="Menus Completos">Menus Completos</option>
+                </select>
+
+                <button
+                  onClick={openCreateProductModal}
+                  className="bg-primary text-surface-white hover:bg-primary/90 text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 transition-all cursor-pointer shadow-sm shrink-0"
+                  title="Novo Produto"
+                >
+                  <Plus className="w-4 h-4 stroke-[2]" />
+                  <span className="whitespace-nowrap">Novo Produto</span>
+                </button>
+              </div>
             </div>
 
             <div className="overflow-x-auto border border-border-subtle rounded-xl">
@@ -942,7 +996,7 @@ export const CantinaView: React.FC<CantinaViewProps> = ({ onShowToast }) => {
                           {p.categoria}
                         </span>
                       </td>
-                      <td className="px-3.5 py-3 text-right font-extrabold text-secondary">{formatKz(p.preco)}</td>
+                      <td className="px-3.5 py-3 text-right font-extrabold text-primary">{formatKz(p.preco)}</td>
                       <td className="px-3.5 py-3 text-center font-bold text-primary">{p.stockAtual} Unidades</td>
                       <td className="px-3.5 py-3 text-center">
                         {p.stockAtual <= p.stockMinimo ? (
@@ -958,7 +1012,7 @@ export const CantinaView: React.FC<CantinaViewProps> = ({ onShowToast }) => {
                       <td className="px-3.5 py-3 text-right">
                         <button
                           onClick={() => openEditProductModal(p)}
-                          className="p-1.5 text-outline hover:text-secondary cursor-pointer"
+                          className="p-1.5 text-outline hover:text-primary cursor-pointer"
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
@@ -977,7 +1031,7 @@ export const CantinaView: React.FC<CantinaViewProps> = ({ onShowToast }) => {
             <div className="flex justify-between items-center">
               <div>
                 <h3 className="font-bold text-primary text-base flex items-center gap-2">
-                  <Wallet className="w-5 h-5 text-secondary" />
+                  <Wallet className="w-5 h-5 text-primary" />
                   Saldos da Carteira Digital do Cartão do Estudante
                 </h3>
                 <p className="text-xs text-on-surface-variant">
@@ -1005,7 +1059,7 @@ export const CantinaView: React.FC<CantinaViewProps> = ({ onShowToast }) => {
                       <td className="px-3.5 py-3 text-on-surface-variant">
                         {c.matricula} ({c.classe} - {c.turma})
                       </td>
-                      <td className="px-3.5 py-3 text-right font-extrabold text-secondary text-sm">
+                      <td className="px-3.5 py-3 text-right font-extrabold text-primary text-sm">
                         {formatKz(c.saldoAtual)}
                       </td>
                       <td className="px-3.5 py-3 text-right font-bold text-primary">{formatKz(c.limiteDiario)}</td>
@@ -1016,7 +1070,7 @@ export const CantinaView: React.FC<CantinaViewProps> = ({ onShowToast }) => {
                             setRechargeStudent(c);
                             setIsRechargeModalOpen(true);
                           }}
-                          className="bg-secondary text-surface-white hover:bg-secondary/90 px-3 py-1 rounded text-[11px] font-bold cursor-pointer"
+                          className="bg-primary text-surface-white hover:bg-primary/90 px-3 py-1 rounded text-[11px] font-bold cursor-pointer transition-all shadow-2xs"
                         >
                           + Carregar Saldo
                         </button>
