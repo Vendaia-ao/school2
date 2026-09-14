@@ -196,7 +196,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div>
           <button
             onClick={() => handleSelectScreen('dashboard')}
-            className={`w-full flex items-center gap-2 px-3 py-2 transition-all rounded menu-item text-left cursor-pointer ${
+            className={`w-full flex items-center gap-2 px-3 py-2 transition-all rounded-none menu-item text-left cursor-pointer ${
               currentView === 'dashboard'
                 ? 'text-on-primary bg-info/20 border-l-3 border-[#2563EB] font-bold shadow-2xs'
                 : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -213,7 +213,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div>
             <button
               onClick={() => toggleModule('academica')}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded cursor-pointer menu-item transition-all text-left ${
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-none cursor-pointer menu-item transition-all text-left ${
                 ['estudantes', 'perfil', 'turmas', 'professores', 'config_academicas', 'aluno_portal', 'encarregado_portal', 'professor_portal'].includes(currentView)
                   ? 'text-on-primary bg-info/20 border-l-3 border-[#2563EB] font-bold shadow-2xs'
                   : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -235,7 +235,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="sidebar-text ml-5 pl-2 border-l border-on-primary-container/15 my-1 space-y-0.5">
                 <button
                   onClick={() => handleSelectScreen('estudantes')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'estudantes' || currentView === 'perfil'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -245,7 +245,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
                 <button
                   onClick={() => handleSelectScreen('turmas')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'turmas'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -255,7 +255,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
                 <button
                   onClick={() => handleSelectScreen('professores')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'professores'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -265,7 +265,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
                 <button
                   onClick={() => handleSelectScreen('config_academicas')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'config_academicas'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -275,7 +275,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
                 <button
                   onClick={() => handleSelectScreen('aluno_portal')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'aluno_portal'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -285,7 +285,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
                 <button
                   onClick={() => handleSelectScreen('encarregado_portal')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'encarregado_portal'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -295,7 +295,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
                 <button
                   onClick={() => handleSelectScreen('professor_portal')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'professor_portal'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -311,7 +311,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div>
             <button
               onClick={() => toggleModule('biblioteca')}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded cursor-pointer menu-item transition-all text-left ${
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-none cursor-pointer menu-item transition-all text-left ${
                 ['biblioteca', 'biblioteca_catalogo', 'biblioteca_solicitacoes', 'biblioteca_relatorios', 'biblioteca_configuracoes'].includes(currentView)
                   ? 'text-on-primary bg-info/20 border-l-3 border-[#2563EB] font-bold shadow-2xs'
                   : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -333,7 +333,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="sidebar-text ml-5 pl-2 border-l border-on-primary-container/15 my-1 space-y-0.5">
                 <button
                   onClick={() => handleSelectScreen('biblioteca_catalogo')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'biblioteca' || currentView === 'biblioteca_catalogo'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -343,7 +343,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
                 <button
                   onClick={() => handleSelectScreen('biblioteca_solicitacoes')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'biblioteca_solicitacoes'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -353,7 +353,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
                 <button
                   onClick={() => handleSelectScreen('biblioteca_relatorios')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'biblioteca_relatorios'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -363,7 +363,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
                 <button
                   onClick={() => handleSelectScreen('biblioteca_configuracoes')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'biblioteca_configuracoes'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -379,7 +379,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div>
             <button
               onClick={() => toggleModule('servicos')}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded cursor-pointer menu-item transition-all text-left ${
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-none cursor-pointer menu-item transition-all text-left ${
                 ['servicos_produtos', 'cantina'].includes(currentView)
                   ? 'text-on-primary bg-info/20 border-l-3 border-[#2563EB] font-bold shadow-2xs'
                   : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -401,7 +401,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="sidebar-text ml-5 pl-2 border-l border-on-primary-container/15 my-1 space-y-0.5">
                 <button
                   onClick={() => handleSelectScreen('servicos_produtos')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'servicos_produtos'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -411,7 +411,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
                 <button
                   onClick={() => handleSelectScreen('cantina')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'cantina'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -427,7 +427,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div>
             <button
               onClick={() => toggleModule('financeira')}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded cursor-pointer menu-item transition-all text-left ${
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-none cursor-pointer menu-item transition-all text-left ${
                 ['tesouraria', 'gestao_financeira', 'financeiro'].includes(currentView)
                   ? 'text-on-primary bg-info/20 border-l-3 border-[#2563EB] font-bold shadow-2xs'
                   : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -449,7 +449,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="sidebar-text ml-5 pl-2 border-l border-on-primary-container/15 my-1 space-y-0.5">
                 <button
                   onClick={() => handleSelectScreen('tesouraria')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'tesouraria'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -459,7 +459,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
                 <button
                   onClick={() => handleSelectScreen('gestao_financeira')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'gestao_financeira' || currentView === 'financeiro'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -475,7 +475,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div>
             <button
               onClick={() => toggleModule('rh')}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded cursor-pointer menu-item transition-all text-left ${
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-none cursor-pointer menu-item transition-all text-left ${
                 ['rh_colaboradores'].includes(currentView)
                   ? 'text-on-primary bg-info/20 border-l-3 border-[#2563EB] font-bold shadow-2xs'
                   : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -497,7 +497,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="sidebar-text ml-5 pl-2 border-l border-on-primary-container/15 my-1 space-y-0.5">
                 <button
                   onClick={() => handleSelectScreen('rh_colaboradores')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'rh_colaboradores'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -513,7 +513,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div>
             <button
               onClick={() => toggleModule('documental')}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded cursor-pointer menu-item transition-all text-left ${
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-none cursor-pointer menu-item transition-all text-left ${
                 ['gestao_documental', 'documental'].includes(currentView)
                   ? 'text-on-primary bg-info/20 border-l-3 border-[#2563EB] font-bold shadow-2xs'
                   : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -535,7 +535,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="sidebar-text ml-5 pl-2 border-l border-on-primary-container/15 my-1 space-y-0.5">
                 <button
                   onClick={() => handleSelectScreen('gestao_documental')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'gestao_documental' || currentView === 'documental'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -551,7 +551,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div>
             <button
               onClick={() => toggleModule('comunicacao')}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded cursor-pointer menu-item transition-all text-left ${
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-none cursor-pointer menu-item transition-all text-left ${
                 ['comunicacao', 'cms'].includes(currentView)
                   ? 'text-on-primary bg-info/20 border-l-3 border-[#2563EB] font-bold shadow-2xs'
                   : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -573,7 +573,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="sidebar-text ml-5 pl-2 border-l border-on-primary-container/15 my-1 space-y-0.5">
                 <button
                   onClick={() => handleSelectScreen('comunicacao')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'comunicacao'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -583,7 +583,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
                 <button
                   onClick={() => handleSelectScreen('cms')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'cms'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -593,11 +593,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
               </div>
             )}
+          </div>
+
           {/* ADMINISTRAÇÃO DA PLATAFORMA */}
           <div>
             <button
               onClick={() => toggleModule('admin')}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded cursor-pointer menu-item transition-all text-left ${
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-none cursor-pointer menu-item transition-all text-left ${
                 ['utilizadores_permissoes', 'estruturas', 'config_instituicao', 'administracao'].includes(currentView)
                   ? 'text-on-primary bg-info/20 border-l-3 border-[#2563EB] font-bold shadow-2xs'
                   : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -619,7 +621,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="sidebar-text ml-5 pl-2 border-l border-on-primary-container/15 my-1 space-y-0.5">
                 <button
                   onClick={() => handleSelectScreen('utilizadores_permissoes')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'utilizadores_permissoes' || currentView === 'administracao'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -629,7 +631,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
                 <button
                   onClick={() => handleSelectScreen('estruturas')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'estruturas'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -639,7 +641,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
                 <button
                   onClick={() => handleSelectScreen('config_instituicao')}
-                  className={`block w-full text-left px-2.5 py-1.5 rounded text-xs transition-colors cursor-pointer ${
+                  className={`block w-full text-left px-2.5 py-1.5 rounded-none text-xs transition-colors cursor-pointer ${
                     currentView === 'config_instituicao'
                       ? 'text-info font-bold bg-on-primary-container/20'
                       : 'text-on-primary-container hover:text-on-primary hover:bg-on-primary-container/20'
@@ -651,7 +653,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
           </div>
         </div>
-      </div>
 
       {/* Footer (3 Ações: Definições, Ajuda & Suporte, Terminar Sessão) */}
       <div className="border-t border-on-primary-container/20 p-2 shrink-0 space-y-0.5 relative">
