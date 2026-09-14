@@ -235,14 +235,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectView, onSh
               </span>
             </div>
 
-            {/* Gauge Conic Squarish Visual (Arredondamento Garantido 20px) */}
+            {/* Gauge Conic Squarish Visual (Borda Externa 8px, Borda Interna 14px) */}
             <div className="flex flex-col items-center justify-center my-3">
               <div
                 className="w-32 h-32 flex items-center justify-center shadow-sm relative transition-transform hover:scale-105 cursor-pointer p-3"
                 style={{
                   background: 'conic-gradient(#051939 0% 88%, #edeeef 88% 100%)',
-                  borderRadius: '20px',
-                  WebkitBorderRadius: '20px',
+                  borderRadius: '8px',
+                  WebkitBorderRadius: '8px',
                 }}
                 onClick={() => onSelectView('financeiro')}
               >
