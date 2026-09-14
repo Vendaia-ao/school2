@@ -154,7 +154,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside
-      className={`fixed left-0 top-0 h-full flex flex-col bg-primary-container border-r border-outline-variant z-50 transition-all duration-300 ${
+      className={`fixed left-0 top-0 h-full flex flex-col bg-[#051939] border-r border-[#051939]/40 z-50 transition-all duration-300 ${
         isExpanded ? 'sidebar-expanded w-[230px]' : 'sidebar-collapsed w-[72px]'
       }`}
       id="sidebar"
